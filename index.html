@@ -141,7 +141,7 @@ a:hover { text-decoration-thickness: 2px; }
 button { font: inherit; color: inherit; }
 
 /* ------------------------------------------------------------------ shell */
-.shell { display: grid; grid-template-columns: 304px minmax(0, 1fr); min-height: 100vh; }
+.shell { --side-w: 304px; display: grid; grid-template-columns: var(--side-w) minmax(0, 1fr); min-height: 100vh; }
 
 .side {
   position: sticky;
@@ -243,6 +243,39 @@ button { font: inherit; color: inherit; }
 
 .topbar { display: none; }
 
+/* sidebar close / open buttons */
+.side > .brand { padding-inline-end: 44px; }
+/* (.app prefix: these must beat the base .iconbtn rule further down) */
+.app .side-close { position: absolute; top: 16px; inset-inline-end: 12px; width: 36px; height: 36px; }
+.app .side-open { display: none; position: fixed; top: 16px; inset-inline-start: 16px; z-index: 15; box-shadow: var(--shadow); }
+.app.side-collapsed .shell { grid-template-columns: minmax(0, 1fr); }
+.app.side-collapsed .side, .app.side-collapsed .side-resize { display: none; }
+.app.side-collapsed .side-open { display: inline-grid; }
+
+/* drag handle on the sidebar edge */
+.side-resize {
+  position: fixed;
+  inset-block: 0;
+  inset-inline-start: calc(var(--side-w) - 4px);
+  width: 8px;
+  z-index: 12;
+  cursor: col-resize;
+  touch-action: none;
+}
+.side-resize::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 3px;
+  width: 2px;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity .15s;
+}
+.side-resize:hover::after, .side-resize:focus-visible::after, .resizing .side-resize::after { opacity: 1; }
+.resizing { cursor: col-resize; user-select: none; }
+.app.side-collapsed main { padding-inline-start: 72px; }
+
 main { min-width: 0; padding-block: 28px 80px; padding-inline: 32px; }
 
 .page { max-width: 780px; margin-inline: auto; }
@@ -278,7 +311,9 @@ main { min-width: 0; padding-block: 28px 80px; padding-inline: 32px; }
   }
   .topbar .brand { font-size: 16.5px; flex: 1; min-width: 0; }
   .topbar .losscurve { margin: 0; width: 110px; flex: none; }
-  main { padding-block: 18px 72px; padding-inline: 16px; }
+  main, .app.side-collapsed main { padding-block: 18px 72px; padding-inline: 16px; }
+  .app.side-collapsed .side { display: block; }
+  .app.side-collapsed .side-open, .side-resize { display: none; }
   pre { font-size: 12.6px; padding: 12px 13px; }
   body { font-size: 17px; }
 }
@@ -967,7 +1002,13 @@ svg { direction: ltr; }
     <div class="losscurve mini" aria-hidden="true"></div>
   </header>
   <div class="shell">
+    <button class="iconbtn side-open" id="side-open" type="button" aria-label="إظهار قائمة الدروس" aria-controls="side">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="15" y1="4" x2="15" y2="20"/></svg>
+    </button>
     <aside class="side" id="side">
+      <button class="iconbtn side-close" id="side-close" type="button" aria-label="إخفاء قائمة الدروس" aria-controls="side">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="15" y1="4" x2="15" y2="20"/></svg>
+      </button>
       <a class="brand" href="#home">الذكاء الاصطناعي من الصفر<small>من معادلة الخط إلى النماذج اللغوية الكبيرة</small></a>
       <div class="losscurve" aria-hidden="true"></div>
       <div class="runcount" dir="ltr">epoch <b data-count>0</b> / 59 · loss <b data-loss>2.303</b></div>
@@ -975,6 +1016,7 @@ svg { direction: ltr; }
         <div class="extra"><a href="#home">الصفحة الرئيسية</a><a href="#notebooks">دفاتر الكود والتحميل</a><a href="#glossary">قاموس المصطلحات</a></div>
       </nav>
     </aside>
+    <div class="side-resize" id="side-resize" role="separator" aria-orientation="vertical" aria-controls="side" aria-label="تغيير عرض قائمة الدروس" tabindex="0"></div>
     <main id="main"></main>
   </div>
 </div>
@@ -3196,6 +3238,82 @@ window.AIWidgets = (function () {
   }
   document.getElementById("menu-btn").addEventListener("click", function () {
     if (side.classList.contains("open")) closeMenu(); else openMenu();
+  });
+
+  // ------------------------------------------------------------ desktop sidebar toggle
+  var app = document.querySelector(".app");
+  var SIDE_KEY = STORE_KEY + ":side";
+  var phone = window.matchMedia("(max-width: 980px)");
+  function setCollapsed(collapsed) {
+    app.classList.toggle("side-collapsed", collapsed);
+    try {
+      if (collapsed) window.localStorage.setItem(SIDE_KEY, "closed");
+      else window.localStorage.removeItem(SIDE_KEY);
+    } catch (e) { /* ignore */ }
+  }
+  try {
+    if (window.localStorage.getItem(SIDE_KEY) === "closed") app.classList.add("side-collapsed");
+  } catch (e) { /* ignore */ }
+  document.getElementById("side-close").addEventListener("click", function () {
+    if (phone.matches) { closeMenu(); document.getElementById("menu-btn").focus(); return; }
+    setCollapsed(true);
+    document.getElementById("side-open").focus();
+  });
+  document.getElementById("side-open").addEventListener("click", function () {
+    setCollapsed(false);
+    document.getElementById("side-close").focus();
+  });
+
+  // ------------------------------------------------------------ desktop sidebar resize
+  var shell = document.querySelector(".shell");
+  var handle = document.getElementById("side-resize");
+  var WIDTH_KEY = STORE_KEY + ":side-w";
+  var SIDE_MIN = 220, SIDE_MAX = 560, SIDE_DEFAULT = 304;
+  var rtl = getComputedStyle(app).direction === "rtl";
+  function setWidth(w, save) {
+    w = Math.round(Math.max(SIDE_MIN, Math.min(SIDE_MAX, w, window.innerWidth - 360)));
+    shell.style.setProperty("--side-w", w + "px");
+    handle.setAttribute("aria-valuenow", w);
+    if (save) { try { window.localStorage.setItem(WIDTH_KEY, String(w)); } catch (e) { /* ignore */ } }
+    return w;
+  }
+  handle.setAttribute("aria-valuemin", SIDE_MIN);
+  handle.setAttribute("aria-valuemax", SIDE_MAX);
+  try {
+    var savedW = parseInt(window.localStorage.getItem(WIDTH_KEY), 10);
+    setWidth(savedW > 0 ? savedW : SIDE_DEFAULT, false);
+  } catch (e) { setWidth(SIDE_DEFAULT, false); }
+  handle.addEventListener("pointerdown", function (e) {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    handle.setPointerCapture(e.pointerId);
+    document.body.classList.add("resizing");
+    function move(ev) {
+      setWidth(rtl ? window.innerWidth - ev.clientX : ev.clientX, false);
+    }
+    function up() {
+      handle.removeEventListener("pointermove", move);
+      handle.removeEventListener("pointerup", up);
+      handle.removeEventListener("pointercancel", up);
+      document.body.classList.remove("resizing");
+      setWidth(side.getBoundingClientRect().width, true);
+    }
+    handle.addEventListener("pointermove", move);
+    handle.addEventListener("pointerup", up);
+    handle.addEventListener("pointercancel", up);
+  });
+  handle.addEventListener("dblclick", function () { setWidth(SIDE_DEFAULT, true); });
+  handle.addEventListener("keydown", function (e) {
+    var step = e.shiftKey ? 48 : 16;
+    var cur = side.getBoundingClientRect().width;
+    // arrows follow the edge: in a right-to-left page, ArrowLeft widens the sidebar
+    var grow = rtl ? "ArrowLeft" : "ArrowRight", shrink = rtl ? "ArrowRight" : "ArrowLeft";
+    if (e.key === grow) setWidth(cur + step, true);
+    else if (e.key === shrink) setWidth(cur - step, true);
+    else if (e.key === "Home") setWidth(SIDE_MIN, true);
+    else if (e.key === "End") setWidth(SIDE_MAX, true);
+    else return;
+    e.preventDefault();
   });
 
   // ------------------------------------------------------------ enhance a rendered view
