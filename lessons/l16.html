@@ -1,0 +1,771 @@
+<div class="page"><article><div class="eyebrow">الجزء الثاني · التعلم الآلي</div><h1>الانحدار الخطي من الصفر</h1><div class="meta"><span>الدرس 16 من 59</span><span>المدة: حوالي 60 دقيقة</span><span class="nbdl-slot"></span></div><div class="chips" dir="ltr"><bdi class="chip">linear regression</bdi><bdi class="chip">least squares</bdi><bdi class="chip">closed-form solution</bdi><bdi class="chip">normal equation</bdi><bdi class="chip">residual</bdi><bdi class="chip">coefficient</bdi><bdi class="chip">intercept</bdi></div><div class="goals"><b>بعد هذا الدرس ستعرف:</b><ul><li>تجمع كل ما تعلّمته في نموذج كامل: الانحدار الخطي</li><li>تحسب أفضل خط بيدك بمعادلة مباشرة، بدون نزول بالتدرّج</li><li>تكتب الانحدار الخطي من الصفر كصنف في بايثون، بأمري التدريب والتوقع</li><li>تقارن نتيجتك بمكتبة سايكت ليرن</li><li>تفسّر المعاملات، وتقرأ رسم البواقي</li></ul></div><h2>كل القطع في مكانها</h2><div class="blk"><p>في الجزء الأول بنينا كل القطع:</p></div><div class="tablewrap"><table><thead><tr><th>القطعة</th><th>من أين</th></tr></thead><tbody><tr><td>النموذج: خط <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mover accent="true"><mi>y</mi><mo>^</mo></mover><mo>=</mo><mi>w</mi><mi>x</mi><mo>+</mo><mi>b</mi></mrow></math></bdi></td><td>الدرس 3</td></tr><tr><td>الخسارة: متوسط مربعات الأخطاء</td><td>الدرس 3</td></tr><tr><td>التدرّج: الخطأ مضروباً في المدخل</td><td>الدرس 8</td></tr><tr><td>التعلّم: النزول بالتدرّج</td><td>الدرس 9</td></tr></tbody></table></div><div class="blk"><p>الآن نجمعها في نموذج حقيقي، ونعطيه اسمه:</p></div><div class="blk"><div class="term" dir="ltr"><code>linear regression</code></div></div><div class="blk"><p><b>الانحدار الخطي</b> أقدم نموذج في المجال، وما زال مستخدماً كل يوم.</p><p>سريع، وسهل التفسير. وهو أول نموذج تجربه في أي مشكلة انحدار، كنقطة مقارنة.</p></div><h2>المثال: سنوات الخبرة والراتب</h2><div class="blk"><p>عندنا موظفون. نعرف سنوات خبرة كل واحد، وراتبه بآلاف الليرات.</p><p>نريد نموذجاً يتوقع الراتب من سنوات الخبرة.</p></div><div class="blk"><p>البيانات في هذا الدرس <b>مصنوعة</b> للتدريب: صنعناها بقاعدة معروفة وضجيج عشوائي.</p><p>لذلك نعرف الجواب الحقيقي، ونستطيع أن نتأكد أن النموذج وجده.</p></div><h2>طريقتان لإيجاد أفضل خط</h2><h3>الطريقة الأولى: النزول بالتدرّج</h3><div class="blk"><p>نعرفها جيداً. نبدأ من أي خط، ونتحرك خطوة خطوة نحو القاع.</p><p>تعمل مع أي نموذج، مهما كان كبيراً.</p></div><h3>الطريقة الثانية: معادلة مباشرة</h3><div class="blk"><p>في الانحدار الخطي بالذات، نستطيع أن نحسب القاع مباشرة.</p><p>الفكرة: في القاع، المشتقتان صفر. نكتب المعادلتين، ونحلّهما.</p><p>الناتج لميزة واحدة:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>w</mi><mo>=</mo><mfrac><mrow><munder><mo>∑</mo><mi>i</mi></munder><mo stretchy="false">(</mo><msub><mi>x</mi><mi>i</mi></msub><mo>−</mo><mover accent="true"><mi>x</mi><mo>ˉ</mo></mover><mo stretchy="false">)</mo><mo stretchy="false">(</mo><msub><mi>y</mi><mi>i</mi></msub><mo>−</mo><mover accent="true"><mi>y</mi><mo>ˉ</mo></mover><mo stretchy="false">)</mo></mrow><mrow><munder><mo>∑</mo><mi>i</mi></munder><mo stretchy="false">(</mo><msub><mi>x</mi><mi>i</mi></msub><mo>−</mo><mover accent="true"><mi>x</mi><mo>ˉ</mo></mover><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow></mfrac><mspace width="2em"/><mi>b</mi><mo>=</mo><mover accent="true"><mi>y</mi><mo>ˉ</mo></mover><mo>−</mo><mi>w</mi><mtext> </mtext><mover accent="true"><mi>x</mi><mo>ˉ</mo></mover></mrow></math></div></div><div class="blk"><p>لاحظ شكل البسط: نفس بسط معامل الارتباط من الدرس 10.</p><p>المعنى: الميل هو كم يتحرك الجواب مع الميزة، مقسوماً على كم تتحرك الميزة وحدها.</p></div><div class="blk"><p>وسطر الإزاحة يقول: أفضل خط يمر دائماً بنقطة المتوسطين.</p></div><div class="blk"><p>الاسم بالإنجليزية لهذه الطريقة:</p></div><div class="blk"><div class="term" dir="ltr"><code>least squares · closed-form solution</code></div></div><section class="hand"><div class="hand-h"><span class="hand-tag">مثال محلول باليد</span><div class="hand-t">أفضل خط لأربعة موظفين</div></div><div class="hand-body"><div class="tablewrap"><table><thead><tr><th>الموظف</th><th>الخبرة <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>x</mi></mrow></math></bdi></th><th>الراتب <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>y</mi></mrow></math></bdi></th></tr></thead><tbody><tr><td>1</td><td>1</td><td>35</td></tr><tr><td>2</td><td>2</td><td>40</td></tr><tr><td>3</td><td>4</td><td>48</td></tr><tr><td>4</td><td>5</td><td>57</td></tr></tbody></table></div><div class="step">المتوسطان</div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mover accent="true"><mi>x</mi><mo>ˉ</mo></mover><mo>=</mo><mfrac><mrow><mn>1</mn><mo>+</mo><mn>2</mn><mo>+</mo><mn>4</mn><mo>+</mo><mn>5</mn></mrow><mn>4</mn></mfrac><mo>=</mo><mn>3</mn><mspace width="2em"/><mover accent="true"><mi>y</mi><mo>ˉ</mo></mover><mo>=</mo><mfrac><mrow><mn>35</mn><mo>+</mo><mn>40</mn><mo>+</mo><mn>48</mn><mo>+</mo><mn>57</mn></mrow><mn>4</mn></mfrac><mo>=</mo><mn>45</mn></mrow></math></div></div><div class="step">البعد عن المتوسط</div><div class="tablewrap"><table><thead><tr><th><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>x</mi><mo>−</mo><mover accent="true"><mi>x</mi><mo>ˉ</mo></mover></mrow></math></bdi></th><th><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>y</mi><mo>−</mo><mover accent="true"><mi>y</mi><mo>ˉ</mo></mover></mrow></math></bdi></th><th>حاصل الضرب</th><th><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mi>x</mi><mo>−</mo><mover accent="true"><mi>x</mi><mo>ˉ</mo></mover><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow></math></bdi></th></tr></thead><tbody><tr><td>−2</td><td>−10</td><td>20</td><td>4</td></tr><tr><td>−1</td><td>−5</td><td>5</td><td>1</td></tr><tr><td>1</td><td>3</td><td>3</td><td>1</td></tr><tr><td>2</td><td>12</td><td>24</td><td>4</td></tr><tr><td></td><td></td><td><b>52</b></td><td><b>10</b></td></tr></tbody></table></div><div class="step">الميل والإزاحة</div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>w</mi><mo>=</mo><mfrac><mn>52</mn><mn>10</mn></mfrac><mo>=</mo><mn>5.2</mn><mspace width="2em"/><mi>b</mi><mo>=</mo><mn>45</mn><mo>−</mo><mn>5.2</mn><mo>×</mo><mn>3</mn><mo>=</mo><mn>29.4</mn></mrow></math></div></div><div class="step">ماذا يعني هذا؟</div><div class="blk"><p>كل سنة خبرة إضافية ترفع الراتب <b>5.2 ألف ليرة</b> في المتوسط، في هذه البيانات.</p><p>والإزاحة 29.4: راتب موظف بدون خبرة، حسب الخط.</p></div><div class="step">التوقعات والبواقي</div><div class="blk"><p>الباقي هو الجواب الحقيقي ناقص التوقع:</p></div><div class="tablewrap"><table><thead><tr><th><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>x</mi></mrow></math></bdi></th><th><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>y</mi></mrow></math></bdi></th><th>التوقع <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>5.2</mn><mi>x</mi><mo>+</mo><mn>29.4</mn></mrow></math></bdi></th><th>الباقي</th></tr></thead><tbody><tr><td>1</td><td>35</td><td>34.6</td><td>0.4</td></tr><tr><td>2</td><td>40</td><td>39.8</td><td>0.2</td></tr><tr><td>4</td><td>48</td><td>50.2</td><td>−2.2</td></tr><tr><td>5</td><td>57</td><td>55.4</td><td>1.6</td></tr></tbody></table></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>MSE</mtext><mo>=</mo><mfrac><mrow><mn>0.16</mn><mo>+</mo><mn>0.04</mn><mo>+</mo><mn>4.84</mn><mo>+</mo><mn>2.56</mn></mrow><mn>4</mn></mfrac><mo>=</mo><mfrac><mn>7.6</mn><mn>4</mn></mfrac><mo>=</mo><mn>1.9</mn></mrow></math></div></div><div class="blk"><p>لاحظ: مجموع البواقي صفر تماماً. هذا يحدث دائماً مع أفضل خط فيه إزاحة.</p></div></div></section><h3>جرّب: الخط يتدرّب أمامك</h3><div class="blk"><p>حرّك الخط بيدك أولاً. ثم اضغط زر التدريب عدة مرات، وراقب الخط يقترب من الحل المباشر: ميل 5.2 وإزاحة 29.4.</p></div><div class="widget" data-widget="line" data-args="{&quot;train&quot;: &quot;1&quot;, &quot;points&quot;: &quot;1,35;2,40;4,48;5,57&quot;, &quot;xmax&quot;: &quot;6&quot;, &quot;ymax&quot;: &quot;70&quot;, &quot;ystep&quot;: &quot;10&quot;, &quot;w&quot;: &quot;0&quot;, &quot;b&quot;: &quot;0&quot;, &quot;wmin&quot;: &quot;-5&quot;, &quot;wmax&quot;: &quot;15&quot;, &quot;wstep&quot;: &quot;0.1&quot;, &quot;bmin&quot;: &quot;-10&quot;, &quot;bmax&quot;: &quot;60&quot;, &quot;bstep&quot;: &quot;0.5&quot;, &quot;lr&quot;: &quot;0.05&quot;, &quot;lrmax&quot;: &quot;0.08&quot;}"><div class="w-fallback">هنا أداة تفاعلية. إذا لم تظهر، حدّث الصفحة.</div></div><div class="blk"><p>لاحظ أن الميل يصل بسرعة، والإزاحة تتحرك ببطء شديد.</p><p>السبب أن المدخلات كلها موجبة وبعيدة عن الصفر. سنفهم هذا، ونعالجه بتوحيد المقياس، في الدرس القادم.</p></div><details class="more"><summary>من أين جاءت المعادلة المباشرة؟</summary><div class="dbody"><div class="blk"><p>الخسارة:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>L</mi><mo stretchy="false">(</mo><mi>w</mi><mo separator="true">,</mo><mi>b</mi><mo stretchy="false">)</mo><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><munder><mo>∑</mo><mi>i</mi></munder><mo stretchy="false">(</mo><mi>w</mi><msub><mi>x</mi><mi>i</mi></msub><mo>+</mo><mi>b</mi><mo>−</mo><msub><mi>y</mi><mi>i</mi></msub><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow></math></div></div><div class="blk"><p>في القاع، المشتقة بالنسبة للإزاحة صفر:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mn>2</mn><mi>n</mi></mfrac><munder><mo>∑</mo><mi>i</mi></munder><mo stretchy="false">(</mo><mi>w</mi><msub><mi>x</mi><mi>i</mi></msub><mo>+</mo><mi>b</mi><mo>−</mo><msub><mi>y</mi><mi>i</mi></msub><mo stretchy="false">)</mo><mo>=</mo><mn>0</mn><mspace width="1em"/><mo>⇒</mo><mspace width="1em"/><mi>b</mi><mo>=</mo><mover accent="true"><mi>y</mi><mo>ˉ</mo></mover><mo>−</mo><mi>w</mi><mover accent="true"><mi>x</mi><mo>ˉ</mo></mover></mrow></math></div></div><div class="blk"><p>نعوّض هذا في مشتقة الميل، ونساويها بالصفر، فنحصل على معادلة الميل بعد قليل من الجبر.</p></div><div class="blk"><p>مع ميزات كثيرة، نكتب كل شيء بالمصفوفات. الحل اسمه <b>المعادلة الطبيعية</b>:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>w</mi><mo>=</mo><mo stretchy="false">(</mo><msup><mi>X</mi><mi>T</mi></msup><mi>X</mi><msup><mo stretchy="false">)</mo><mrow><mo>−</mo><mn>1</mn></mrow></msup><msup><mi>X</mi><mi>T</mi></msup><mi>y</mi></mrow></math></div></div><div class="blk"><p>حيث أضفنا عموداً من الآحاد إلى المصفوفة، لكي تكون الإزاحة وزناً عادياً.</p><p>حساب المعكوس مكلف جداً مع آلاف الميزات، وغير ممكن في الشبكات العصبية أصلاً.</p><p>لذلك النزول بالتدرّج هو الطريقة العامة، والمعادلة المباشرة حالة خاصة جميلة.</p></div></div></details><h2>بالكود</h2><h3>نصنع البيانات</h3><div class="code "><div class="code-head"><span class="path">data.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">n</span> <span class="o">=</span> <span class="mi">40</span>
+<span class="n">years</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
+<span class="n">salary</span> <span class="o">=</span> <span class="mi">30</span> <span class="o">+</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">years</span> <span class="o">+</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>   <span class="c1"># القاعدة الحقيقية + ضجيج</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;first 5 years :&quot;</span><span class="p">,</span> <span class="n">years</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;first 5 salary:&quot;</span><span class="p">,</span> <span class="n">salary</span><span class="p">[:</span><span class="mi">5</span><span class="p">]</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>first 5 years : [7.7 4.4 8.6 7.  0.9]
+first 5 salary: [71.7 54.1 70.3 65.8 35.2]</pre></div><div class="blk"><p>القاعدة الحقيقية: 30 ألفاً، زائد 5 آلاف لكل سنة. والضجيج بانحراف معياري 4.</p><p>النموذج لا يعرف هذا. سنرى هل يكتشفه.</p></div><h3>الحل المباشر</h3><div class="code "><div class="code-head"><span class="path">closed_form.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="k">def</span><span class="w"> </span><span class="nf">fit_closed_form</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">*</span> <span class="p">(</span><span class="n">y</span> <span class="o">-</span> <span class="n">y</span><span class="o">.</span><span class="n">mean</span><span class="p">()))</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">-</span> <span class="n">w</span> <span class="o">*</span> <span class="n">x</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">w</span><span class="p">,</span> <span class="n">b</span>
+
+<span class="n">w_cf</span><span class="p">,</span> <span class="n">b_cf</span> <span class="o">=</span> <span class="n">fit_closed_form</span><span class="p">(</span><span class="n">years</span><span class="p">,</span> <span class="n">salary</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;closed form: w = </span><span class="si">{</span><span class="n">w_cf</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, b = </span><span class="si">{</span><span class="n">b_cf</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>closed form: w = 4.765, b = 31.307</pre></div><h3>من الصفر، بالنزول بالتدرّج</h3><div class="blk"><p>نكتبه كصنف، بنفس شكل المكتبات: أمر للتدريب، وأمر للتوقع.</p></div><div class="code "><div class="code-head"><span class="path">linear_regression_gd.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="k">class</span><span class="w"> </span><span class="nc">LinearRegressionGD</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">5000</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lr</span> <span class="o">=</span> <span class="n">lr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epochs</span> <span class="o">=</span> <span class="n">epochs</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">history</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epochs</span><span class="p">):</span>
+            <span class="n">err</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">y</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lr</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">err</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lr</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">history</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">err</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">LinearRegressionGD</span><span class="p">(</span><span class="n">lr</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">5000</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">years</span><span class="p">,</span> <span class="n">salary</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;gradient descent: w = </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">w</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, b = </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">b</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;final MSE: </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>gradient descent: w = 4.765, b = 31.307
+final MSE: 7.854</pre></div><div class="blk"><p>الطريقتان وصلتا إلى نفس الخط تقريباً. والميل قريب من 5، والإزاحة قريبة من 30: وجد النموذج القاعدة الحقيقية رغم الضجيج.</p></div><h3>بمكتبة سايكت ليرن</h3><div class="code "><div class="code-head"><span class="path">sklearn_lr.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.linear_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinearRegression</span>
+
+<span class="n">X</span> <span class="o">=</span> <span class="n">years</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>          <span class="c1"># المكتبة تنتظر جدولاً: صف لكل مثال</span>
+<span class="n">lr_model</span> <span class="o">=</span> <span class="n">LinearRegression</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">salary</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sklearn: w = </span><span class="si">{</span><span class="n">lr_model</span><span class="o">.</span><span class="n">coef_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, b = </span><span class="si">{</span><span class="n">lr_model</span><span class="o">.</span><span class="n">intercept_</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;prediction for 7 years:&quot;</span><span class="p">,</span> <span class="n">lr_model</span><span class="o">.</span><span class="n">predict</span><span class="p">([[</span><span class="mi">7</span><span class="p">]])</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>sklearn: w = 4.765, b = 31.307
+prediction for 7 years: [64.66]</pre></div><div class="blk"><p>المكتبة تستخدم الحل المباشر، بطريقة عددية أكثر استقراراً. لذلك النتيجة مطابقة للطريقة الأولى تماماً.</p></div><h3>نرسم الخط والبواقي</h3><div class="code "><div class="code-head"><span class="path">plots.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="p">(</span><span class="n">ax1</span><span class="p">,</span> <span class="n">ax2</span><span class="p">)</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mf">3.4</span><span class="p">))</span>
+
+<span class="n">xx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">years</span><span class="p">,</span> <span class="n">salary</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C1&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;data&quot;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">w_cf</span> <span class="o">*</span> <span class="n">xx</span> <span class="o">+</span> <span class="n">b_cf</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;fitted line&quot;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;years of experience&quot;</span><span class="p">);</span> <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;salary&quot;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span> <span class="n">ax1</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">residuals</span> <span class="o">=</span> <span class="n">salary</span> <span class="o">-</span> <span class="p">(</span><span class="n">w_cf</span> <span class="o">*</span> <span class="n">years</span> <span class="o">+</span> <span class="n">b_cf</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">years</span><span class="p">,</span> <span class="n">residuals</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">1.5</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;years of experience&quot;</span><span class="p">);</span> <span class="n">ax2</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;residual&quot;</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></pre></div><figure class="plot"><div class="svgwrap"><svg xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 637.734444 235.131875" xmlns="http://www.w3.org/2000/svg" version="1.1">
+<defs>
+</defs>
+<g id="figure_1">
+<g id="patch_1">
+<path d="M 0 235.131875 
+L 637.734444 235.131875 
+L 637.734444 0 
+L 0 0 
+L 0 235.131875 
+z
+" style="fill: none"/>
+</g>
+<g id="axes_1">
+<g id="patch_2">
+<path d="M 42.843438 195.64 
+L 311.156942 195.64 
+L 311.156942 7.2 
+L 42.843438 7.2 
+L 42.843438 195.64 
+z
+" style="fill: none"/>
+</g>
+<g id="PathCollection_1">
+<defs>
+<path id="mead62a3517" d="M 0 2.5 
+C 0.663008 2.5 1.29895 2.236584 1.767767 1.767767 
+C 2.236584 1.29895 2.5 0.663008 2.5 0 
+C 2.5 -0.663008 2.236584 -1.29895 1.767767 -1.767767 
+C 1.29895 -2.236584 0.663008 -2.5 0 -2.5 
+C -0.663008 -2.5 -1.29895 -2.236584 -1.767767 -1.767767 
+C -2.236584 -1.29895 -2.5 -0.663008 -2.5 0 
+C -2.5 0.663008 -2.236584 1.29895 -1.767767 1.767767 
+C -1.29895 2.236584 -0.663008 2.5 0 2.5 
+z
+" style="stroke: #ff7f0e"/>
+</defs>
+<g clip-path="url(#pc86b2bac48)">
+<use xlink:href="#mead62a3517" x="243.823924" y="43.50366" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="162.091335" y="104.483123" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="264.469885" y="48.377222" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="225.142469" y="63.907772" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="78.011373" y="170.279479" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="293.014644" y="15.765455" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="240.697743" y="43.948716" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="246.777386" y="48.621288" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="86.289158" y="156.572952" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="164.89826" y="109.092554" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="145.485067" y="119.837726" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="281.097289" y="18.518309" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="212.091967" y="96.673772" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="255.728644" y="49.796121" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="163.197704" y="117.778337" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="110.467886" y="157.66688" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="190.314586" y="95.756567" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="70.605898" y="156.401722" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="256.916433" y="56.539263" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="209.11595" y="65.09133" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="239.953304" y="79.970949" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="141.515965" y="131.334574" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="291.813496" y="17.39798" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="272.890831" y="24.988048" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="244.903873" y="43.17969" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="102.516046" y="143.428261" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="168.882731" y="112.039917" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="65.72418" y="187.074545" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="92.67401" y="149.538429" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="221.649741" y="72.27891" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="236.70291" y="76.627606" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="291.035803" y="35.960313" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="134.515273" y="144.442134" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="145.402544" y="117.00574" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="169.574202" y="104.722972" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="101.255619" y="145.755042" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="86.730137" y="171.629196" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="171.074102" y="103.431038" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="110.387545" y="140.15422" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mead62a3517" x="218.421452" y="76.217872" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+</g>
+</g>
+<g id="matplotlib.axis_1">
+<g id="xtick_1">
+<g id="line2d_1">
+<path d="M 55.039506 195.64 
+L 55.039506 7.2 
+" clip-path="url(#pc86b2bac48)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_2">
+<defs>
+<path id="m991596a941" d="M 0 0 
+L 0 3.5 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#m991596a941" x="55.039506" y="195.64" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_1">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="55.039506" y="210.998281" transform="rotate(-0 55.039506 210.998281)">0</text>
+</g>
+</g>
+<g id="xtick_2">
+<g id="line2d_3">
+<path d="M 103.823779 195.64 
+L 103.823779 7.2 
+" clip-path="url(#pc86b2bac48)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_4">
+<g>
+<use xlink:href="#m991596a941" x="103.823779" y="195.64" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_2">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="103.823779" y="210.998281" transform="rotate(-0 103.823779 210.998281)">2</text>
+</g>
+</g>
+<g id="xtick_3">
+<g id="line2d_5">
+<path d="M 152.608053 195.64 
+L 152.608053 7.2 
+" clip-path="url(#pc86b2bac48)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_6">
+<g>
+<use xlink:href="#m991596a941" x="152.608053" y="195.64" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_3">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="152.608053" y="210.998281" transform="rotate(-0 152.608053 210.998281)">4</text>
+</g>
+</g>
+<g id="xtick_4">
+<g id="line2d_7">
+<path d="M 201.392326 195.64 
+L 201.392326 7.2 
+" clip-path="url(#pc86b2bac48)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_8">
+<g>
+<use xlink:href="#m991596a941" x="201.392326" y="195.64" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_4">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="201.392326" y="210.998281" transform="rotate(-0 201.392326 210.998281)">6</text>
+</g>
+</g>
+<g id="xtick_5">
+<g id="line2d_9">
+<path d="M 250.1766 195.64 
+L 250.1766 7.2 
+" clip-path="url(#pc86b2bac48)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_10">
+<g>
+<use xlink:href="#m991596a941" x="250.1766" y="195.64" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_5">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="250.1766" y="210.998281" transform="rotate(-0 250.1766 210.998281)">8</text>
+</g>
+</g>
+<g id="xtick_6">
+<g id="line2d_11">
+<path d="M 298.960874 195.64 
+L 298.960874 7.2 
+" clip-path="url(#pc86b2bac48)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_12">
+<g>
+<use xlink:href="#m991596a941" x="298.960874" y="195.64" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_6">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="298.960874" y="210.998281" transform="rotate(-0 298.960874 210.998281)">10</text>
+</g>
+</g>
+<g id="text_7">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="177.00019" y="225.644219" transform="rotate(-0 177.00019 225.644219)">years of experience</text>
+</g>
+</g>
+<g id="matplotlib.axis_2">
+<g id="ytick_1">
+<g id="line2d_13">
+<path d="M 42.843438 188.258339 
+L 311.156942 188.258339 
+" clip-path="url(#pc86b2bac48)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_14">
+<defs>
+<path id="m05c76a9fe8" d="M 0 0 
+L -3.5 0 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#m05c76a9fe8" x="42.843438" y="188.258339" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_8">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="35.843438" y="192.43748" transform="rotate(-0 35.843438 192.43748)">30</text>
+</g>
+</g>
+<g id="ytick_2">
+<g id="line2d_15">
+<path d="M 42.843438 153.520678 
+L 311.156942 153.520678 
+" clip-path="url(#pc86b2bac48)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_16">
+<g>
+<use xlink:href="#m05c76a9fe8" x="42.843438" y="153.520678" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_9">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="35.843438" y="157.699819" transform="rotate(-0 35.843438 157.699819)">40</text>
+</g>
+</g>
+<g id="ytick_3">
+<g id="line2d_17">
+<path d="M 42.843438 118.783017 
+L 311.156942 118.783017 
+" clip-path="url(#pc86b2bac48)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_18">
+<g>
+<use xlink:href="#m05c76a9fe8" x="42.843438" y="118.783017" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_10">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="35.843438" y="122.962158" transform="rotate(-0 35.843438 122.962158)">50</text>
+</g>
+</g>
+<g id="ytick_4">
+<g id="line2d_19">
+<path d="M 42.843438 84.045356 
+L 311.156942 84.045356 
+" clip-path="url(#pc86b2bac48)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_20">
+<g>
+<use xlink:href="#m05c76a9fe8" x="42.843438" y="84.045356" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_11">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="35.843438" y="88.224497" transform="rotate(-0 35.843438 88.224497)">60</text>
+</g>
+</g>
+<g id="ytick_5">
+<g id="line2d_21">
+<path d="M 42.843438 49.307695 
+L 311.156942 49.307695 
+" clip-path="url(#pc86b2bac48)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_22">
+<g>
+<use xlink:href="#m05c76a9fe8" x="42.843438" y="49.307695" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_12">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="35.843438" y="53.486836" transform="rotate(-0 35.843438 53.486836)">70</text>
+</g>
+</g>
+<g id="ytick_6">
+<g id="line2d_23">
+<path d="M 42.843438 14.570034 
+L 311.156942 14.570034 
+" clip-path="url(#pc86b2bac48)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_24">
+<g>
+<use xlink:href="#m05c76a9fe8" x="42.843438" y="14.570034" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_13">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="35.843438" y="18.749175" transform="rotate(-0 35.843438 18.749175)">80</text>
+</g>
+</g>
+<g id="text_14">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="15.558281" y="101.42" transform="rotate(-90 15.558281 101.42)">salary</text>
+</g>
+</g>
+<g id="line2d_25">
+<path d="M 55.039506 183.719063 
+L 60.017493 180.34101 
+L 64.99548 176.962957 
+L 69.973467 173.584904 
+L 74.951454 170.206851 
+L 79.929441 166.828798 
+L 84.907428 163.450745 
+L 89.885416 160.072692 
+L 94.863403 156.694639 
+L 99.84139 153.316587 
+L 104.819377 149.938534 
+L 109.797364 146.560481 
+L 114.775351 143.182428 
+L 119.753338 139.804375 
+L 124.731325 136.426322 
+L 129.709312 133.048269 
+L 134.687299 129.670216 
+L 139.665286 126.292163 
+L 144.643274 122.91411 
+L 149.621261 119.536057 
+L 154.599248 116.158005 
+L 159.577235 112.779952 
+L 164.555222 109.401899 
+L 169.533209 106.023846 
+L 174.511196 102.645793 
+L 179.489183 99.26774 
+L 184.46717 95.889687 
+L 189.445157 92.511634 
+L 194.423145 89.133581 
+L 199.401132 85.755528 
+L 204.379119 82.377475 
+L 209.357106 78.999422 
+L 214.335093 75.62137 
+L 219.31308 72.243317 
+L 224.291067 68.865264 
+L 229.269054 65.487211 
+L 234.247041 62.109158 
+L 239.225028 58.731105 
+L 244.203015 55.353052 
+L 249.181003 51.974999 
+L 254.15899 48.596946 
+L 259.136977 45.218893 
+L 264.114964 41.84084 
+L 269.092951 38.462787 
+L 274.070938 35.084735 
+L 279.048925 31.706682 
+L 284.026912 28.328629 
+L 289.004899 24.950576 
+L 293.982886 21.572523 
+L 298.960874 18.19447 
+" clip-path="url(#pc86b2bac48)" style="fill: none; stroke: #1f77b4; stroke-width: 2.5; stroke-linecap: square"/>
+</g>
+<g id="patch_3">
+<path d="M 42.843438 195.64 
+L 42.843438 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_4">
+<path d="M 311.156942 195.64 
+L 311.156942 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_5">
+<path d="M 42.843438 195.64 
+L 311.156942 195.64 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_6">
+<path d="M 42.843438 7.2 
+L 311.156942 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="legend_1">
+<g id="patch_7">
+<path d="M 50.543438 48.291875 
+L 138.395625 48.291875 
+Q 140.595625 48.291875 140.595625 46.091875 
+L 140.595625 14.9 
+Q 140.595625 12.7 138.395625 12.7 
+L 50.543438 12.7 
+Q 48.343438 12.7 48.343438 14.9 
+L 48.343438 46.091875 
+Q 48.343438 48.291875 50.543438 48.291875 
+L 50.543438 48.291875 
+z
+" style="fill: none; opacity: 0.35; stroke: currentColor; stroke-linejoin: miter"/>
+</g>
+<g id="PathCollection_2">
+<g>
+<use xlink:href="#mead62a3517" x="63.743438" y="22.570781" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+</g>
+</g>
+<g id="text_15">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="83.543438" y="25.458281" transform="rotate(-0 83.543438 25.458281)">data</text>
+</g>
+<g id="line2d_26">
+<path d="M 52.743438 37.754219 
+L 63.743438 37.754219 
+L 74.743437 37.754219 
+" style="fill: none; stroke: #1f77b4; stroke-width: 2.5; stroke-linecap: square"/>
+</g>
+<g id="text_16">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="83.543438" y="41.604219" transform="rotate(-0 83.543438 41.604219)">fitted line</text>
+</g>
+</g>
+</g>
+<g id="axes_2">
+<g id="patch_8">
+<path d="M 361.036942 195.64 
+L 629.350446 195.64 
+L 629.350446 7.2 
+L 361.036942 7.2 
+L 361.036942 195.64 
+z
+" style="fill: none"/>
+</g>
+<g id="PathCollection_3">
+<defs>
+<path id="m7bab5dde56" d="M 0 2.5 
+C 0.663008 2.5 1.29895 2.236584 1.767767 1.767767 
+C 2.236584 1.29895 2.5 0.663008 2.5 0 
+C 2.5 -0.663008 2.236584 -1.29895 1.767767 -1.767767 
+C 1.29895 -2.236584 0.663008 -2.5 0 -2.5 
+C -0.663008 -2.5 -1.29895 -2.236584 -1.767767 -1.767767 
+C -2.236584 -1.29895 -2.5 -0.663008 -2.5 0 
+C -2.5 0.663008 -2.236584 1.29895 -1.767767 1.767767 
+C -1.29895 2.236584 -0.663008 2.5 0 2.5 
+z
+" style="stroke: #1f77b4"/>
+</defs>
+<g clip-path="url(#p63353fe218)">
+<use xlink:href="#m7bab5dde56" x="564.364359" y="36.450754" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="476.651375" y="61.001743" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="586.520991" y="120.502241" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="544.315978" y="70.842975" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="386.419261" y="99.902511" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="617.154378" y="61.565452" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="561.009435" y="28.989307" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="567.533928" y="68.149833" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="395.302733" y="63.897588" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="479.663684" y="89.996248" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="458.830022" y="79.1867" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="604.365027" y="37.822924" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="530.310566" y="177.265375" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="577.140151" y="100.415515" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="477.838697" y="123.519989" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="421.250624" y="141.796481" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="506.939729" y="107.406139" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="378.471925" y="15.765455" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="578.414851" y="134.016633" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="527.116794" y="27.704171" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="560.210526" y="187.074545" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="454.5705" y="118.370438" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="615.865341" y="65.203799" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="595.5581" y="41.832587" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="565.523329" y="38.27067" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="412.716946" y="54.402987" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="483.9397" y="115.149631" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="373.23301" y="137.544336" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="402.154766" y="51.87208" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="540.567685" y="97.553133" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="556.722299" y="162.375892" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="615.030744" y="145.475163" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="447.057565" y="155.566734" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="458.741461" y="66.332372" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="484.681765" y="84.670682" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="411.364294" y="60.952394" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="395.775979" y="132.244368" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="486.291414" y="83.450654" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="421.164405" y="63.605556" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m7bab5dde56" x="537.103181" y="105.334537" style="fill: #1f77b4; stroke: #1f77b4"/>
+</g>
+</g>
+<g id="matplotlib.axis_3">
+<g id="xtick_7">
+<g id="line2d_27">
+<path d="M 361.766535 195.64 
+L 361.766535 7.2 
+" clip-path="url(#p63353fe218)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_28">
+<g>
+<use xlink:href="#m991596a941" x="361.766535" y="195.64" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_17">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="361.766535" y="210.998281" transform="rotate(-0 361.766535 210.998281)">0</text>
+</g>
+</g>
+<g id="xtick_8">
+<g id="line2d_29">
+<path d="M 414.120367 195.64 
+L 414.120367 7.2 
+" clip-path="url(#p63353fe218)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_30">
+<g>
+<use xlink:href="#m991596a941" x="414.120367" y="195.64" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_18">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="414.120367" y="210.998281" transform="rotate(-0 414.120367 210.998281)">2</text>
+</g>
+</g>
+<g id="xtick_9">
+<g id="line2d_31">
+<path d="M 466.474199 195.64 
+L 466.474199 7.2 
+" clip-path="url(#p63353fe218)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_32">
+<g>
+<use xlink:href="#m991596a941" x="466.474199" y="195.64" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_19">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="466.474199" y="210.998281" transform="rotate(-0 466.474199 210.998281)">4</text>
+</g>
+</g>
+<g id="xtick_10">
+<g id="line2d_33">
+<path d="M 518.828031 195.64 
+L 518.828031 7.2 
+" clip-path="url(#p63353fe218)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_34">
+<g>
+<use xlink:href="#m991596a941" x="518.828031" y="195.64" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_20">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="518.828031" y="210.998281" transform="rotate(-0 518.828031 210.998281)">6</text>
+</g>
+</g>
+<g id="xtick_11">
+<g id="line2d_35">
+<path d="M 571.181863 195.64 
+L 571.181863 7.2 
+" clip-path="url(#p63353fe218)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_36">
+<g>
+<use xlink:href="#m991596a941" x="571.181863" y="195.64" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_21">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="571.181863" y="210.998281" transform="rotate(-0 571.181863 210.998281)">8</text>
+</g>
+</g>
+<g id="xtick_12">
+<g id="line2d_37">
+<path d="M 623.535694 195.64 
+L 623.535694 7.2 
+" clip-path="url(#p63353fe218)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_38">
+<g>
+<use xlink:href="#m991596a941" x="623.535694" y="195.64" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_22">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="623.535694" y="210.998281" transform="rotate(-0 623.535694 210.998281)">10</text>
+</g>
+</g>
+<g id="text_23">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="495.193694" y="225.644219" transform="rotate(-0 495.193694 225.644219)">years of experience</text>
+</g>
+</g>
+<g id="matplotlib.axis_4">
+<g id="ytick_7">
+<g id="line2d_39">
+<path d="M 361.036942 183.106715 
+L 629.350446 183.106715 
+" clip-path="url(#p63353fe218)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_40">
+<g>
+<use xlink:href="#m05c76a9fe8" x="361.036942" y="183.106715" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_24">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="354.036942" y="187.285856" transform="rotate(-0 354.036942 187.285856)">−6</text>
+</g>
+</g>
+<g id="ytick_8">
+<g id="line2d_41">
+<path d="M 361.036942 152.183482 
+L 629.350446 152.183482 
+" clip-path="url(#p63353fe218)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_42">
+<g>
+<use xlink:href="#m05c76a9fe8" x="361.036942" y="152.183482" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_25">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="354.036942" y="156.362622" transform="rotate(-0 354.036942 156.362622)">−4</text>
+</g>
+</g>
+<g id="ytick_9">
+<g id="line2d_43">
+<path d="M 361.036942 121.260248 
+L 629.350446 121.260248 
+" clip-path="url(#p63353fe218)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_44">
+<g>
+<use xlink:href="#m05c76a9fe8" x="361.036942" y="121.260248" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_26">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="354.036942" y="125.439389" transform="rotate(-0 354.036942 125.439389)">−2</text>
+</g>
+</g>
+<g id="ytick_10">
+<g id="line2d_45">
+<path d="M 361.036942 90.337015 
+L 629.350446 90.337015 
+" clip-path="url(#p63353fe218)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_46">
+<g>
+<use xlink:href="#m05c76a9fe8" x="361.036942" y="90.337015" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_27">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="354.036942" y="94.516155" transform="rotate(-0 354.036942 94.516155)">0</text>
+</g>
+</g>
+<g id="ytick_11">
+<g id="line2d_47">
+<path d="M 361.036942 59.413781 
+L 629.350446 59.413781 
+" clip-path="url(#p63353fe218)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_48">
+<g>
+<use xlink:href="#m05c76a9fe8" x="361.036942" y="59.413781" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_28">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="354.036942" y="63.592922" transform="rotate(-0 354.036942 63.592922)">2</text>
+</g>
+</g>
+<g id="ytick_12">
+<g id="line2d_49">
+<path d="M 361.036942 28.490548 
+L 629.350446 28.490548 
+" clip-path="url(#p63353fe218)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_50">
+<g>
+<use xlink:href="#m05c76a9fe8" x="361.036942" y="28.490548" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_29">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="354.036942" y="32.669689" transform="rotate(-0 354.036942 32.669689)">4</text>
+</g>
+</g>
+<g id="text_30">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="331.532879" y="101.42" transform="rotate(-90 331.532879 101.42)">residual</text>
+</g>
+</g>
+<g id="line2d_51">
+<path d="M 361.036942 90.337015 
+L 629.350446 90.337015 
+" clip-path="url(#p63353fe218)" style="fill: none; stroke: #808080; stroke-width: 1.5; stroke-linecap: square"/>
+</g>
+<g id="patch_9">
+<path d="M 361.036942 195.64 
+L 361.036942 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_10">
+<path d="M 629.350446 195.64 
+L 629.350446 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_11">
+<path d="M 361.036942 195.64 
+L 629.350446 195.64 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_12">
+<path d="M 361.036942 7.2 
+L 629.350446 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+</g>
+</g>
+<defs>
+<clipPath id="pc86b2bac48">
+<rect x="42.843438" y="7.2" width="268.313504" height="188.44"/>
+</clipPath>
+<clipPath id="p63353fe218">
+<rect x="361.036942" y="7.2" width="268.313504" height="188.44"/>
+</clipPath>
+</defs>
+</svg></div><figcaption>يسار: البيانات والخط. يمين: البواقي. البواقي الجيدة تبدو مثل ضجيج عشوائي حول الصفر، بدون أي شكل.</figcaption></figure><h3>لماذا نرسم البواقي؟</h3><div class="blk"><p>إذا رأيت في البواقي شكلاً واضحاً، مثل منحنى، فالنموذج فاتته علاقة في البيانات.</p><p>مثلاً: الرواتب تقفز أسرع بعد عشر سنوات. الخط المستقيم لن يرى هذا، وسيظهر في البواقي كقوس.</p><p>الحل عندها ميزات إضافية، كما سنرى في الدرس القادم، أو نموذج آخر.</p></div><div class="callout mistake"><div class="ct">خطأ شائع: الثقة بالتوقع خارج مجال البيانات</div><div class="blk"><p>بياناتنا من صفر إلى عشر سنوات. الخط سيعطيك توقعاً لأربعين سنة خبرة أيضاً، بكل ثقة.</p><p>لكن لا شيء يضمن أن العلاقة تبقى خطية هناك. التوقع خارج مجال بيانات التدريب اسمه:</p></div><div class="blk"><div class="term" dir="ltr"><code>extrapolation</code></div></div><div class="blk"><p>وهو خطير مع أي نموذج.</p></div></div><div class="callout interview"><div class="ct">سؤال مقابلة</div><div class="blk"><p>سؤال قد تسمعه في المقابلة:</p></div><div class="en" dir="ltr"><p>How can we fit a linear regression model?</p></div><div class="blk"><p>جواب قصير وجيد:</p></div><div class="en" dir="ltr"><p>Two ways. The closed-form least squares solution, the normal equation, gives the best weights directly by solving a linear system. It is exact but becomes expensive with many features. Or gradient descent, which starts from any weights and takes small steps against the gradient of the mean squared error. It scales to very large data and models.</p></div></div><section class="summary"><div class="ct">الخلاصة</div><ul class="l"><li>الانحدار الخطي: خط، وخسارة مربعات الأخطاء، ونزول بالتدرّج.</li><li>للانحدار الخطي حل مباشر: الميل هو التغاير مقسوماً على التباين، والخط يمر بنقطة المتوسطين.</li><li>النزول بالتدرّج طريقة عامة. والحل المباشر حالة خاصة.</li><li>الميل يُفسَّر: كم يتغير التوقع مع كل وحدة من الميزة.</li><li>البواقي الجيدة ضجيج بلا شكل. والشكل في البواقي علاقة فاتت النموذج.</li></ul></section><section class="quiz" data-quiz="l16-q"><h2>اختبر فهمك</h2><div class="q" data-answer="0"><div class="qt"><span class="qn">1.</span>في نموذج الراتب، الميل 5.2. ماذا يعني؟</div><div class="opts"><button type="button" class="opt">كل سنة خبرة إضافية ترفع الراتب المتوقع 5.2 ألف ليرة</button><button type="button" class="opt">الراتب الأدنى 5.2 ألف ليرة</button><button type="button" class="opt">النموذج يخطئ بمقدار 5.2 ألف ليرة</button></div><div class="explain" hidden><span class="verdict"></span><p>الميل هو التغير في التوقع لكل وحدة من الميزة.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">2.</span>بأي نقطة يمر أفضل خط، دائماً؟</div><div class="opts"><button type="button" class="opt">بنقطة الأصل</button><button type="button" class="opt">بنقطة المتوسطين</button><button type="button" class="opt">بأول نقطة في البيانات</button></div><div class="explain" hidden><span class="verdict"></span><p>من معادلة الإزاحة: التوقع عند متوسط الميزة يساوي متوسط الجواب.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">3.</span>ما الباقي لموظف راتبه 48، وتوقع النموذج له 50.2؟</div><div class="opts"><button type="button" class="opt">2.2</button><button type="button" class="opt">−2.2</button><button type="button" class="opt">98.2</button></div><div class="explain" hidden><span class="verdict"></span><p>الباقي هو الحقيقي ناقص التوقع.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">4.</span>لماذا لا نستخدم المعادلة الطبيعية دائماً بدل النزول بالتدرّج؟</div><div class="opts"><button type="button" class="opt">لأنها تعطي جواباً تقريبياً فقط</button><button type="button" class="opt">لأن حساب المعكوس مكلف جداً مع ميزات كثيرة، ولا تنطبق على النماذج غير الخطية</button><button type="button" class="opt">لأنها لا تعمل في بايثون</button></div><div class="explain" hidden><span class="verdict"></span><p>الحل المباشر خاص بالانحدار الخطي. النزول بالتدرّج عام.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">5.</span>رسم البواقي على شكل قوس واضح. ماذا يعني ذلك؟</div><div class="opts"><button type="button" class="opt">النموذج ممتاز</button><button type="button" class="opt">العلاقة ليست خطية، وفاتت النموذج</button><button type="button" class="opt">البيانات فيها أخطاء كتابة</button></div><div class="explain" hidden><span class="verdict"></span><p>البواقي الجيدة لا شكل لها.</p></div></div><div class="row"><span class="score"></span><button type="button" class="btn ghost quiz-reset">أعد المحاولة</button></div></section><section class="exercise"><div class="xt">تمرين: أسعار سيارات مستعملة</div><div class="blk"><p>عمر السيارة بالسنوات، وسعرها بآلاف الليرات:</p></div><div class="tablewrap"><table><thead><tr><th>العمر <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>x</mi></mrow></math></bdi></th><th>1</th><th>3</th><th>5</th><th>7</th></tr></thead><tbody><tr><td>السعر <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>y</mi></mrow></math></bdi></td><td>900</td><td>740</td><td>620</td><td>460</td></tr></tbody></table></div><ol class="l"><li>احسب بيدك الميل والإزاحة بالمعادلة المباشرة.</li><li>فسّر الميل بجملة. لماذا هو سالب؟</li><li>توقع سعر سيارة عمرها 4 سنوات.</li><li>تحقق بالكود بطريقتين: دالة الحل المباشر من الدرس، ومكتبة سايكت ليرن.</li></ol><details><summary>تلميح</summary><div class="dbody"><div class="blk"><p>المتوسطان 4 و 680. أبعاد العمر عن متوسطه: سالب 3، سالب 1، 1، 3.</p></div></div></details><details class="sol"><summary>الحل (افتحه بعد أن تحاول)</summary><div class="dbody"><div class="blk"><p>البعد عن المتوسط للسعر: 220، 60، سالب 60، سالب 220.</p><p>مجموع حواصل الضرب: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo>−</mo><mn>660</mn><mo>−</mo><mn>60</mn><mo>−</mo><mn>60</mn><mo>−</mo><mn>660</mn><mo>=</mo><mo>−</mo><mn>1440</mn></mrow></math></bdi>. ومجموع مربعات أبعاد العمر: 20.</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>w</mi><mo>=</mo><mfrac><mrow><mo>−</mo><mn>1440</mn></mrow><mn>20</mn></mfrac><mo>=</mo><mo>−</mo><mn>72</mn><mspace width="2em"/><mi>b</mi><mo>=</mo><mn>680</mn><mo>−</mo><mo stretchy="false">(</mo><mo>−</mo><mn>72</mn><mo stretchy="false">)</mo><mo stretchy="false">(</mo><mn>4</mn><mo stretchy="false">)</mo><mo>=</mo><mn>968</mn></mrow></math></div></div><div class="blk"><p>كل سنة من العمر تنقص السعر 72 ألف ليرة في المتوسط. الميل سالب لأن السعر ينقص كلما كبرت السيارة.</p><p>توقع سيارة عمرها 4 سنوات: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>968</mn><mo>−</mo><mn>72</mn><mo>×</mo><mn>4</mn><mo>=</mo><mn>680</mn></mrow></math></bdi>. هذا متوسط الأسعار، لأن 4 هو متوسط الأعمار.</p></div><div class="code "><div class="code-head"><span class="path"></span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="n">age</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">])</span>
+<span class="n">price</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">900</span><span class="p">,</span> <span class="mi">740</span><span class="p">,</span> <span class="mi">620</span><span class="p">,</span> <span class="mi">460</span><span class="p">])</span>
+<span class="n">w_car</span><span class="p">,</span> <span class="n">b_car</span> <span class="o">=</span> <span class="n">fit_closed_form</span><span class="p">(</span><span class="n">age</span><span class="p">,</span> <span class="n">price</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;closed form:&quot;</span><span class="p">,</span> <span class="n">w_car</span><span class="p">,</span> <span class="n">b_car</span><span class="p">)</span>
+<span class="n">m</span> <span class="o">=</span> <span class="n">LinearRegression</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">age</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">price</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;sklearn    :&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">coef_</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">3</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">intercept_</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;4 years    :&quot;</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">predict</span><span class="p">([[</span><span class="mi">4</span><span class="p">]])[</span><span class="mi">0</span><span class="p">])</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>closed form: -72.0 968.0
+sklearn    : -72.0 968.0
+4 years    : 680.0</pre></div></div></details><div class="askbox" data-kind="review" hidden><div class="al">اطلب من كلود أن يراجع حلّك</div><div class="ah">اكتب إجابتك أو الصق الكود. سيقارنه بالحل ويشرح لك بالعربي. هذا يستهلك من رصيد استخدامك.</div><textarea id="rv-l16-1" dir="auto" placeholder="اكتب إجابتك هنا"></textarea><div class="row"><button type="button" class="btn ask-go">راجع حلّي</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></div><pre hidden class="x-task">عمر السيارة بالسنوات، وسعرها بآلاف الليرات:
+
+| العمر $x$ | 1 | 3 | 5 | 7 |
+|---|---|---|---|---|
+| السعر $y$ | 900 | 740 | 620 | 460 |
+
+1. احسب بيدك الميل والإزاحة بالمعادلة المباشرة.
+2. فسّر الميل بجملة. لماذا هو سالب؟
+3. توقع سعر سيارة عمرها 4 سنوات.
+4. تحقق بالكود بطريقتين: دالة الحل المباشر من الدرس، ومكتبة سايكت ليرن.</pre><pre hidden class="x-solution">البعد عن المتوسط للسعر: 220، 60، سالب 60، سالب 220.
+مجموع حواصل الضرب: $-660 - 60 - 60 - 660 = -1440$. ومجموع مربعات أبعاد العمر: 20.
+
+$$w = \frac{-1440}{20} = -72 \qquad b = 680 - (-72)(4) = 968$$
+
+كل سنة من العمر تنقص السعر 72 ألف ليرة في المتوسط. الميل سالب لأن السعر ينقص كلما كبرت السيارة.
+توقع سيارة عمرها 4 سنوات: $968 - 72 \times 4 = 680$. هذا متوسط الأسعار، لأن 4 هو متوسط الأعمار.
+
+```python
+age = np.array([1, 3, 5, 7])
+price = np.array([900, 740, 620, 460])
+w_car, b_car = fit_closed_form(age, price)
+print("closed form:", w_car, b_car)
+m = LinearRegression().fit(age.reshape(-1, 1), price)
+print("sklearn    :", round(m.coef_[0], 3), round(m.intercept_, 3))
+print("4 years    :", m.predict([[4]])[0])
+```</pre></section></article><section class="askbox" data-kind="ask" hidden><div class="al">عندك سؤال عن هذا الدرس؟ اسأل كلود</div><div class="ah">اكتب سؤالك بالعربي. كلود يقرأ نص الدرس ويجيبك. هذا يستهلك من رصيد استخدامك.</div><textarea id="ask-l16" dir="auto" placeholder="مثلاً: لماذا نضرب هنا في المشتقة؟"></textarea><div class="row"><button type="button" class="btn ask-go">اسأل</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></section><div class="donebox"><span class="dmsg"></span><button type="button" class="btn">أنهيت هذا الدرس</button></div><nav class="pager" aria-label="التنقل بين الدروس"><a class="prev" href="#l15"><small>الدرس السابق</small>ما هو التعلم الآلي؟ وأول نموذج: أقرب الجيران</a><a class="next" href="#l17"><small>الدرس التالي</small>الانحدار المتعدد وتجهيز الميزات</a></nav></div>

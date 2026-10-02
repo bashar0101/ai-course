@@ -1,0 +1,526 @@
+<div class="page"><article><div class="eyebrow">الجزء الثاني · التعلم الآلي</div><h1>ما هو التعلم الآلي؟ وأول نموذج: أقرب الجيران</h1><div class="meta"><span>الدرس 15 من 59</span><span>المدة: حوالي 50 دقيقة</span><span class="nbdl-slot"></span></div><div class="chips" dir="ltr"><bdi class="chip">sample</bdi><bdi class="chip">feature</bdi><bdi class="chip">label</bdi><bdi class="chip">training set</bdi><bdi class="chip">test set</bdi><bdi class="chip">accuracy</bdi><bdi class="chip">k-nearest neighbors</bdi><bdi class="chip">fit</bdi><bdi class="chip">predict</bdi></div><div class="goals"><b>بعد هذا الدرس ستعرف:</b><ul><li>تعرف مصطلحات التعلّم الآلي الأساسية: المثال، والميزة، والتسمية، ومجموعتي التدريب والاختبار</li><li>تعرف خطوات أي مشروع تعلّم آلي، ولماذا نختبر على بيانات لم يرها النموذج</li><li>تطبق خوارزمية أقرب الجيران بيدك، ثم من الصفر، ثم بمكتبة سايكت ليرن</li><li>ترى بالأرقام كيف يغيّر توحيد المقياس النتيجة</li><li>تفهم أثر عدد الجيران</li></ul></div><h2>الكلمات التي ستسمعها في كل مشروع</h2><div class="blk"><p>بياناتنا جدول. تعرفنا على هذا في الدرس 5. الآن نعطي كل جزء اسمه:</p></div><figure><div class="svgwrap"><svg viewBox="0 0 560 230" width="560" role="img" aria-label="جدول فيه صفوف أمثلة وأعمدة ميزات، وعمود منفصل للتسميات" fill="none">
+  <g font-size="13" fill="currentColor" text-anchor="middle">
+    <rect x="30" y="40" width="330" height="34" class="f-accent" fill-opacity=".14" stroke="currentColor" stroke-opacity=".4"/>
+    <text x="85" y="62" class="mono">area</text><text x="195" y="62" class="mono">rooms</text><text x="305" y="62" class="mono">age</text>
+    <g stroke="currentColor" stroke-opacity=".4"><rect x="30" y="74" width="330" height="120"/><line x1="140" y1="40" x2="140" y2="194"/><line x1="250" y1="40" x2="250" y2="194"/><line x1="30" y1="114" x2="360" y2="114"/><line x1="30" y1="154" x2="360" y2="154"/></g>
+    <text x="85" y="99" class="mono">120</text><text x="195" y="99" class="mono">3</text><text x="305" y="99" class="mono">10</text>
+    <text x="85" y="139" class="mono">75</text><text x="195" y="139" class="mono">2</text><text x="305" y="139" class="mono">25</text>
+    <text x="85" y="179" class="mono">95</text><text x="195" y="179" class="mono">2</text><text x="305" y="179" class="mono">4</text>
+    <rect x="400" y="40" width="110" height="34" class="f-orange" fill-opacity=".18" stroke="currentColor" stroke-opacity=".4"/>
+    <text x="455" y="62" class="mono">price</text>
+    <rect x="400" y="74" width="110" height="120" stroke="currentColor" stroke-opacity=".4"/>
+    <line x1="400" y1="114" x2="510" y2="114" stroke="currentColor" stroke-opacity=".4"/><line x1="400" y1="154" x2="510" y2="154" stroke="currentColor" stroke-opacity=".4"/>
+    <text x="455" y="99" class="mono">4200</text><text x="455" y="139" class="mono">2100</text><text x="455" y="179" class="mono">3900</text>
+    <text x="195" y="24" font-weight="600">الميزات: المصفوفة X</text>
+    <text x="455" y="24" font-weight="600">التسمية: y</text>
+    <text x="195" y="218">كل صف مثال واحد</text>
+  </g>
+</svg></div><figcaption>شكل البيانات في التعلّم الموجَّه: جدول الميزات، وبجانبه عمود الأجوبة.</figcaption></figure><div class="tablewrap"><table><thead><tr><th>الكلمة</th><th>معناها</th><th>بالإنجليزية</th></tr></thead><tbody><tr><td>مثال</td><td>صف واحد: شقة واحدة، رسالة واحدة، صورة واحدة</td><td><bdi class="chip" dir="ltr">sample</bdi></td></tr><tr><td>ميزة</td><td>عمود من المدخلات: المساحة، عدد الغرف</td><td><bdi class="chip" dir="ltr">feature</bdi></td></tr><tr><td>تسمية</td><td>الجواب الصحيح لكل مثال: السعر، أو الفئة</td><td><bdi class="chip" dir="ltr">label / target</bdi></td></tr><tr><td>مجموعة التدريب</td><td>الأمثلة التي يتعلّم منها النموذج</td><td><bdi class="chip" dir="ltr">training set</bdi></td></tr><tr><td>مجموعة الاختبار</td><td>أمثلة نخفيها، لنقيس الأداء الحقيقي</td><td><bdi class="chip" dir="ltr">test set</bdi></td></tr></tbody></table></div><h2>خطوات أي مشروع</h2><figure><div class="svgwrap"><svg viewBox="0 0 600 150" width="600" role="img" aria-label="خمس خطوات: البيانات، ثم التقسيم، ثم التدريب على جزء، ثم التقييم على الجزء الآخر، ثم الاستخدام" fill="none">
+  <defs><marker id="l15-ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L8,4 L0,8 z" fill="currentColor"/></marker></defs>
+  <g font-size="13" fill="currentColor" text-anchor="middle">
+    <rect x="10" y="50" width="88" height="44" rx="9" stroke="currentColor" stroke-opacity=".5"/><text x="54" y="77">البيانات</text>
+    <rect x="130" y="50" width="88" height="44" rx="9" stroke="currentColor" stroke-opacity=".5"/><text x="174" y="77">التقسيم</text>
+    <rect x="250" y="14" width="100" height="44" rx="9" class="s-accent f-accent" fill-opacity=".12" stroke-width="1.6"/><text x="300" y="41">التدريب</text>
+    <rect x="250" y="88" width="100" height="44" rx="9" class="s-orange f-orange" fill-opacity=".14" stroke-width="1.6"/><text x="300" y="115">التقييم</text>
+    <rect x="390" y="88" width="88" height="44" rx="9" stroke="currentColor" stroke-opacity=".5"/><text x="434" y="115">الاستخدام</text>
+    <text x="200" y="30" font-size="11.5">80% تدريب</text>
+    <text x="200" y="146" font-size="11.5">20% اختبار</text>
+  </g>
+  <g stroke="currentColor" stroke-width="1.5">
+    <line x1="100" y1="72" x2="126" y2="72" marker-end="url(#l15-ar)"/>
+    <line x1="220" y1="64" x2="246" y2="44" marker-end="url(#l15-ar)"/>
+    <line x1="220" y1="80" x2="246" y2="104" marker-end="url(#l15-ar)"/>
+    <line x1="300" y1="60" x2="300" y2="84" marker-end="url(#l15-ar)"/>
+    <line x1="352" y1="110" x2="386" y2="110" marker-end="url(#l15-ar)"/>
+  </g>
+  <text x="310" y="76" fill="currentColor" font-size="11.5" text-anchor="start">النموذج</text>
+</svg></div><figcaption>الطريق من البيانات إلى نموذج تستخدمه. مجموعة الاختبار لا يراها النموذج إلا في خطوة التقييم.</figcaption></figure><h3>لماذا نخفي جزءاً من البيانات؟</h3><div class="blk"><p>تخيل طالباً حفظ أجوبة أسئلة التدريب حرفياً. سيحصل على العلامة الكاملة فيها.</p><p>لكن في الامتحان الحقيقي، بأسئلة جديدة، قد يرسب.</p></div><div class="blk"><p>النموذج مثله. الأداء على بيانات التدريب لا يعني شيئاً وحده.</p><p>ما يهمنا: كيف يعمل مع بيانات <b>لم يرها</b>. لذلك نخفي جزءاً، ونختبر عليه في النهاية.</p></div><div class="key">لا تقِس جودة النموذج أبداً على البيانات التي تدرّب عليها.</div><div class="blk"><p>سنتعمق في هذا كثيراً في الجزء الثالث، لأنه أهم مهارة في المجال كله.</p></div><h3>أبسط مقياس: الدقة</h3><div class="blk"><p>في التصنيف، أبسط سؤال: كم توقعاً كان صحيحاً؟</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>accuracy</mtext><mo>=</mo><mfrac><mtext>correct predictions</mtext><mtext>all predictions</mtext></mfrac></mrow></math></div></div><div class="blk"><p>سنرى في الدرس 29 أن الدقة وحدها قد تخدع. لكنها بداية جيدة.</p></div><h2>أول خوارزمية: أقرب الجيران</h2><div class="blk"><p>الفكرة من المثل المعروف: قل لي من أصدقاؤك، أقل لك من أنت.</p></div><div class="blk"><p>لكي نصنّف مثالاً جديداً:</p></div><ol class="l"><li>نحسب المسافة بينه وبين <b>كل</b> مثال في بيانات التدريب.</li><li>نأخذ أقرب <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>K</mi></mrow></math></bdi> أمثلة. هؤلاء الجيران.</li><li>في التصنيف: الجيران يصوّتون، والفئة الأكثر تفوز.</li><li>في الانحدار: نأخذ متوسط أجوبة الجيران.</li></ol><div class="blk"><p>لاحظ شيئاً غريباً: لا يوجد تدريب حقيقي! الخوارزمية تحفظ البيانات فقط.</p><p>كل العمل يحدث وقت التوقع. لذلك اسمها بالإنجليزية:</p></div><div class="blk"><div class="term" dir="ltr"><code>k-nearest neighbors (KNN)</code></div></div><div class="blk"><p>والرقم <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>K</mi></mrow></math></bdi> نختاره نحن قبل التدريب. هذا النوع من الأرقام اسمه <b>معامل فائق</b>، لأن النموذج لا يتعلّمه من البيانات.</p></div><section class="hand"><div class="hand-h"><span class="hand-tag">مثال محلول باليد</span><div class="hand-t">هل سينجح الطالب؟</div></div><div class="hand-body"><div class="blk"><p>لكل طالب ميزتان: عدد الدروس التي حضرها، وعدد الواجبات التي سلّمها. كلاهما من صفر إلى ستة.</p></div><div class="tablewrap"><table><thead><tr><th>الطالب</th><th>الدروس <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>x</mi><mn>1</mn></msub></mrow></math></bdi></th><th>الواجبات <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>x</mi><mn>2</mn></msub></mrow></math></bdi></th><th>النتيجة</th></tr></thead><tbody><tr><td>أ</td><td>1</td><td>0</td><td>رسب</td></tr><tr><td>ب</td><td>4</td><td>0</td><td>رسب</td></tr><tr><td>ج</td><td>3</td><td>1</td><td>رسب</td></tr><tr><td>د</td><td>5</td><td>5</td><td>نجح</td></tr><tr><td>هـ</td><td>5</td><td>2</td><td>نجح</td></tr><tr><td>و</td><td>6</td><td>3</td><td>نجح</td></tr></tbody></table></div><div class="blk"><p>طالب جديد حضر 3 دروس، وسلّم 3 واجبات. هل سينجح؟</p></div><div class="step">المسافة إلى كل طالب</div><div class="blk"><p>نحسب مربع المسافة أولاً. الترتيب نفسه، والحساب أسهل:</p></div><div class="tablewrap"><table><thead><tr><th>الطالب</th><th>الفرق</th><th>مربع المسافة</th><th>المسافة</th></tr></thead><tbody><tr><td>أ</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>2</mn><mo separator="true">,</mo><mn>3</mn><mo stretchy="false">)</mo></mrow></math></bdi></td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>4</mn><mo>+</mo><mn>9</mn><mo>=</mo><mn>13</mn></mrow></math></bdi></td><td>3.606</td></tr><tr><td>ب</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>1</mn><mo separator="true">,</mo><mn>3</mn><mo stretchy="false">)</mo></mrow></math></bdi></td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1</mn><mo>+</mo><mn>9</mn><mo>=</mo><mn>10</mn></mrow></math></bdi></td><td>3.162</td></tr><tr><td>ج</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mn>2</mn><mo stretchy="false">)</mo></mrow></math></bdi></td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0</mn><mo>+</mo><mn>4</mn><mo>=</mo><mn>4</mn></mrow></math></bdi></td><td>2</td></tr><tr><td>د</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>2</mn><mo separator="true">,</mo><mn>2</mn><mo stretchy="false">)</mo></mrow></math></bdi></td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>4</mn><mo>+</mo><mn>4</mn><mo>=</mo><mn>8</mn></mrow></math></bdi></td><td>2.828</td></tr><tr><td>هـ</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>2</mn><mo separator="true">,</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></math></bdi></td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>4</mn><mo>+</mo><mn>1</mn><mo>=</mo><mn>5</mn></mrow></math></bdi></td><td>2.236</td></tr><tr><td>و</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>3</mn><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">)</mo></mrow></math></bdi></td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>9</mn><mo>+</mo><mn>0</mn><mo>=</mo><mn>9</mn></mrow></math></bdi></td><td>3</td></tr></tbody></table></div><div class="step">الترتيب من الأقرب</div><div class="blk"><p>ج (رسب)، ثم هـ (نجح)، ثم د (نجح)، ثم و (نجح)، ثم ب (رسب)، ثم أ (رسب).</p></div><div class="step">بجار واحد</div><div class="blk"><p>أقرب طالب هو ج، ورسب. التوقع: <b>رسب</b>.</p></div><div class="step">بثلاثة جيران</div><div class="blk"><p>ج رسب، وهـ نجح، ود نجح. صوتان للنجاح مقابل صوت. التوقع: <b>نجح</b>.</p></div><div class="step">بخمسة جيران</div><div class="blk"><p>ثلاثة أصوات للنجاح، وصوتان للرسوب. التوقع: <b>نجح</b>.</p></div><div class="step">الدرس المهم</div><div class="blk"><p>الجواب تغيّر مع عدد الجيران!</p><p>جار واحد يثق بمثال واحد، وقد يكون هذا المثال غريباً أو خاطئاً.</p><p>الجيران الأكثر يعطون قراراً أهدأ. لكن لو أخذنا كل الأمثلة، فستفوز دائماً الفئة الأكبر في البيانات، مهما كانت النقطة.</p></div></div></section><div class="widget" data-widget="knn" data-args="{}"><div class="w-fallback">هنا أداة تفاعلية. إذا لم تظهر، حدّث الصفحة.</div></div><h2>بالكود</h2><h3>من الصفر</h3><div class="code "><div class="code-head"><span class="path">knn_scratch.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="n">X_train</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">3</span><span class="p">]])</span>
+<span class="n">y_train</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>      <span class="c1"># 0 رسب، 1 نجح</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">knn_predict</span><span class="p">(</span><span class="n">x_new</span><span class="p">,</span> <span class="n">k</span><span class="p">):</span>
+    <span class="n">distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">X_train</span> <span class="o">-</span> <span class="n">x_new</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>   <span class="c1"># مسافة لكل صف</span>
+    <span class="n">nearest</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">distances</span><span class="p">)[:</span><span class="n">k</span><span class="p">]</span>                   <span class="c1"># أرقام أقرب k</span>
+    <span class="n">votes</span> <span class="o">=</span> <span class="n">y_train</span><span class="p">[</span><span class="n">nearest</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">votes</span><span class="p">)</span><span class="o">.</span><span class="n">argmax</span><span class="p">()</span>                    <span class="c1"># الفئة الأكثر</span>
+
+<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">]:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;k = </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">: prediction = </span><span class="si">{</span><span class="n">knn_predict</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">]),</span><span class="w"> </span><span class="n">k</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>k = 1: prediction = 0
+k = 3: prediction = 1
+k = 5: prediction = 1</pre></div><div class="blk"><p>السطر الأول في الدالة يستخدم البث: يطرح النقطة الجديدة من كل صف مرة واحدة.</p><p>والدالة التي ترتب تعطي <b>أماكن</b> العناصر من الأصغر إلى الأكبر، وليس القيم.</p></div><h3>بمكتبة سايكت ليرن</h3><div class="blk"><p>كل نماذج المكتبة لها نفس الشكل: أمر للتدريب، وأمر للتوقع، وأمر للتقييم.</p></div><div class="code "><div class="code-head"><span class="path">knn_sklearn.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.neighbors</span><span class="w"> </span><span class="kn">import</span> <span class="n">KNeighborsClassifier</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">KNeighborsClassifier</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;prediction:&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">([[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]]))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;probabilities:&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">([[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]])</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>prediction: [1]
+probabilities: [[0.333 0.667]]</pre></div><div class="blk"><p>الاحتمالات هنا مجرد نسب الأصوات: جار من ثلاثة، وجاران من ثلاثة.</p></div><h3>بيانات حقيقية: أنواع النبيذ</h3><div class="blk"><p>مكتبة سايكت ليرن فيها بيانات صغيرة جاهزة، لا تحتاج تحميلاً.</p><p>هنا 178 عينة نبيذ من ثلاثة أنواع، ولكل عينة 13 ميزة كيميائية.</p></div><div class="code "><div class="code-head"><span class="path">wine.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_wine</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
+
+<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">load_wine</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;shape:&quot;</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s2">&quot; classes:&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;smallest column max:&quot;</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="s2">&quot; largest column max:&quot;</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+
+<span class="n">X_tr</span><span class="p">,</span> <span class="n">X_te</span><span class="p">,</span> <span class="n">y_tr</span><span class="p">,</span> <span class="n">y_te</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">stratify</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;train:&quot;</span><span class="p">,</span> <span class="n">X_tr</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s2">&quot; test:&quot;</span><span class="p">,</span> <span class="n">X_te</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>shape: (178, 13)  classes: [59 71 48]
+smallest column max: 0.66  largest column max: 1680.0
+train: (124, 13)  test: (54, 13)</pre></div><div class="blk"><p>أمر التقسيم يخلط الأمثلة ثم يقسمها. والرقم الثابت يجعل الخلط نفسه في كل تشغيل.</p><p>والخيار الأخير يحافظ على نسبة كل نوع في الجزأين. سنشرح لماذا في الدرس 26.</p></div><div class="blk"><p>لاحظ الفرق الهائل بين الأعمدة: بعضها أقل من 1، وأحدها يصل إلى 1680.</p><p>تذكّر ما قلناه في الدرسين 4 و 10 عن المسافات والوحدات. الآن نراه بالأرقام:</p></div><div class="code "><div class="code-head"><span class="path">scaling_matters.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_pipeline</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">StandardScaler</span>
+
+<span class="n">raw</span> <span class="o">=</span> <span class="n">KNeighborsClassifier</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_tr</span><span class="p">,</span> <span class="n">y_tr</span><span class="p">)</span>
+<span class="n">scaled</span> <span class="o">=</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">KNeighborsClassifier</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">5</span><span class="p">))</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_tr</span><span class="p">,</span> <span class="n">y_tr</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;accuracy without scaling: </span><span class="si">{</span><span class="n">raw</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_te</span><span class="p">,</span><span class="w"> </span><span class="n">y_te</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;accuracy with scaling   : </span><span class="si">{</span><span class="n">scaled</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_te</span><span class="p">,</span><span class="w"> </span><span class="n">y_te</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>accuracy without scaling: 0.722
+accuracy with scaling   : 0.963</pre></div><div class="blk"><p>من 72% إلى 96%، بسطر واحد!</p><p>الخط الذي يربط التوحيد بالنموذج اسمه خط المعالجة:</p></div><div class="blk"><div class="term" dir="ltr"><code>Pipeline</code></div></div><div class="blk"><p>فائدته الكبيرة: يحسب إحصاءات التوحيد من بيانات التدريب وحدها، ثم يطبقها على الاختبار. بدون تسريب.</p></div><h3>أثر عدد الجيران</h3><div class="code "><div class="code-head"><span class="path">k_effect.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="n">ks</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">41</span><span class="p">)</span>
+<span class="n">train_acc</span><span class="p">,</span> <span class="n">test_acc</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">ks</span><span class="p">:</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">KNeighborsClassifier</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="n">k</span><span class="p">))</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_tr</span><span class="p">,</span> <span class="n">y_tr</span><span class="p">)</span>
+    <span class="n">train_acc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_tr</span><span class="p">,</span> <span class="n">y_tr</span><span class="p">))</span>
+    <span class="n">test_acc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_te</span><span class="p">,</span> <span class="n">y_te</span><span class="p">))</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">3.4</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ks</span><span class="p">,</span> <span class="n">train_acc</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;train accuracy&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ks</span><span class="p">,</span> <span class="n">test_acc</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;test accuracy&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;k (number of neighbors)&quot;</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;accuracy&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span> <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></pre></div><figure class="plot"><div class="svgwrap"><svg xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 395.338125 235.187875" xmlns="http://www.w3.org/2000/svg" version="1.1">
+<defs>
+</defs>
+<g id="figure_1">
+<g id="patch_1">
+<path d="M 0 235.187875 
+L 395.338125 235.187875 
+L 395.338125 -0 
+L 0 -0 
+L 0 235.187875 
+z
+" style="fill: none"/>
+</g>
+<g id="axes_1">
+<g id="patch_2">
+<path d="M 53.338125 195.696 
+L 388.138125 195.696 
+L 388.138125 7.2 
+L 53.338125 7.2 
+L 53.338125 195.696 
+z
+" style="fill: none"/>
+</g>
+<g id="matplotlib.axis_1">
+<g id="xtick_1">
+<g id="line2d_1">
+<path d="M 60.752111 195.696 
+L 60.752111 7.2 
+" clip-path="url(#pc8ef2a54fe)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_2">
+<defs>
+<path id="m5ae0cb71e1" d="M 0 0 
+L 0 3.5 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#m5ae0cb71e1" x="60.752111" y="195.696" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_1">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="60.752111" y="211.054281" transform="rotate(-0 60.752111 211.054281)">0</text>
+</g>
+</g>
+<g id="xtick_2">
+<g id="line2d_3">
+<path d="M 99.77309 195.696 
+L 99.77309 7.2 
+" clip-path="url(#pc8ef2a54fe)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_4">
+<g>
+<use xlink:href="#m5ae0cb71e1" x="99.77309" y="195.696" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_2">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="99.77309" y="211.054281" transform="rotate(-0 99.77309 211.054281)">5</text>
+</g>
+</g>
+<g id="xtick_3">
+<g id="line2d_5">
+<path d="M 138.794069 195.696 
+L 138.794069 7.2 
+" clip-path="url(#pc8ef2a54fe)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_6">
+<g>
+<use xlink:href="#m5ae0cb71e1" x="138.794069" y="195.696" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_3">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="138.794069" y="211.054281" transform="rotate(-0 138.794069 211.054281)">10</text>
+</g>
+</g>
+<g id="xtick_4">
+<g id="line2d_7">
+<path d="M 177.815048 195.696 
+L 177.815048 7.2 
+" clip-path="url(#pc8ef2a54fe)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_8">
+<g>
+<use xlink:href="#m5ae0cb71e1" x="177.815048" y="195.696" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_4">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="177.815048" y="211.054281" transform="rotate(-0 177.815048 211.054281)">15</text>
+</g>
+</g>
+<g id="xtick_5">
+<g id="line2d_9">
+<path d="M 216.836027 195.696 
+L 216.836027 7.2 
+" clip-path="url(#pc8ef2a54fe)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_10">
+<g>
+<use xlink:href="#m5ae0cb71e1" x="216.836027" y="195.696" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_5">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="216.836027" y="211.054281" transform="rotate(-0 216.836027 211.054281)">20</text>
+</g>
+</g>
+<g id="xtick_6">
+<g id="line2d_11">
+<path d="M 255.857006 195.696 
+L 255.857006 7.2 
+" clip-path="url(#pc8ef2a54fe)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_12">
+<g>
+<use xlink:href="#m5ae0cb71e1" x="255.857006" y="195.696" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_6">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="255.857006" y="211.054281" transform="rotate(-0 255.857006 211.054281)">25</text>
+</g>
+</g>
+<g id="xtick_7">
+<g id="line2d_13">
+<path d="M 294.877985 195.696 
+L 294.877985 7.2 
+" clip-path="url(#pc8ef2a54fe)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_14">
+<g>
+<use xlink:href="#m5ae0cb71e1" x="294.877985" y="195.696" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_7">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="294.877985" y="211.054281" transform="rotate(-0 294.877985 211.054281)">30</text>
+</g>
+</g>
+<g id="xtick_8">
+<g id="line2d_15">
+<path d="M 333.898964 195.696 
+L 333.898964 7.2 
+" clip-path="url(#pc8ef2a54fe)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_16">
+<g>
+<use xlink:href="#m5ae0cb71e1" x="333.898964" y="195.696" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_8">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="333.898964" y="211.054281" transform="rotate(-0 333.898964 211.054281)">35</text>
+</g>
+</g>
+<g id="xtick_9">
+<g id="line2d_17">
+<path d="M 372.919943 195.696 
+L 372.919943 7.2 
+" clip-path="url(#pc8ef2a54fe)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_18">
+<g>
+<use xlink:href="#m5ae0cb71e1" x="372.919943" y="195.696" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_9">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="372.919943" y="211.054281" transform="rotate(-0 372.919943 211.054281)">40</text>
+</g>
+</g>
+<g id="text_10">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="220.738125" y="225.700219" transform="rotate(-0 220.738125 225.700219)">k (number of neighbors)</text>
+</g>
+</g>
+<g id="matplotlib.axis_2">
+<g id="ytick_1">
+<g id="line2d_19">
+<path d="M 53.338125 167.544 
+L 388.138125 167.544 
+" clip-path="url(#pc8ef2a54fe)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_20">
+<defs>
+<path id="m9d6f43a022" d="M 0 0 
+L -3.5 0 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#m9d6f43a022" x="53.338125" y="167.544" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_11">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="46.338125" y="171.723141" transform="rotate(-0 46.338125 171.723141)">0.95</text>
+</g>
+</g>
+<g id="ytick_2">
+<g id="line2d_21">
+<path d="M 53.338125 137.1888 
+L 388.138125 137.1888 
+" clip-path="url(#pc8ef2a54fe)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_22">
+<g>
+<use xlink:href="#m9d6f43a022" x="53.338125" y="137.1888" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_12">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="46.338125" y="141.367941" transform="rotate(-0 46.338125 141.367941)">0.96</text>
+</g>
+</g>
+<g id="ytick_3">
+<g id="line2d_23">
+<path d="M 53.338125 106.8336 
+L 388.138125 106.8336 
+" clip-path="url(#pc8ef2a54fe)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_24">
+<g>
+<use xlink:href="#m9d6f43a022" x="53.338125" y="106.8336" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_13">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="46.338125" y="111.012741" transform="rotate(-0 46.338125 111.012741)">0.97</text>
+</g>
+</g>
+<g id="ytick_4">
+<g id="line2d_25">
+<path d="M 53.338125 76.4784 
+L 388.138125 76.4784 
+" clip-path="url(#pc8ef2a54fe)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_26">
+<g>
+<use xlink:href="#m9d6f43a022" x="53.338125" y="76.4784" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_14">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="46.338125" y="80.657541" transform="rotate(-0 46.338125 80.657541)">0.98</text>
+</g>
+</g>
+<g id="ytick_5">
+<g id="line2d_27">
+<path d="M 53.338125 46.1232 
+L 388.138125 46.1232 
+" clip-path="url(#pc8ef2a54fe)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_28">
+<g>
+<use xlink:href="#m9d6f43a022" x="53.338125" y="46.1232" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_15">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="46.338125" y="50.302341" transform="rotate(-0 46.338125 50.302341)">0.99</text>
+</g>
+</g>
+<g id="ytick_6">
+<g id="line2d_29">
+<path d="M 53.338125 15.768 
+L 388.138125 15.768 
+" clip-path="url(#pc8ef2a54fe)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_30">
+<g>
+<use xlink:href="#m9d6f43a022" x="53.338125" y="15.768" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_16">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="46.338125" y="19.947141" transform="rotate(-0 46.338125 19.947141)">1.00</text>
+</g>
+</g>
+<g id="text_17">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="15.558281" y="101.448" transform="rotate(-90 15.558281 101.448)">accuracy</text>
+</g>
+</g>
+<g id="line2d_31">
+<path d="M 68.556307 15.768 
+L 76.360503 138.168 
+L 84.164698 187.128 
+L 91.968894 138.168 
+L 99.77309 113.688 
+L 107.577286 89.208 
+L 115.381482 138.168 
+L 123.185677 89.208 
+L 130.989873 162.648 
+L 138.794069 138.168 
+L 146.598265 138.168 
+L 154.402461 138.168 
+L 162.206656 162.648 
+L 170.010852 138.168 
+L 177.815048 162.648 
+L 185.619244 113.688 
+L 193.42344 162.648 
+L 201.227635 138.168 
+L 209.031831 162.648 
+L 216.836027 162.648 
+L 224.640223 187.128 
+L 232.444419 138.168 
+L 240.248615 113.688 
+L 248.05281 138.168 
+L 255.857006 113.688 
+L 263.661202 89.208 
+L 271.465398 89.208 
+L 279.269594 64.728 
+L 287.073789 89.208 
+L 294.877985 64.728 
+L 302.682181 89.208 
+L 310.486377 89.208 
+L 318.290573 89.208 
+L 326.094768 89.208 
+L 333.898964 113.688 
+L 341.70316 89.208 
+L 349.507356 89.208 
+L 357.311552 64.728 
+L 365.115747 89.208 
+L 372.919943 89.208 
+" clip-path="url(#pc8ef2a54fe)" style="fill: none; stroke: #1f77b4; stroke-width: 2; stroke-linecap: square"/>
+</g>
+<g id="line2d_32">
+<path d="M 68.556307 15.768 
+L 76.360503 15.768 
+L 84.164698 128.194667 
+L 91.968894 128.194667 
+L 99.77309 128.194667 
+L 107.577286 128.194667 
+L 115.381482 128.194667 
+L 123.185677 128.194667 
+L 130.989873 128.194667 
+L 138.794069 128.194667 
+L 146.598265 128.194667 
+L 154.402461 71.981333 
+L 162.206656 128.194667 
+L 170.010852 71.981333 
+L 177.815048 71.981333 
+L 185.619244 71.981333 
+L 193.42344 71.981333 
+L 201.227635 71.981333 
+L 209.031831 71.981333 
+L 216.836027 71.981333 
+L 224.640223 71.981333 
+L 232.444419 71.981333 
+L 240.248615 71.981333 
+L 248.05281 71.981333 
+L 255.857006 71.981333 
+L 263.661202 71.981333 
+L 271.465398 71.981333 
+L 279.269594 71.981333 
+L 287.073789 71.981333 
+L 294.877985 71.981333 
+L 302.682181 71.981333 
+L 310.486377 128.194667 
+L 318.290573 71.981333 
+L 326.094768 128.194667 
+L 333.898964 71.981333 
+L 341.70316 71.981333 
+L 349.507356 71.981333 
+L 357.311552 128.194667 
+L 365.115747 128.194667 
+L 372.919943 128.194667 
+" clip-path="url(#pc8ef2a54fe)" style="fill: none; stroke: #ff7f0e; stroke-width: 2; stroke-linecap: square"/>
+</g>
+<g id="patch_3">
+<path d="M 53.338125 195.696 
+L 53.338125 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_4">
+<path d="M 388.138125 195.696 
+L 388.138125 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_5">
+<path d="M 53.338125 195.696 
+L 388.138125 195.696 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_6">
+<path d="M 53.338125 7.2 
+L 388.138125 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="legend_1">
+<g id="patch_7">
+<path d="M 266.509062 48.291875 
+L 380.438125 48.291875 
+Q 382.638125 48.291875 382.638125 46.091875 
+L 382.638125 14.9 
+Q 382.638125 12.7 380.438125 12.7 
+L 266.509062 12.7 
+Q 264.309062 12.7 264.309062 14.9 
+L 264.309062 46.091875 
+Q 264.309062 48.291875 266.509062 48.291875 
+L 266.509062 48.291875 
+z
+" style="fill: none; opacity: 0.35; stroke: currentColor; stroke-linejoin: miter"/>
+</g>
+<g id="line2d_33">
+<path d="M 268.709062 21.608281 
+L 279.709062 21.608281 
+L 290.709062 21.608281 
+" style="fill: none; stroke: #1f77b4; stroke-width: 2; stroke-linecap: square"/>
+</g>
+<g id="text_18">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="299.509062" y="25.458281" transform="rotate(-0 299.509062 25.458281)">train accuracy</text>
+</g>
+<g id="line2d_34">
+<path d="M 268.709062 37.754219 
+L 279.709062 37.754219 
+L 290.709062 37.754219 
+" style="fill: none; stroke: #ff7f0e; stroke-width: 2; stroke-linecap: square"/>
+</g>
+<g id="text_19">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="299.509062" y="41.604219" transform="rotate(-0 299.509062 41.604219)">test accuracy</text>
+</g>
+</g>
+</g>
+</g>
+<defs>
+<clipPath id="pc8ef2a54fe">
+<rect x="53.338125" y="7.2" width="334.8" height="188.496"/>
+</clipPath>
+</defs>
+</svg></div><figcaption>الرسم الذي يظهر عندما تشغّل الكود.</figcaption></figure><div class="blk"><p>مع جار واحد، دقة التدريب 100%: كل مثال أقرب جار له هو نفسه!</p><p>هذا مثال واضح على الطالب الذي حفظ الأجوبة. دقة الاختبار هي التي تقول الحقيقة.</p></div><div class="callout warn"><div class="ct">متى يكون أقرب الجيران بطيئاً؟</div><div class="blk"><p>التوقع يحسب المسافة إلى <b>كل</b> أمثلة التدريب. مع ملايين الأمثلة، يصبح بطيئاً جداً.</p><p>ومع ميزات كثيرة جداً، كل النقاط تصبح بعيدة عن بعضها تقريباً بنفس الدرجة، فيضعف معنى "الأقرب".</p><p>هذه المشكلة لها اسم مشهور:</p></div><div class="blk"><div class="term" dir="ltr"><code>curse of dimensionality</code></div></div></div><div class="callout mistake"><div class="ct">خطأ شائع: عدد زوجي من الجيران مع فئتين</div><div class="blk"><p>أربعة جيران قد يصوّتون اثنين مقابل اثنين. المكتبة تكسر التعادل بقاعدة ثابتة، وقد لا تكون ما تريد.</p><p>مع فئتين، اختر عدداً فردياً.</p></div></div><div class="callout interview"><div class="ct">سؤال مقابلة</div><div class="blk"><p>سؤال قد تسمعه في المقابلة:</p></div><div class="en" dir="ltr"><p>How does k-nearest neighbors work, and what is its main weakness?</p></div><div class="blk"><p>جواب قصير وجيد:</p></div><div class="en" dir="ltr"><p>To predict a new point, it computes the distance to every training example, takes the k closest ones, and uses a majority vote for classification or the average for regression. There is no real training. Its weaknesses: prediction is slow on big datasets, it needs feature scaling, and it works badly with many features because distances lose their meaning.</p></div></div><section class="summary"><div class="ct">الخلاصة</div><ul class="l"><li>مثال، وميزة، وتسمية، ومجموعة تدريب، ومجموعة اختبار: كلمات كل مشروع.</li><li>نقيس الأداء على بيانات لم يرها النموذج. دقة التدريب وحدها تخدع.</li><li>أقرب الجيران: احسب المسافات، وخذ الأقرب، ودعهم يصوّتون.</li><li>عدد الجيران معامل فائق نختاره نحن. قليل جداً يتأثر بالضجيج، وكثير جداً يفقد التفاصيل.</li><li>التوحيد القياسي ضروري لكل خوارزمية تعتمد على المسافة. واستخدم خط المعالجة لتطبيقه بدون تسريب.</li></ul></section><section class="quiz" data-quiz="l15-q"><h2>اختبر فهمك</h2><div class="q" data-answer="1"><div class="qt"><span class="qn">1.</span>في جدول بيانات الشقق، ما هو عمود السعر إذا أردنا أن نتوقعه؟</div><div class="opts"><button type="button" class="opt">ميزة</button><button type="button" class="opt">التسمية</button><button type="button" class="opt">مثال</button></div><div class="explain" hidden><span class="verdict"></span><p>الجواب الصحيح الذي نريد توقعه اسمه التسمية.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">2.</span>لماذا لا نقيس جودة النموذج على بيانات التدريب؟</div><div class="opts"><button type="button" class="opt">لأن الحساب أبطأ</button><button type="button" class="opt">لأن النموذج قد يحفظها، فتبدو النتيجة ممتازة دون أن يعمل مع بيانات جديدة</button><button type="button" class="opt">لأن بيانات التدريب صغيرة دائماً</button></div><div class="explain" hidden><span class="verdict"></span><p>مثل الطالب الذي حفظ أجوبة التدريب.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">3.</span>أقرب الجيران بجار واحد. ما دقته على بيانات التدريب نفسها، إذا لم تتكرر أمثلة؟</div><div class="opts"><button type="button" class="opt">50%</button><button type="button" class="opt">100%</button><button type="button" class="opt">لا يمكن معرفتها</button></div><div class="explain" hidden><span class="verdict"></span><p>أقرب جار لكل مثال تدريب هو نفسه.</p></div></div><div class="q" data-answer="0"><div class="qt"><span class="qn">4.</span>ما الفرق بين المعامل والمعامل الفائق؟</div><div class="opts"><button type="button" class="opt">المعامل يتعلّمه النموذج من البيانات، والمعامل الفائق نختاره نحن قبل التدريب</button><button type="button" class="opt">لا فرق</button><button type="button" class="opt">المعامل الفائق يتعلّمه النموذج بسرعة أكبر</button></div><div class="explain" hidden><span class="verdict"></span><p>عدد الجيران معامل فائق. الميل في الانحدار الخطي معامل.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">5.</span>في أي مرحلة تعمل خوارزمية أقرب الجيران أغلب عملها؟</div><div class="opts"><button type="button" class="opt">في التدريب</button><button type="button" class="opt">في التوقع</button><button type="button" class="opt">في التقسيم</button></div><div class="explain" hidden><span class="verdict"></span><p>التدريب مجرد حفظ للبيانات. الحساب كله عند التوقع.</p></div></div><div class="row"><span class="score"></span><button type="button" class="btn ghost quiz-reset">أعد المحاولة</button></div></section><section class="exercise"><div class="xt">تمرين: طالب آخر</div><div class="blk"><p>طالب جديد حضر 4 دروس، وسلّم واجبين. استخدم نفس بيانات الطلاب الستة.</p></div><ol class="l"><li>احسب مربع المسافة إلى كل طالب، ورتّبها.</li><li>ما التوقع بجار واحد؟ وبثلاثة؟ وبخمسة؟</li><li>تحقق بالكود بمكتبة سايكت ليرن، للأعداد الثلاثة.</li></ol><details><summary>تلميح</summary><div class="dbody"><div class="blk"><p>الفرق مع الطالب هـ: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>1</mn><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">)</mo></mrow></math></bdi>. ومع الطالب ج: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>1</mn><mo separator="true">,</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></math></bdi>.</p></div></div></details><details class="sol"><summary>الحل (افتحه بعد أن تحاول)</summary><div class="dbody"><div class="blk"><p>مربعات المسافات: أ 13، ب 4، ج 2، د 10، هـ 1، و 5.</p><p>الترتيب: هـ نجح، ثم ج رسب، ثم ب رسب، ثم و نجح، ثم د نجح.</p></div><ul class="l"><li>بجار واحد: هـ نجح. التوقع <b>نجح</b>.</li><li>بثلاثة: نجح، رسب، رسب. التوقع <b>رسب</b>.</li><li>بخمسة: ثلاثة للنجاح، واثنان للرسوب. التوقع <b>نجح</b>.</li></ul><div class="code "><div class="code-head"><span class="path"></span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">]:</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">KNeighborsClassifier</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="n">k</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">predict</span><span class="p">([[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">]]))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>1 [1]
+3 [0]
+5 [1]</pre></div><div class="blk"><p>النتيجة تقفز مع عدد الجيران، لأن الطالب الجديد على الحدود بين المجموعتين.</p><p>هذه النقاط الحدودية هي الأصعب دائماً، لأي نموذج.</p></div></div></details><div class="askbox" data-kind="review" hidden><div class="al">اطلب من كلود أن يراجع حلّك</div><div class="ah">اكتب إجابتك أو الصق الكود. سيقارنه بالحل ويشرح لك بالعربي. هذا يستهلك من رصيد استخدامك.</div><textarea id="rv-l15-1" dir="auto" placeholder="اكتب إجابتك هنا"></textarea><div class="row"><button type="button" class="btn ask-go">راجع حلّي</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></div><pre hidden class="x-task">طالب جديد حضر 4 دروس، وسلّم واجبين. استخدم نفس بيانات الطلاب الستة.
+
+1. احسب مربع المسافة إلى كل طالب، ورتّبها.
+2. ما التوقع بجار واحد؟ وبثلاثة؟ وبخمسة؟
+3. تحقق بالكود بمكتبة سايكت ليرن، للأعداد الثلاثة.</pre><pre hidden class="x-solution">مربعات المسافات: أ 13، ب 4، ج 2، د 10، هـ 1، و 5.
+الترتيب: هـ نجح، ثم ج رسب، ثم ب رسب، ثم و نجح، ثم د نجح.
+
+- بجار واحد: هـ نجح. التوقع نجح.
+- بثلاثة: نجح، رسب، رسب. التوقع رسب.
+- بخمسة: ثلاثة للنجاح، واثنان للرسوب. التوقع نجح.
+
+```python
+for k in [1, 3, 5]:
+    m = KNeighborsClassifier(n_neighbors=k).fit(X_train, y_train)
+    print(k, m.predict([[4, 2]]))
+```
+
+النتيجة تقفز مع عدد الجيران، لأن الطالب الجديد على الحدود بين المجموعتين.
+هذه النقاط الحدودية هي الأصعب دائماً، لأي نموذج.</pre></section></article><section class="askbox" data-kind="ask" hidden><div class="al">عندك سؤال عن هذا الدرس؟ اسأل كلود</div><div class="ah">اكتب سؤالك بالعربي. كلود يقرأ نص الدرس ويجيبك. هذا يستهلك من رصيد استخدامك.</div><textarea id="ask-l15" dir="auto" placeholder="مثلاً: لماذا نضرب هنا في المشتقة؟"></textarea><div class="row"><button type="button" class="btn ask-go">اسأل</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></section><div class="donebox"><span class="dmsg"></span><button type="button" class="btn">أنهيت هذا الدرس</button></div><nav class="pager" aria-label="التنقل بين الدروس"><a class="prev" href="#l14"><small>الدرس السابق</small>الأرجحية والإنتروبيا المتقاطعة</a><a class="next" href="#l16"><small>الدرس التالي</small>الانحدار الخطي من الصفر</a></nav></div>

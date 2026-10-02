@@ -1,0 +1,539 @@
+<div class="page"><article><div class="eyebrow">الجزء الأول · الرياضيات والإحصاء</div><h1>المشتقة: سرعة التغيّر</h1><div class="meta"><span>الدرس 6 من 59</span><span>المدة: حوالي 45 دقيقة</span><span class="nbdl-slot"></span></div><div class="chips" dir="ltr"><bdi class="chip">derivative</bdi><bdi class="chip">slope</bdi><bdi class="chip">rate of change</bdi><bdi class="chip">tangent line</bdi><bdi class="chip">power rule</bdi><bdi class="chip">numerical derivative</bdi></div><div class="goals"><b>بعد هذا الدرس ستعرف:</b><ul><li>تفهم المشتقة كميل المنحنى عند نقطة، أي سرعة التغيّر</li><li>ترى كيف يقترب ميل الوتر من ميل المماس</li><li>تحسب مشتقات الدوال التي نحتاجها بقواعد بسيطة</li><li>تفهم ماذا تقول إشارة المشتقة، ولماذا هي مفتاح التعلّم</li><li>تحسب المشتقة بالكود بطريقة عددية، وتتحقق من حسابك</li></ul></div><h2>لماذا نحتاج المشتقة؟</h2><div class="blk"><p>في الدرس 3 وصلنا إلى مشكلة:</p><p>نريد أفضل قيم للمعاملات، والبحث بتجربة كل القيم مستحيل.</p></div><div class="blk"><p>نحتاج أن نعرف شيئاً واحداً عن كل معامل:</p></div><div class="key">إذا زدت هذا المعامل قليلاً، هل يكبر الخطأ أم يصغر؟ وبأي سرعة؟</div><div class="blk"><p>جواب هذا السؤال اسمه <b>المشتقة</b>.</p><p>إذا عرفناه، نعرف في أي اتجاه نحرك المعامل. بدون تجربة عشوائية.</p></div><h2>الميل عند نقطة</h2><div class="blk"><p>في الخط المستقيم، الميل واحد في كل مكان.</p><p>أجرة الأجرة من الدرس 3 تزيد 3 ليرات لكل كيلومتر، في أول الطريق وفي آخره.</p></div><div class="blk"><p>لكن المنحنى مختلف. خذ هذه الدالة:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>w</mi><mo stretchy="false">)</mo><mo>=</mo><mo stretchy="false">(</mo><mi>w</mi><mo>−</mo><mn>3</mn><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow></math></div></div><div class="blk"><p>شكلها وعاء، أسفله عند <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>w</mi><mo>=</mo><mn>3</mn></mrow></math></bdi>.</p><p>عند <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>w</mi><mo>=</mo><mn>5</mn></mrow></math></bdi> المنحنى يصعد بقوة. وعند <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>w</mi><mo>=</mo><mn>3.5</mn></mrow></math></bdi> يصعد بهدوء. وعند <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>w</mi><mo>=</mo><mn>1</mn></mrow></math></bdi> ينزل.</p></div><div class="blk"><p>إذن ميل المنحنى يتغير من نقطة لأخرى.</p><p>الميل عند نقطة واحدة هو ميل الخط الذي <b>يلمس</b> المنحنى عندها. اسم هذا الخط <b>المماس</b>.</p></div><h3>من الوتر إلى المماس</h3><div class="blk"><p>كيف نحسب ميل المماس؟ لا نعرفه مباشرة. لكن نعرف كيف نحسب ميل خط بين نقطتين.</p></div><div class="blk"><p>خذ النقطة <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>w</mi></mrow></math></bdi>، ونقطة ثانية قريبة منها على بعد <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>h</mi></mrow></math></bdi>.</p><p>الخط بينهما اسمه <b>الوتر</b>، وميله:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>w</mi><mo>+</mo><mi>h</mi><mo stretchy="false">)</mo><mo>−</mo><mi>f</mi><mo stretchy="false">(</mo><mi>w</mi><mo stretchy="false">)</mo></mrow><mi>h</mi></mfrac></mrow></math></div></div><div class="blk"><p>كلما قرّبنا النقطة الثانية، أي صغّرنا <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>h</mi></mrow></math></bdi>، يقترب الوتر من المماس.</p><p>المشتقة هي ما يقترب منه هذا الميل عندما تصبح المسافة صغيرة جداً جداً.</p></div><div class="blk"><p>نكتب المشتقة بإحدى طريقتين:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msup><mi>f</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo stretchy="false">(</mo><mi>w</mi><mo stretchy="false">)</mo><mspace width="2em"/><mtext>or</mtext><mspace width="2em"/><mfrac><mrow><mi>d</mi><mi>f</mi></mrow><mrow><mi>d</mi><mi>w</mi></mrow></mfrac></mrow></math></div></div><div class="blk"><p>الطريقة الثانية تُقرأ: التغيّر في المخرج مقسوماً على التغيّر في المدخل. وهي تذكّرك بالمعنى.</p></div><div class="widget" data-widget="slope" data-args="{}"><div class="w-fallback">هنا أداة تفاعلية. إذا لم تظهر، حدّث الصفحة.</div></div><h2>قواعد نحتاجها فقط</h2><div class="blk"><p>لا نحتاج أن نحسب الحد كل مرة. توجد قواعد جاهزة.</p><p>هذه كل القواعد التي تحتاجها في الدورة تقريباً:</p></div><div class="tablewrap"><table><thead><tr><th>الدالة</th><th>مشتقتها</th><th>مثال</th></tr></thead><tbody><tr><td>رقم ثابت <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>c</mi></mrow></math></bdi></td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0</mn></mrow></math></bdi></td><td>مشتقة 7 هي صفر</td></tr><tr><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>x</mi></mrow></math></bdi></td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1</mn></mrow></math></bdi></td><td></td></tr><tr><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msup><mi>x</mi><mi>n</mi></msup></mrow></math></bdi></td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>n</mi><mtext> </mtext><msup><mi>x</mi><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow></msup></mrow></math></bdi></td><td>مشتقة <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msup><mi>x</mi><mn>2</mn></msup></mrow></math></bdi> هي <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>2</mn><mi>x</mi></mrow></math></bdi>، ومشتقة <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msup><mi>x</mi><mn>3</mn></msup></mrow></math></bdi> هي <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>3</mn><msup><mi>x</mi><mn>2</mn></msup></mrow></math></bdi></td></tr><tr><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>c</mi><mo>⋅</mo><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></math></bdi></td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>c</mi><mo>⋅</mo><msup><mi>f</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></math></bdi></td><td>مشتقة <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>5</mn><msup><mi>x</mi><mn>2</mn></msup></mrow></math></bdi> هي <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>10</mn><mi>x</mi></mrow></math></bdi></td></tr><tr><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>+</mo><mi>g</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></math></bdi></td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msup><mi>f</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>+</mo><msup><mi>g</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></math></bdi></td><td>مشتقة <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><mi>x</mi></mrow></math></bdi> هي <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>2</mn><mi>x</mi><mo>+</mo><mn>1</mn></mrow></math></bdi></td></tr><tr><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msup><mi>e</mi><mi>x</mi></msup></mrow></math></bdi></td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msup><mi>e</mi><mi>x</mi></msup></mrow></math></bdi></td><td>نحتاجها في الدرس 13</td></tr><tr><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>ln</mi><mo>⁡</mo><mi>x</mi></mrow></math></bdi></td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1</mn><mi mathvariant="normal">/</mi><mi>x</mi></mrow></math></bdi></td><td>نحتاجها في الدرس 13</td></tr></tbody></table></div><div class="blk"><p>القاعدة الثالثة اسمها <b>قاعدة القوة</b>. أنزل الأس إلى الأمام، ثم أنقصه واحداً.</p></div><div class="callout note"><div class="ct">لماذا مشتقة الثابت صفر؟</div><div class="blk"><p>الثابت لا يتغير أبداً. خطه أفقي، وميله صفر.</p><p>ولماذا مشتقة <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>x</mi></mrow></math></bdi> هي 1؟ لأن الخط <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>y</mi><mo>=</mo><mi>x</mi></mrow></math></bdi> يصعد خطوة لكل خطوة: ميله 1.</p></div></div><section class="hand"><div class="hand-h"><span class="hand-tag">مثال محلول باليد</span><div class="hand-t">مشتقة دالة الوعاء</div></div><div class="hand-body"><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>w</mi><mo stretchy="false">)</mo><mo>=</mo><mo stretchy="false">(</mo><mi>w</mi><mo>−</mo><mn>3</mn><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow></math></div></div><div class="step">نفك القوس أولاً</div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>w</mi><mo stretchy="false">)</mo><mo>=</mo><msup><mi>w</mi><mn>2</mn></msup><mo>−</mo><mn>6</mn><mi>w</mi><mo>+</mo><mn>9</mn></mrow></math></div></div><div class="step">نطبق القواعد على كل جزء</div><div class="blk"><p>مشتقة <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msup><mi>w</mi><mn>2</mn></msup></mrow></math></bdi> هي <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>2</mn><mi>w</mi></mrow></math></bdi>. ومشتقة <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>6</mn><mi>w</mi></mrow></math></bdi> هي 6. ومشتقة الثابت 9 صفر:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msup><mi>f</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo stretchy="false">(</mo><mi>w</mi><mo stretchy="false">)</mo><mo>=</mo><mn>2</mn><mi>w</mi><mo>−</mo><mn>6</mn></mrow></math></div></div><div class="step">نحسب الميل عند ثلاث نقاط</div><div class="tablewrap"><table><thead><tr><th>النقطة <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>w</mi></mrow></math></bdi></th><th>المشتقة <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>2</mn><mi>w</mi><mo>−</mo><mn>6</mn></mrow></math></bdi></th><th>المعنى</th></tr></thead><tbody><tr><td>5</td><td>4</td><td>يصعد بقوة. لكي ننزل، نحرك <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>w</mi></mrow></math></bdi> إلى اليسار</td></tr><tr><td>1</td><td>−4</td><td>ينزل. لكي ننزل أكثر، نحرك <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>w</mi></mrow></math></bdi> إلى اليمين</td></tr><tr><td>3</td><td>0</td><td>مسطح تماماً: هذا أسفل الوعاء</td></tr></tbody></table></div><div class="step">نتأكد بميل الوتر عند النقطة 5</div><div class="blk"><p>القيمة عند 5 هي <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>f</mi><mo stretchy="false">(</mo><mn>5</mn><mo stretchy="false">)</mo><mo>=</mo><mn>4</mn></mrow></math></bdi>. نجرب مسافات تصغر:</p></div><div class="tablewrap"><table><thead><tr><th>المسافة <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>h</mi></mrow></math></bdi></th><th><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>f</mi><mo stretchy="false">(</mo><mn>5</mn><mo>+</mo><mi>h</mi><mo stretchy="false">)</mo></mrow></math></bdi></th><th>ميل الوتر</th></tr></thead><tbody><tr><td>1</td><td>9</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>9</mn><mo>−</mo><mn>4</mn><mo stretchy="false">)</mo><mi mathvariant="normal">/</mi><mn>1</mn><mo>=</mo><mn>5</mn></mrow></math></bdi></td></tr><tr><td>0.1</td><td>4.41</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>4.41</mn><mo>−</mo><mn>4</mn><mo stretchy="false">)</mo><mi mathvariant="normal">/</mi><mn>0.1</mn><mo>=</mo><mn>4.1</mn></mrow></math></bdi></td></tr><tr><td>0.01</td><td>4.0401</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>4.0401</mn><mo>−</mo><mn>4</mn><mo stretchy="false">)</mo><mi mathvariant="normal">/</mi><mn>0.01</mn><mo>=</mo><mn>4.01</mn></mrow></math></bdi></td></tr></tbody></table></div><div class="blk"><p>ميل الوتر يقترب من 4. وهذا بالضبط ما أعطته القاعدة.</p></div><div class="step">نستخدم المشتقة لنتوقع</div><div class="blk"><p>المشتقة تقول: قرب النقطة 5، كل زيادة صغيرة في المدخل تزيد المخرج أربعة أضعافها.</p><p>إذن إذا زدنا المدخل 0.1، فالمخرج يزيد تقريباً 0.4:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>f</mi><mo stretchy="false">(</mo><mn>5.1</mn><mo stretchy="false">)</mo><mo>≈</mo><mi>f</mi><mo stretchy="false">(</mo><mn>5</mn><mo stretchy="false">)</mo><mo>+</mo><msup><mi>f</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo stretchy="false">(</mo><mn>5</mn><mo stretchy="false">)</mo><mo>×</mo><mn>0.1</mn><mo>=</mo><mn>4</mn><mo>+</mo><mn>0.4</mn><mo>=</mo><mn>4.4</mn></mrow></math></div></div><div class="blk"><p>والقيمة الحقيقية 4.41. قريبة جداً.</p></div></div></section><h2>ماذا تقول لنا إشارة المشتقة؟</h2><div class="blk"><p>هذه الفكرة هي كل ما نحتاجه للتعلّم:</p></div><ul class="l"><li><b>المشتقة موجبة:</b> الدالة تصعد. لكي تنزل، أنقص المدخل.</li><li><b>المشتقة سالبة:</b> الدالة تنزل. لكي تنزل أكثر، زد المدخل.</li><li><b>المشتقة صفر:</b> وصلت إلى نقطة مسطحة. غالباً قاع، أو قمة.</li></ul><div class="blk"><p>إذن لكي تنزل، تحرّك دائماً <b>عكس</b> إشارة المشتقة.</p><p>والدالة التي نريد أن ننزل فيها هي دالة الخطأ. والمدخل الذي نحرّكه هو المعامل.</p><p>هذه هي فكرة النزول بالتدرّج، وسنبنيها كاملة في الدرس 9.</p></div><h2>بالكود: المشتقة العددية</h2><div class="blk"><p>نستطيع أن نحسب المشتقة بدون أي قاعدة: نجرب مسافة صغيرة جداً.</p><p>أفضل من الوتر العادي أن نأخذ نقطة قبل ونقطة بعد:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msup><mi>f</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo stretchy="false">(</mo><mi>w</mi><mo stretchy="false">)</mo><mo>≈</mo><mfrac><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>w</mi><mo>+</mo><mi>h</mi><mo stretchy="false">)</mo><mo>−</mo><mi>f</mi><mo stretchy="false">(</mo><mi>w</mi><mo>−</mo><mi>h</mi><mo stretchy="false">)</mo></mrow><mrow><mn>2</mn><mi>h</mi></mrow></mfrac></mrow></math></div></div><div class="blk"><p>هذه الطريقة أدق بكثير. وسنستخدمها في كل الدورة لنتحقق أن المشتقات التي نحسبها بيدنا صحيحة.</p></div><div class="code "><div class="code-head"><span class="path">numeric_derivative.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="k">def</span><span class="w"> </span><span class="nf">f</span><span class="p">(</span><span class="n">w</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">w</span> <span class="o">-</span> <span class="mi">3</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">f_prime</span><span class="p">(</span><span class="n">w</span><span class="p">):</span>          <span class="c1"># من القاعدة</span>
+    <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">w</span> <span class="o">-</span> <span class="mi">6</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">numeric_derivative</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">func</span><span class="p">(</span><span class="n">w</span> <span class="o">+</span> <span class="n">h</span><span class="p">)</span> <span class="o">-</span> <span class="n">func</span><span class="p">(</span><span class="n">w</span> <span class="o">-</span> <span class="n">h</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">h</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">]:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;w = </span><span class="si">{</span><span class="n">w</span><span class="si">:</span><span class="s2">&gt;3</span><span class="si">}</span><span class="s2">:  rule = </span><span class="si">{</span><span class="n">f_prime</span><span class="p">(</span><span class="n">w</span><span class="p">)</span><span class="si">:</span><span class="s2">6.3f</span><span class="si">}</span><span class="s2">   numeric = </span><span class="si">{</span><span class="n">numeric_derivative</span><span class="p">(</span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="n">w</span><span class="p">)</span><span class="si">:</span><span class="s2">6.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>w =   5:  rule =  4.000   numeric =  4.000
+w =   1:  rule = -4.000   numeric = -4.000
+w =   3:  rule =  0.000   numeric =  0.000
+w = 3.5:  rule =  1.000   numeric =  1.000</pre></div><div class="blk"><p>الطريقتان متطابقتان. هذا اختبار ممتاز: إذا اختلفتا، فهناك خطأ في حسابك.</p></div><h3>ميل الوتر يقترب من المشتقة</h3><div class="code "><div class="code-head"><span class="path">secant.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">]:</span>
+    <span class="n">secant</span> <span class="o">=</span> <span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="mi">5</span> <span class="o">+</span> <span class="n">h</span><span class="p">)</span> <span class="o">-</span> <span class="n">f</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span> <span class="o">/</span> <span class="n">h</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;h = </span><span class="si">{</span><span class="n">h</span><span class="si">:</span><span class="s2">&lt;6</span><span class="si">}</span><span class="s2"> secant slope = </span><span class="si">{</span><span class="n">secant</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>h = 1      secant slope = 5.0000
+h = 0.1    secant slope = 4.1000
+h = 0.01   secant slope = 4.0100
+h = 0.001  secant slope = 4.0010</pre></div><h3>نرسم المنحنى والمماس</h3><div class="code "><div class="code-head"><span class="path">plot_tangent.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+<span class="n">w0</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">tangent</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">w0</span><span class="p">)</span> <span class="o">+</span> <span class="n">f_prime</span><span class="p">(</span><span class="n">w0</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">w</span> <span class="o">-</span> <span class="n">w0</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">3.6</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">f</span><span class="p">(</span><span class="n">w</span><span class="p">),</span> <span class="n">lw</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;f(w) = (w - 3)^2&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">tangent</span><span class="p">,</span> <span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;tangent at w = 5, slope 4&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">([</span><span class="n">w0</span><span class="p">],</span> <span class="p">[</span><span class="n">f</span><span class="p">(</span><span class="n">w0</span><span class="p">)],</span> <span class="n">s</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C1&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;f(w)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></pre></div><figure class="plot"><div class="svgwrap"><svg xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 387.062344 250.455016" xmlns="http://www.w3.org/2000/svg" version="1.1">
+<defs>
+</defs>
+<g id="figure_1">
+<g id="patch_1">
+<path d="M 0 250.455016 
+L 387.062344 250.455016 
+L 387.062344 0 
+L 0 0 
+L 0 250.455016 
+z
+" style="fill: none"/>
+</g>
+<g id="axes_1">
+<g id="patch_2">
+<path d="M 45.062344 210.963141 
+L 379.862344 210.963141 
+L 379.862344 11.379141 
+L 45.062344 11.379141 
+L 45.062344 210.963141 
+z
+" style="fill: none"/>
+</g>
+<g id="matplotlib.axis_1">
+<g id="xtick_1">
+<g id="line2d_1">
+<path d="M 60.280526 210.963141 
+L 60.280526 11.379141 
+" clip-path="url(#p4212b988c8)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_2">
+<defs>
+<path id="m01a9442c25" d="M 0 0 
+L 0 3.5 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#m01a9442c25" x="60.280526" y="210.963141" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_1">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="60.280526" y="226.321422" transform="rotate(-0 60.280526 226.321422)">−1</text>
+</g>
+</g>
+<g id="xtick_2">
+<g id="line2d_3">
+<path d="M 98.32598 210.963141 
+L 98.32598 11.379141 
+" clip-path="url(#p4212b988c8)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_4">
+<g>
+<use xlink:href="#m01a9442c25" x="98.32598" y="210.963141" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_2">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="98.32598" y="226.321422" transform="rotate(-0 98.32598 226.321422)">0</text>
+</g>
+</g>
+<g id="xtick_3">
+<g id="line2d_5">
+<path d="M 136.371435 210.963141 
+L 136.371435 11.379141 
+" clip-path="url(#p4212b988c8)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_6">
+<g>
+<use xlink:href="#m01a9442c25" x="136.371435" y="210.963141" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_3">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="136.371435" y="226.321422" transform="rotate(-0 136.371435 226.321422)">1</text>
+</g>
+</g>
+<g id="xtick_4">
+<g id="line2d_7">
+<path d="M 174.416889 210.963141 
+L 174.416889 11.379141 
+" clip-path="url(#p4212b988c8)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_8">
+<g>
+<use xlink:href="#m01a9442c25" x="174.416889" y="210.963141" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_4">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="174.416889" y="226.321422" transform="rotate(-0 174.416889 226.321422)">2</text>
+</g>
+</g>
+<g id="xtick_5">
+<g id="line2d_9">
+<path d="M 212.462344 210.963141 
+L 212.462344 11.379141 
+" clip-path="url(#p4212b988c8)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_10">
+<g>
+<use xlink:href="#m01a9442c25" x="212.462344" y="210.963141" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_5">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="212.462344" y="226.321422" transform="rotate(-0 212.462344 226.321422)">3</text>
+</g>
+</g>
+<g id="xtick_6">
+<g id="line2d_11">
+<path d="M 250.507798 210.963141 
+L 250.507798 11.379141 
+" clip-path="url(#p4212b988c8)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_12">
+<g>
+<use xlink:href="#m01a9442c25" x="250.507798" y="210.963141" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_6">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="250.507798" y="226.321422" transform="rotate(-0 250.507798 226.321422)">4</text>
+</g>
+</g>
+<g id="xtick_7">
+<g id="line2d_13">
+<path d="M 288.553253 210.963141 
+L 288.553253 11.379141 
+" clip-path="url(#p4212b988c8)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_14">
+<g>
+<use xlink:href="#m01a9442c25" x="288.553253" y="210.963141" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_7">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="288.553253" y="226.321422" transform="rotate(-0 288.553253 226.321422)">5</text>
+</g>
+</g>
+<g id="xtick_8">
+<g id="line2d_15">
+<path d="M 326.598707 210.963141 
+L 326.598707 11.379141 
+" clip-path="url(#p4212b988c8)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_16">
+<g>
+<use xlink:href="#m01a9442c25" x="326.598707" y="210.963141" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_8">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="326.598707" y="226.321422" transform="rotate(-0 326.598707 226.321422)">6</text>
+</g>
+</g>
+<g id="xtick_9">
+<g id="line2d_17">
+<path d="M 364.644162 210.963141 
+L 364.644162 11.379141 
+" clip-path="url(#p4212b988c8)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_18">
+<g>
+<use xlink:href="#m01a9442c25" x="364.644162" y="210.963141" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_9">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="364.644162" y="226.321422" transform="rotate(-0 364.644162 226.321422)">7</text>
+</g>
+</g>
+<g id="text_10">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="212.462344" y="240.967359" transform="rotate(-0 212.462344 240.967359)">w</text>
+</g>
+</g>
+<g id="matplotlib.axis_2">
+<g id="ytick_1">
+<g id="line2d_19">
+<path d="M 45.062344 210.963141 
+L 379.862344 210.963141 
+" clip-path="url(#p4212b988c8)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_20">
+<defs>
+<path id="m123a4fb0e5" d="M 0 0 
+L -3.5 0 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#m123a4fb0e5" x="45.062344" y="210.963141" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_11">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="38.062344" y="215.142281" transform="rotate(-0 38.062344 215.142281)">−2</text>
+</g>
+</g>
+<g id="ytick_2">
+<g id="line2d_21">
+<path d="M 45.062344 188.787141 
+L 379.862344 188.787141 
+" clip-path="url(#p4212b988c8)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_22">
+<g>
+<use xlink:href="#m123a4fb0e5" x="45.062344" y="188.787141" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_12">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="38.062344" y="192.966281" transform="rotate(-0 38.062344 192.966281)">0</text>
+</g>
+</g>
+<g id="ytick_3">
+<g id="line2d_23">
+<path d="M 45.062344 166.611141 
+L 379.862344 166.611141 
+" clip-path="url(#p4212b988c8)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_24">
+<g>
+<use xlink:href="#m123a4fb0e5" x="45.062344" y="166.611141" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_13">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="38.062344" y="170.790281" transform="rotate(-0 38.062344 170.790281)">2</text>
+</g>
+</g>
+<g id="ytick_4">
+<g id="line2d_25">
+<path d="M 45.062344 144.435141 
+L 379.862344 144.435141 
+" clip-path="url(#p4212b988c8)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_26">
+<g>
+<use xlink:href="#m123a4fb0e5" x="45.062344" y="144.435141" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_14">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="38.062344" y="148.614281" transform="rotate(-0 38.062344 148.614281)">4</text>
+</g>
+</g>
+<g id="ytick_5">
+<g id="line2d_27">
+<path d="M 45.062344 122.259141 
+L 379.862344 122.259141 
+" clip-path="url(#p4212b988c8)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_28">
+<g>
+<use xlink:href="#m123a4fb0e5" x="45.062344" y="122.259141" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_15">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="38.062344" y="126.438281" transform="rotate(-0 38.062344 126.438281)">6</text>
+</g>
+</g>
+<g id="ytick_6">
+<g id="line2d_29">
+<path d="M 45.062344 100.083141 
+L 379.862344 100.083141 
+" clip-path="url(#p4212b988c8)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_30">
+<g>
+<use xlink:href="#m123a4fb0e5" x="45.062344" y="100.083141" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_16">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="38.062344" y="104.262281" transform="rotate(-0 38.062344 104.262281)">8</text>
+</g>
+</g>
+<g id="ytick_7">
+<g id="line2d_31">
+<path d="M 45.062344 77.907141 
+L 379.862344 77.907141 
+" clip-path="url(#p4212b988c8)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_32">
+<g>
+<use xlink:href="#m123a4fb0e5" x="45.062344" y="77.907141" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_17">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="38.062344" y="82.086281" transform="rotate(-0 38.062344 82.086281)">10</text>
+</g>
+</g>
+<g id="ytick_8">
+<g id="line2d_33">
+<path d="M 45.062344 55.731141 
+L 379.862344 55.731141 
+" clip-path="url(#p4212b988c8)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_34">
+<g>
+<use xlink:href="#m123a4fb0e5" x="45.062344" y="55.731141" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_18">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="38.062344" y="59.910281" transform="rotate(-0 38.062344 59.910281)">12</text>
+</g>
+</g>
+<g id="ytick_9">
+<g id="line2d_35">
+<path d="M 45.062344 33.555141 
+L 379.862344 33.555141 
+" clip-path="url(#p4212b988c8)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_36">
+<g>
+<use xlink:href="#m123a4fb0e5" x="45.062344" y="33.555141" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_19">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="38.062344" y="37.734281" transform="rotate(-0 38.062344 37.734281)">14</text>
+</g>
+</g>
+<g id="ytick_10">
+<g id="line2d_37">
+<path d="M 45.062344 11.379141 
+L 379.862344 11.379141 
+" clip-path="url(#p4212b988c8)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_38">
+<g>
+<use xlink:href="#m123a4fb0e5" x="45.062344" y="11.379141" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_20">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="38.062344" y="15.558281" transform="rotate(-0 38.062344 15.558281)">16</text>
+</g>
+</g>
+<g id="text_21">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="15.558281" y="111.171141" transform="rotate(-90 15.558281 111.171141)">f(w)</text>
+</g>
+</g>
+<g id="line2d_39">
+<path d="M 60.280526 11.379141 
+L 66.398388 25.356388 
+L 72.51625 38.760209 
+L 78.634112 51.590605 
+L 84.751974 63.847576 
+L 90.869836 75.531121 
+L 96.987698 86.64124 
+L 103.10556 97.177934 
+L 109.223422 107.141202 
+L 113.811818 114.237343 
+L 118.400215 121.010932 
+L 122.988611 127.461969 
+L 127.577008 133.590454 
+L 132.165405 139.396388 
+L 136.753801 144.879769 
+L 141.342198 150.040599 
+L 145.930594 154.878877 
+L 150.518991 159.394603 
+L 155.107387 163.587777 
+L 159.695784 167.458399 
+L 164.28418 171.00647 
+L 168.872577 174.231988 
+L 173.460973 177.134955 
+L 178.04937 179.71537 
+L 182.637766 181.973233 
+L 187.226163 183.908544 
+L 191.814559 185.521303 
+L 196.402956 186.811511 
+L 200.991352 187.779166 
+L 205.579749 188.42427 
+L 210.168145 188.746822 
+L 214.756542 188.746822 
+L 219.344939 188.42427 
+L 223.933335 187.779166 
+L 228.521732 186.811511 
+L 233.110128 185.521303 
+L 237.698525 183.908544 
+L 242.286921 181.973233 
+L 246.875318 179.71537 
+L 251.463714 177.134955 
+L 256.052111 174.231988 
+L 260.640507 171.00647 
+L 265.228904 167.458399 
+L 269.8173 163.587777 
+L 274.405697 159.394603 
+L 278.994093 154.878877 
+L 283.58249 150.040599 
+L 288.170886 144.879769 
+L 292.759283 139.396388 
+L 297.34768 133.590454 
+L 301.936076 127.461969 
+L 306.524473 121.010932 
+L 311.112869 114.237343 
+L 315.701266 107.141202 
+L 320.289662 99.72251 
+L 326.407524 89.329172 
+L 332.525386 78.362409 
+L 338.643248 66.822221 
+L 344.76111 54.708606 
+L 350.878972 42.021567 
+L 356.996834 28.761102 
+L 363.114696 14.927211 
+L 364.644162 11.379141 
+L 364.644162 11.379141 
+" clip-path="url(#p4212b988c8)" style="fill: none; stroke: #1f77b4; stroke-width: 2.5; stroke-linecap: square"/>
+</g>
+<g id="line2d_40">
+<path d="M 196.750859 251.455016 
+L 364.644162 55.731141 
+L 364.644162 55.731141 
+" clip-path="url(#p4212b988c8)" style="fill: none; stroke-dasharray: 7.4,3.2; stroke-dashoffset: 0; stroke: #ff7f0e; stroke-width: 2"/>
+</g>
+<g id="patch_3">
+<path d="M 45.062344 210.963141 
+L 45.062344 11.379141 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_4">
+<path d="M 379.862344 210.963141 
+L 379.862344 11.379141 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_5">
+<path d="M 45.062344 210.963141 
+L 379.862344 210.963141 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_6">
+<path d="M 45.062344 11.379141 
+L 379.862344 11.379141 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="PathCollection_1">
+<defs>
+<path id="mef6751ce04" d="M 0 3.872983 
+C 1.027127 3.872983 2.012324 3.464901 2.738613 2.738613 
+C 3.464901 2.012324 3.872983 1.027127 3.872983 0 
+C 3.872983 -1.027127 3.464901 -2.012324 2.738613 -2.738613 
+C 2.012324 -3.464901 1.027127 -3.872983 0 -3.872983 
+C -1.027127 -3.872983 -2.012324 -3.464901 -2.738613 -2.738613 
+C -3.464901 -2.012324 -3.872983 -1.027127 -3.872983 0 
+C -3.872983 1.027127 -3.464901 2.012324 -2.738613 2.738613 
+C -2.012324 3.464901 -1.027127 3.872983 0 3.872983 
+z
+" style="stroke: #ff7f0e"/>
+</defs>
+<g clip-path="url(#p4212b988c8)">
+<use xlink:href="#mef6751ce04" x="288.553253" y="144.435141" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+</g>
+</g>
+<g id="legend_1">
+<g id="patch_7">
+<path d="M 124.830156 52.471016 
+L 300.094531 52.471016 
+Q 302.294531 52.471016 302.294531 50.271016 
+L 302.294531 19.079141 
+Q 302.294531 16.879141 300.094531 16.879141 
+L 124.830156 16.879141 
+Q 122.630156 16.879141 122.630156 19.079141 
+L 122.630156 50.271016 
+Q 122.630156 52.471016 124.830156 52.471016 
+L 124.830156 52.471016 
+z
+" style="fill: none; opacity: 0.35; stroke: currentColor; stroke-linejoin: miter"/>
+</g>
+<g id="line2d_41">
+<path d="M 127.030156 25.787422 
+L 138.030156 25.787422 
+L 149.030156 25.787422 
+" style="fill: none; stroke: #1f77b4; stroke-width: 2.5; stroke-linecap: square"/>
+</g>
+<g id="text_22">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="157.830156" y="29.637422" transform="rotate(-0 157.830156 29.637422)">f(w) = (w - 3)^2</text>
+</g>
+<g id="line2d_42">
+<path d="M 127.030156 41.933359 
+L 138.030156 41.933359 
+L 149.030156 41.933359 
+" style="fill: none; stroke-dasharray: 7.4,3.2; stroke-dashoffset: 0; stroke: #ff7f0e; stroke-width: 2"/>
+</g>
+<g id="text_23">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="157.830156" y="45.783359" transform="rotate(-0 157.830156 45.783359)">tangent at w = 5, slope 4</text>
+</g>
+</g>
+</g>
+</g>
+<defs>
+<clipPath id="p4212b988c8">
+<rect x="45.062344" y="11.379141" width="334.8" height="199.584"/>
+</clipPath>
+</defs>
+</svg></div><figcaption>الرسم الذي يظهر عندما تشغّل الكود.</figcaption></figure><div class="callout mistake"><div class="ct">خطأ شائع: مسافة صغيرة جداً جداً</div><div class="blk"><p>قد تظن أن مسافة أصغر دائماً أدق. لكن الجهاز يحفظ الأرقام بدقة محدودة.</p><p>مع مسافة مثل عشرة أس سالب عشرين، يصبح الفرق في المخرج صفراً، فتخرج المشتقة صفراً خطأً.</p><p>مسافة حول عشرة أس سالب خمسة مناسبة غالباً.</p></div><div class="code "><div class="code-head"><span class="path"></span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="nb">print</span><span class="p">(</span><span class="n">numeric_derivative</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">numeric_derivative</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="mf">1e-20</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>3.9999999998485687
+0.0</pre></div></div><div class="callout interview"><div class="ct">سؤال مقابلة</div><div class="blk"><p>سؤال قد تسمعه في المقابلة:</p></div><div class="en" dir="ltr"><p>What does the derivative of the loss with respect to a parameter tell us?</p></div><div class="blk"><p>جواب قصير وجيد:</p></div><div class="en" dir="ltr"><p>It tells us how the loss changes if we increase the parameter a little. The sign gives the direction: if the derivative is positive, increasing the parameter increases the loss, so we should decrease it. The size tells us how sensitive the loss is to that parameter.</p></div></div><section class="summary"><div class="ct">الخلاصة</div><ul class="l"><li>المشتقة هي الميل عند نقطة: كم يتغير المخرج إذا زاد المدخل قليلاً جداً.</li><li>ميل الوتر يقترب من المشتقة عندما تصغر المسافة.</li><li>قاعدة القوة: أنزل الأس إلى الأمام، وأنقصه واحداً. ومشتقة المجموع هي مجموع المشتقات.</li><li>لكي تنزل في دالة، تحرّك عكس إشارة المشتقة. والمشتقة صفر في القاع.</li><li>المشتقة العددية طريقة سهلة للتحقق من أي مشتقة تحسبها بيدك.</li></ul></section><section class="quiz" data-quiz="l06-q"><h2>اختبر فهمك</h2><div class="q" data-answer="1"><div class="qt"><span class="qn">1.</span>ما مشتقة <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><mn>4</mn><msup><mi>x</mi><mn>3</mn></msup></mrow></math></bdi>؟</div><div class="opts"><button type="button" class="opt"><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>4</mn><msup><mi>x</mi><mn>2</mn></msup></mrow></math></bdi></button><button type="button" class="opt"><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>12</mn><msup><mi>x</mi><mn>2</mn></msup></mrow></math></bdi></button><button type="button" class="opt"><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>12</mn><msup><mi>x</mi><mn>3</mn></msup></mrow></math></bdi></button></div><div class="explain" hidden><span class="verdict"></span><p>قاعدة القوة: ننزل 3 ونضربها في 4، ثم ننقص الأس واحداً.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">2.</span>مشتقة دالة الخطأ عند قيمة معينة للمعامل تساوي سالب 2. ماذا تفعل لكي ينقص الخطأ؟</div><div class="opts"><button type="button" class="opt">تنقص المعامل</button><button type="button" class="opt">تزيد المعامل</button><button type="button" class="opt">لا تغير شيئاً</button></div><div class="explain" hidden><span class="verdict"></span><p>المشتقة سالبة: الدالة تنزل عندما يزيد المعامل. نتحرك عكس إشارة المشتقة.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">3.</span>أين تكون المشتقة صفراً في دالة الوعاء <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mi>w</mi><mo>−</mo><mn>3</mn><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow></math></bdi>؟</div><div class="opts"><button type="button" class="opt">عند <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>w</mi><mo>=</mo><mn>0</mn></mrow></math></bdi></button><button type="button" class="opt">عند <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>w</mi><mo>=</mo><mn>3</mn></mrow></math></bdi></button><button type="button" class="opt">لا تكون صفراً أبداً</button></div><div class="explain" hidden><span class="verdict"></span><p>أسفل الوعاء مسطح: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>2</mn><mi>w</mi><mo>−</mo><mn>6</mn><mo>=</mo><mn>0</mn></mrow></math></bdi> عندما <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>w</mi><mo>=</mo><mn>3</mn></mrow></math></bdi>.</p></div></div><div class="q" data-answer="0"><div class="qt"><span class="qn">4.</span>ما مشتقة الثابت 10؟</div><div class="opts"><button type="button" class="opt">صفر</button><button type="button" class="opt">10</button><button type="button" class="opt">1</button></div><div class="explain" hidden><span class="verdict"></span><p>الثابت لا يتغير، فميله صفر.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">5.</span>لماذا نحسب المشتقة العددية في الدورة، مع أننا نعرف القواعد؟</div><div class="opts"><button type="button" class="opt">لأنها أسرع دائماً</button><button type="button" class="opt">لكي نتحقق أن المشتقة التي حسبناها بيدنا أو بالكود صحيحة</button><button type="button" class="opt">لأن القواعد لا تعمل مع الكسور</button></div><div class="explain" hidden><span class="verdict"></span><p>إذا تطابقت الطريقتان، فحسابنا صحيح على الأغلب.</p></div></div><div class="row"><span class="score"></span><button type="button" class="btn ghost quiz-reset">أعد المحاولة</button></div></section><section class="exercise"><div class="xt">تمرين: مشتقة، ثم قاع</div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>g</mi><mo stretchy="false">(</mo><mi>w</mi><mo stretchy="false">)</mo><mo>=</mo><mn>3</mn><msup><mi>w</mi><mn>2</mn></msup><mo>+</mo><mn>2</mn><mi>w</mi><mo>−</mo><mn>5</mn></mrow></math></div></div><ol class="l"><li>احسب المشتقة بالقواعد.</li><li>احسب قيمتها عند <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>w</mi><mo>=</mo><mn>1</mn></mrow></math></bdi>.</li><li>أين تكون المشتقة صفراً؟ هذه أدنى نقطة في الدالة.</li><li>تحقق من الإجابة الثانية بالمشتقة العددية في الكود.</li></ol><details><summary>تلميح</summary><div class="dbody"><div class="blk"><p>مشتقة <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>3</mn><msup><mi>w</mi><mn>2</mn></msup></mrow></math></bdi> هي <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>6</mn><mi>w</mi></mrow></math></bdi>. ومشتقة <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>2</mn><mi>w</mi></mrow></math></bdi> هي 2. والثابت يختفي.</p><p>للنقطة الثالثة: حل المعادلة: المشتقة تساوي صفراً.</p></div></div></details><details class="sol"><summary>الحل (افتحه بعد أن تحاول)</summary><div class="dbody"><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msup><mi>g</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo stretchy="false">(</mo><mi>w</mi><mo stretchy="false">)</mo><mo>=</mo><mn>6</mn><mi>w</mi><mo>+</mo><mn>2</mn><mspace width="2em"/><msup><mi>g</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo><mo>=</mo><mn>8</mn></mrow></math></div></div><div class="blk"><p>المشتقة صفر عندما:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mn>6</mn><mi>w</mi><mo>+</mo><mn>2</mn><mo>=</mo><mn>0</mn><mspace width="1em"/><mo>⇒</mo><mspace width="1em"/><mi>w</mi><mo>=</mo><mo>−</mo><mstyle scriptlevel="0" displaystyle="false"><mfrac><mn>1</mn><mn>3</mn></mfrac></mstyle><mo>≈</mo><mo>−</mo><mn>0.333</mn></mrow></math></div></div><div class="code "><div class="code-head"><span class="path"></span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="k">def</span><span class="w"> </span><span class="nf">g</span><span class="p">(</span><span class="n">w</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">w</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">w</span> <span class="o">-</span> <span class="mi">5</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">numeric_derivative</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">4</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">numeric_derivative</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">),</span> <span class="mi">4</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>8.0
+0.0</pre></div><div class="blk"><p>المشتقة عند 1 تساوي 8، وعند سالب ثلث تساوي صفراً تقريباً. هذه أدنى نقطة.</p></div></div></details><div class="askbox" data-kind="review" hidden><div class="al">اطلب من كلود أن يراجع حلّك</div><div class="ah">اكتب إجابتك أو الصق الكود. سيقارنه بالحل ويشرح لك بالعربي. هذا يستهلك من رصيد استخدامك.</div><textarea id="rv-l06-1" dir="auto" placeholder="اكتب إجابتك هنا"></textarea><div class="row"><button type="button" class="btn ask-go">راجع حلّي</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></div><pre hidden class="x-task">$$g(w) = 3w^2 + 2w - 5$$
+
+1. احسب المشتقة بالقواعد.
+2. احسب قيمتها عند $w = 1$.
+3. أين تكون المشتقة صفراً؟ هذه أدنى نقطة في الدالة.
+4. تحقق من الإجابة الثانية بالمشتقة العددية في الكود.</pre><pre hidden class="x-solution">$$g'(w) = 6w + 2 \qquad g'(1) = 8$$
+
+المشتقة صفر عندما:
+
+$$6w + 2 = 0 \quad \Rightarrow \quad w = -\tfrac{1}{3} \approx -0.333$$
+
+```python
+def g(w):
+    return 3 * w**2 + 2 * w - 5
+
+print(round(numeric_derivative(g, 1), 4))
+print(round(numeric_derivative(g, -1/3), 4))
+```
+
+المشتقة عند 1 تساوي 8، وعند سالب ثلث تساوي صفراً تقريباً. هذه أدنى نقطة.</pre></section></article><section class="askbox" data-kind="ask" hidden><div class="al">عندك سؤال عن هذا الدرس؟ اسأل كلود</div><div class="ah">اكتب سؤالك بالعربي. كلود يقرأ نص الدرس ويجيبك. هذا يستهلك من رصيد استخدامك.</div><textarea id="ask-l06" dir="auto" placeholder="مثلاً: لماذا نضرب هنا في المشتقة؟"></textarea><div class="row"><button type="button" class="btn ask-go">اسأل</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></section><div class="donebox"><span class="dmsg"></span><button type="button" class="btn">أنهيت هذا الدرس</button></div><nav class="pager" aria-label="التنقل بين الدروس"><a class="prev" href="#l05"><small>الدرس السابق</small>المصفوفات: حسابات كثيرة دفعة واحدة</a><a class="next" href="#l07"><small>الدرس التالي</small>المشتقات الجزئية والتدرّج</a></nav></div>

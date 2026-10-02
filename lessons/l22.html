@@ -1,0 +1,474 @@
+<div class="page"><article><div class="eyebrow">الجزء الثاني · التعلم الآلي</div><h1>آلة المتجهات الداعمة</h1><div class="meta"><span>الدرس 22 من 59</span><span>المدة: حوالي 50 دقيقة</span><span class="nbdl-slot"></span></div><div class="chips" dir="ltr"><bdi class="chip">support vector machine</bdi><bdi class="chip">margin</bdi><bdi class="chip">support vectors</bdi><bdi class="chip">hinge loss</bdi><bdi class="chip">soft margin</bdi><bdi class="chip">C</bdi><bdi class="chip">kernel</bdi><bdi class="chip">kernel trick</bdi><bdi class="chip">RBF</bdi><bdi class="chip">gamma</bdi></div><div class="goals"><b>بعد هذا الدرس ستعرف:</b><ul><li>تفهم فكرة أوسع هامش بين فئتين</li><li>تحسب الهامش وخسارة المفصلة لنقاط بيدك</li><li>تفهم دور المعامل الذي يوازن بين هامش واسع وأخطاء قليلة</li><li>تفهم النواة: كيف تصبح البيانات قابلة للفصل في بُعد أعلى</li><li>تستخدم آلة المتجهات الداعمة في سايكت ليرن، مع التوحيد</li></ul></div><h2>أي خط هو الأفضل؟</h2><div class="blk"><p>فئتان منفصلتان تماماً. يوجد عدد لا نهائي من الخطوط التي تفصل بينهما.</p><p>أي خط نختار؟</p></div><div class="blk"><p>الانحدار اللوجستي يختار خطاً حسب الاحتمالات. آلة المتجهات الداعمة لها فكرة أخرى، واضحة جداً:</p></div><div class="key">اختر الخط الذي يبتعد أكثر ما يمكن عن أقرب النقاط من الفئتين.</div><div class="blk"><p>تخيل شارعاً بين قريتين. نريد أعرض شارع ممكن، لا تدخله أي بيوت.</p><p>الخط في منتصف الشارع هو حد القرار. ونصف عرض الشارع هو <b>الهامش</b>.</p></div><div class="blk"><div class="term" dir="ltr"><code>support vector machine (SVM) · margin</code></div></div><figure><div class="svgwrap"><svg viewBox="0 0 420 300" width="420" role="img" aria-label="نقاط من فئتين، وخط فاصل، وهامش حوله، والنقاط على الحافة محاطة بدوائر" fill="none">
+  <polygon points="40,260 280,20 340,20 100,260" class="f-accent" fill-opacity=".08"/>
+  <line x1="70" y1="260" x2="310" y2="20" stroke="currentColor" stroke-width="2.4"/>
+  <line x1="40" y1="260" x2="280" y2="20" stroke="currentColor" stroke-width="1.4" stroke-dasharray="6 5"/>
+  <line x1="100" y1="260" x2="340" y2="20" stroke="currentColor" stroke-width="1.4" stroke-dasharray="6 5"/>
+  <g class="f-accent">
+    <circle cx="60" cy="140" r="7"/><circle cx="95" cy="90" r="7"/><circle cx="130" cy="60" r="7"/><circle cx="60" cy="210" r="7"/><circle cx="40" cy="60" r="7"/><circle cx="160" cy="140" r="7"/><circle cx="110" cy="190" r="7"/>
+  </g>
+  <g class="f-orange">
+    <rect x="193" y="153" width="14" height="14"/><rect x="243" y="103" width="14" height="14"/><rect x="313" y="113" width="14" height="14"/><rect x="323" y="213" width="14" height="14"/><rect x="363" y="163" width="14" height="14"/><rect x="273" y="203" width="14" height="14"/><rect x="373" y="73" width="14" height="14"/>
+  </g>
+  <g stroke="currentColor" stroke-width="1.6">
+    <circle cx="160" cy="140" r="13"/><circle cx="110" cy="190" r="13"/><circle cx="200" cy="160" r="13"/><circle cx="250" cy="110" r="13"/>
+  </g>
+  <line x1="222" y1="108" x2="237" y2="123" class="s-orange" stroke-width="2.4"/>
+  <text x="300" y="60" fill="currentColor" font-size="13">الهامش</text>
+  <line x1="298" y1="62" x2="238" y2="112" stroke="currentColor" stroke-opacity=".5"/>
+</svg></div><figcaption>أوسع شارع بين الفئتين. الخط المتصل هو حد القرار، والخطان المنقطان حافتا الهامش. النقاط المحاطة بدائرة على الحافة هي المتجهات الداعمة: لو حرّكت أي نقطة أخرى، لا يتغير الحد.</figcaption></figure><h2>المتجهات الداعمة</h2><div class="blk"><p>النقاط التي تقع <b>على حافة</b> الشارع هي التي تحدد مكانه وعرضه.</p><p>كل النقاط الأخرى بعيدة، ولا تؤثر أبداً: لو حذفتها، يبقى الحد كما هو.</p></div><div class="blk"><p>هذه النقاط المهمة اسمها <b>المتجهات الداعمة</b>: هي "تدعم" حافتي الشارع. ومن هنا جاء اسم الخوارزمية.</p></div><div class="blk"><div class="term" dir="ltr"><code>support vectors</code></div></div><h2>بالرموز</h2><div class="blk"><p>نسمي الفئتين <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo>+</mo><mn>1</mn></mrow></math></bdi> و <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo>−</mo><mn>1</mn></mrow></math></bdi>، بدل 1 و 0. هذا يسهل الكتابة.</p><p>الحد كما في الانحدار اللوجستي:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><mi>w</mi><mo>⋅</mo><mi>x</mi><mo>+</mo><mi>b</mi><mo>=</mo><mn>0</mn></mrow></math></div></div><div class="blk"><p>ونطلب من كل نقطة أن تكون على جهتها الصحيحة، وبعيدة بما يكفي:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>y</mi><mi>i</mi></msub><mtext> </mtext><mi>f</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mi>i</mi></msub><mo stretchy="false">)</mo><mo>≥</mo><mn>1</mn></mrow></math></div></div><div class="blk"><p>الضرب في الجواب يجعل الشرط واحداً للفئتين: موجب إذا كانت النقطة في جهتها الصحيحة.</p><p>النقاط التي تحقق المساواة بالضبط هي المتجهات الداعمة. وعرض الشارع كله:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>width</mtext><mo>=</mo><mfrac><mn>2</mn><mrow><mo stretchy="false">∥</mo><mi>w</mi><mo stretchy="false">∥</mo></mrow></mfrac></mrow></math></div></div><div class="blk"><p>أوسع شارع يعني أصغر أوزان. إذن آلة المتجهات الداعمة تبحث عن أصغر أوزان تفصل الفئتين بهذا الشرط.</p></div><h2>الهامش المرن، وخسارة المفصلة</h2><div class="blk"><p>في البيانات الحقيقية، الفئتان متداخلتان غالباً. لا يوجد شارع نظيف.</p><p>لذلك نسمح ببعض النقاط داخل الشارع، أو حتى على الجهة الخاطئة، مقابل عقوبة:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>hinge</mtext><mo stretchy="false">(</mo><msub><mi>x</mi><mi>i</mi></msub><mo stretchy="false">)</mo><mo>=</mo><mi>max</mi><mo>⁡</mo><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">(</mo><mn>0</mn><mo separator="true">,</mo><mtext>  </mtext><mn>1</mn><mo>−</mo><msub><mi>y</mi><mi>i</mi></msub><mi>f</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mi>i</mi></msub><mo stretchy="false">)</mo><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">)</mo></mrow></math></div></div><ul class="l"><li>نقطة صحيحة خارج الشارع: العقوبة صفر.</li><li>نقطة داخل الشارع: عقوبة صغيرة.</li><li>نقطة على الجهة الخاطئة: عقوبة أكبر من 1، تكبر كلما ابتعدت.</li></ul><div class="blk"><div class="term" dir="ltr"><code>hinge loss · soft margin</code></div></div><div class="blk"><p>والهدف الكامل يوازن بين شيئين:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>min</mi><mo>⁡</mo><mtext>  </mtext><mtext>  </mtext><mfrac><mn>1</mn><mn>2</mn></mfrac><mo stretchy="false">∥</mo><mi>w</mi><msup><mo stretchy="false">∥</mo><mn>2</mn></msup><mo>+</mo><mi>C</mi><munder><mo>∑</mo><mi>i</mi></munder><mtext>hinge</mtext><mo stretchy="false">(</mo><msub><mi>x</mi><mi>i</mi></msub><mo stretchy="false">)</mo></mrow></math></div></div><div class="blk"><p>المعامل <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>C</mi></mrow></math></bdi> نختاره نحن:</p></div><div class="tablewrap"><table><thead><tr><th>قيمة المعامل</th><th>النتيجة</th></tr></thead><tbody><tr><td>صغيرة</td><td>شارع واسع، ونسمح بنقاط كثيرة داخله. نموذج أهدأ</td></tr><tr><td>كبيرة</td><td>شارع ضيق، ونحاول ألا نخطئ في أي نقطة. قد يحفظ الضجيج</td></tr></tbody></table></div><section class="hand"><div class="hand-h"><span class="hand-tag">مثال محلول باليد</span><div class="hand-t">الهامش وخسارة المفصلة لخمس نقاط</div></div><div class="hand-body"><div class="blk"><p>حد القرار: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>w</mi><mo>=</mo><mo stretchy="false">(</mo><mn>1</mn><mo separator="true">,</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></math></bdi> و <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>b</mi><mo>=</mo><mo>−</mo><mn>3</mn></mrow></math></bdi>. أي:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><msub><mi>x</mi><mn>1</mn></msub><mo>+</mo><msub><mi>x</mi><mn>2</mn></msub><mo>−</mo><mn>3</mn></mrow></math></div></div><div class="step">عرض الشارع</div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mo stretchy="false">∥</mo><mi>w</mi><mo stretchy="false">∥</mo><mo>=</mo><msqrt><mrow><mn>1</mn><mo>+</mo><mn>1</mn></mrow></msqrt><mo>=</mo><msqrt><mn>2</mn></msqrt><mspace width="2em"/><mtext>width</mtext><mo>=</mo><mfrac><mn>2</mn><msqrt><mn>2</mn></msqrt></mfrac><mo>=</mo><msqrt><mn>2</mn></msqrt><mo>≈</mo><mn>1.414</mn></mrow></math></div></div><div class="step">كل نقطة</div><div class="tablewrap"><table><thead><tr><th>النقطة</th><th>الفئة <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>y</mi></mrow></math></bdi></th><th><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></math></bdi></th><th><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>y</mi><mo>⋅</mo><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></math></bdi></th><th>خسارة المفصلة</th><th>أين هي؟</th></tr></thead><tbody><tr><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>1</mn><mo separator="true">,</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></math></bdi></td><td>−1</td><td>−1</td><td>1</td><td>0</td><td>على الحافة: متجه داعم</td></tr><tr><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>2</mn><mo separator="true">,</mo><mn>2</mn><mo stretchy="false">)</mo></mrow></math></bdi></td><td>+1</td><td>1</td><td>1</td><td>0</td><td>على الحافة: متجه داعم</td></tr><tr><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>3</mn><mo separator="true">,</mo><mn>3</mn><mo stretchy="false">)</mo></mrow></math></bdi></td><td>+1</td><td>3</td><td>3</td><td>0</td><td>بعيدة وآمنة</td></tr><tr><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></math></bdi></td><td>−1</td><td>−2</td><td>2</td><td>0</td><td>بعيدة وآمنة</td></tr><tr><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>2</mn><mo separator="true">,</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></math></bdi></td><td>−1</td><td>0</td><td>0</td><td>1</td><td>على الحد نفسه تماماً</td></tr></tbody></table></div><div class="step">ماذا نتعلم؟</div><div class="blk"><p>النقطتان الأوليان تحددان الشارع. والنقطة الأخيرة دخلته، فعقوبتها 1.</p><p>إذا أردنا أن نخرجها، يجب أن نغيّر الحد. والمعامل <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>C</mi></mrow></math></bdi> يقرر: هل يستحق ذلك تضييق الشارع؟</p></div></div></section><h2>النواة: حين لا يكفي خط مستقيم</h2><div class="blk"><p>هذه البيانات في بُعد واحد، على خط الأعداد:</p></div><div class="tablewrap"><table><thead><tr><th><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>x</mi></mrow></math></bdi></th><th>−3</th><th>−2</th><th>−1</th><th>0</th><th>1</th><th>2</th><th>3</th></tr></thead><tbody><tr><td>الفئة</td><td>+</td><td>+</td><td>−</td><td>−</td><td>−</td><td>+</td><td>+</td></tr></tbody></table></div><div class="blk"><p>الموجبة على الطرفين، والسالبة في الوسط. لا توجد نقطة واحدة تفصل بينهما.</p></div><div class="blk"><p>الحيلة: نضيف ميزة جديدة: مربع المدخل. كل نقطة تصبح زوجاً:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>x</mi><mtext>  </mtext><mo>→</mo><mtext>  </mtext><mo stretchy="false">(</mo><mi>x</mi><mo separator="true">,</mo><mtext>  </mtext><msup><mi>x</mi><mn>2</mn></msup><mo stretchy="false">)</mo></mrow></math></div></div><div class="blk"><p>الآن النقاط الموجبة لها مربع 4 أو 9، والسالبة 0 أو 1.</p><p>خط أفقي عند ارتفاع 2.5 يفصلها تماماً!</p></div><figure><div class="svgwrap"><svg viewBox="0 0 580 230" width="580" role="img" aria-label="نقاط على خط لا يمكن فصلها، ثم نفس النقاط بعد رفعها بالمربع، مع خط أفقي يفصلها" fill="none">
+  <line x1="20" y1="120" x2="250" y2="120" stroke="currentColor" stroke-width="1.4"/>
+  <g class="f-orange"><rect x="24" y="113" width="14" height="14"/><rect x="56" y="113" width="14" height="14"/><rect x="216" y="113" width="14" height="14"/><rect x="184" y="113" width="14" height="14"/></g>
+  <g class="f-accent"><circle cx="95" cy="120" r="7"/><circle cx="127" cy="120" r="7"/><circle cx="159" cy="120" r="7"/></g>
+  <g class="mono" font-size="11" fill="currentColor" text-anchor="middle"><text x="31" y="145">−3</text><text x="63" y="145">−2</text><text x="95" y="145">−1</text><text x="127" y="145">0</text><text x="159" y="145">1</text><text x="191" y="145">2</text><text x="223" y="145">3</text></g>
+  <text x="135" y="190" fill="currentColor" font-size="13" text-anchor="middle">بُعد واحد: لا يوجد فاصل</text>
+  <line x1="300" y1="200" x2="560" y2="200" stroke="currentColor" stroke-width="1.4"/>
+  <line x1="430" y1="200" x2="430" y2="20" stroke="currentColor" stroke-width="1" stroke-opacity=".5"/>
+  <g class="f-orange"><rect x="323" y="23" width="14" height="14"/><rect x="359" y="121" width="14" height="14"/><rect x="487" y="121" width="14" height="14"/><rect x="523" y="23" width="14" height="14"/></g>
+  <g class="f-accent"><circle cx="398" cy="182" r="7"/><circle cx="430" cy="200" r="7"/><circle cx="462" cy="182" r="7"/></g>
+  <line x1="300" y1="155" x2="560" y2="155" class="s-good" stroke-width="2.4" stroke-dasharray="7 4"/>
+  <text x="556" y="148" text-anchor="end" fill="currentColor" font-size="12" class="mono">x² = 2.5</text>
+  <text x="430" y="224" fill="currentColor" font-size="13" text-anchor="middle">بعد إضافة المربع: خط يفصل</text>
+</svg></div><figcaption>يسار: في بُعد واحد، لا يمكن الفصل بنقطة. يمين: بعد إضافة المربع كميزة ثانية، خط مستقيم يفصل الفئتين.</figcaption></figure><h3>حيلة النواة</h3><div class="blk"><p>إضافة ميزات يدوياً تصبح مكلفة جداً مع أبعاد كثيرة.</p><p>لكن آلة المتجهات الداعمة تحتاج شيئاً واحداً فقط من النقاط: <b>الضرب النقطي</b> بين كل نقطتين.</p></div><div class="blk"><p>النواة دالة تحسب هذا الضرب النقطي كأن النقاط في الفضاء الأكبر، <b>بدون أن ننقلها فعلاً</b>.</p><p>هذه اسمها حيلة النواة:</p></div><div class="blk"><div class="term" dir="ltr"><code>kernel trick</code></div></div><div class="blk"><p>أشهر نواة تقيس التشابه بالمسافة:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>K</mi><mo stretchy="false">(</mo><mi>x</mi><mo separator="true">,</mo><mi>z</mi><mo stretchy="false">)</mo><mo>=</mo><msup><mi>e</mi><mrow><mo>−</mo><mi>γ</mi><mo stretchy="false">∥</mo><mi>x</mi><mo>−</mo><mi>z</mi><msup><mo stretchy="false">∥</mo><mn>2</mn></msup></mrow></msup></mrow></math></div></div><div class="blk"><p>النقاط القريبة تشابهها قريب من 1، والبعيدة قريب من 0.</p><p>المعامل <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>γ</mi></mrow></math></bdi> يحدد كم "قريب" يعني قريباً: كبير جداً يجعل كل نقطة جزيرة وحدها، فيحفظ النموذج البيانات.</p></div><div class="blk"><div class="term" dir="ltr"><code>RBF kernel · gamma</code></div></div><h2>بالكود</h2><h3>خطي، والمعامل</h3><div class="code "><div class="code-head"><span class="path">svm_linear.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.svm</span><span class="w"> </span><span class="kn">import</span> <span class="n">SVC</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_blobs</span>
+
+<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">make_blobs</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span> <span class="n">centers</span><span class="o">=</span><span class="p">[[</span><span class="o">-</span><span class="mf">1.5</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span> <span class="n">cluster_std</span><span class="o">=</span><span class="mf">1.1</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">C</span> <span class="ow">in</span> <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">]:</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span> <span class="n">C</span><span class="o">=</span><span class="n">C</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    <span class="n">width</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">coef_</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;C = </span><span class="si">{</span><span class="n">C</span><span class="si">:</span><span class="s2">&lt;5</span><span class="si">}</span><span class="s2"> support vectors = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">support_</span><span class="p">)</span><span class="si">:</span><span class="s2">2d</span><span class="si">}</span><span class="s2">   street width = </span><span class="si">{</span><span class="n">width</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">   train acc = </span><span class="si">{</span><span class="n">m</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>C = 0.01  support vectors = 48   street width = 4.21   train acc = 0.912
+C = 1     support vectors = 15   street width = 1.54   train acc = 0.938
+C = 100   support vectors = 14   street width = 1.10   train acc = 0.925</pre></div><div class="blk"><p>معامل صغير: شارع عريض، ونقاط كثيرة داخله، وكلها متجهات داعمة.</p><p>معامل كبير: شارع ضيق، ومتجهات داعمة أقل.</p></div><div class="code "><div class="code-head"><span class="path">svm_plot.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="n">m</span> <span class="o">=</span> <span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span> <span class="n">C</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="n">xx</span><span class="p">,</span> <span class="n">yy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">300</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">300</span><span class="p">))</span>
+<span class="n">Z</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">decision_function</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">xx</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">yy</span><span class="o">.</span><span class="n">ravel</span><span class="p">()]))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">xx</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">5.2</span><span class="p">,</span> <span class="mf">4.4</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">contour</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">colors</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;gray&quot;</span><span class="p">,</span> <span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="s2">&quot;gray&quot;</span><span class="p">],</span> <span class="n">linestyles</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;--&quot;</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C0&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C1&quot;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">)</span>
+<span class="n">sv</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">support_vectors_</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">sv</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">sv</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">110</span><span class="p">,</span> <span class="n">facecolors</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span> <span class="n">edgecolors</span><span class="o">=</span><span class="s2">&quot;C3&quot;</span><span class="p">,</span> <span class="n">linewidths</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;support vectors&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;upper left&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></pre></div><figure class="plot"><div class="svgwrap"><svg xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 327.776406 275.981938" xmlns="http://www.w3.org/2000/svg" version="1.1">
+<defs>
+</defs>
+<g id="figure_1">
+<g id="patch_1">
+<path d="M 0 275.981938 
+L 327.776406 275.981938 
+L 327.776406 0 
+L 0 0 
+L 0 275.981938 
+z
+" style="fill: none"/>
+</g>
+<g id="axes_1">
+<g id="patch_2">
+<path d="M 30.416406 251.136 
+L 320.576406 251.136 
+L 320.576406 7.2 
+L 30.416406 7.2 
+L 30.416406 251.136 
+z
+" style="fill: none"/>
+</g>
+<g id="PathCollection_1">
+<defs>
+<path id="m657761999e" d="M 0 2.12132 
+C 0.562581 2.12132 1.102195 1.897805 1.5 1.5 
+C 1.897805 1.102195 2.12132 0.562581 2.12132 0 
+C 2.12132 -0.562581 1.897805 -1.102195 1.5 -1.5 
+C 1.102195 -1.897805 0.562581 -2.12132 0 -2.12132 
+C -0.562581 -2.12132 -1.102195 -1.897805 -1.5 -1.5 
+C -1.897805 -1.102195 -2.12132 -0.562581 -2.12132 0 
+C -2.12132 0.562581 -1.897805 1.102195 -1.5 1.5 
+C -1.102195 1.897805 -0.562581 2.12132 0 2.12132 
+z
+" style="stroke: #1f77b4"/>
+</defs>
+<g clip-path="url(#p03d7b0baf1)">
+<use xlink:href="#m657761999e" x="95.465101" y="139.878943" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="125.692769" y="131.115059" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="169.130479" y="147.05031" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="184.181542" y="190.080335" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="157.354365" y="153.04936" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="148.243324" y="145.499757" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="96.684817" y="131.079971" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="112.602021" y="112.051566" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="142.57703" y="184.351795" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="176.016144" y="155.025572" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="145.539697" y="144.646265" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="133.170832" y="152.597544" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="137.075805" y="186.001258" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="137.030374" y="100.161782" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="211.019029" y="144.107184" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="185.988403" y="183.421644" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="161.804193" y="162.848538" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="111.186841" y="139.006026" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="198.612233" y="129.013709" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="107.116897" y="148.747479" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="141.456441" y="179.368918" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="155.059734" y="152.323646" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="100.185383" y="134.950299" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="202.936728" y="142.981492" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="134.125919" y="173.210429" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="100.597672" y="152.101008" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="85.515244" y="138.637504" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="123.156658" y="132.188828" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="88.964708" y="153.812759" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="151.718858" y="155.92255" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="157.078863" y="202.957748" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="133.586215" y="140.146426" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="103.072994" y="142.016147" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="133.50465" y="216.835695" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="111.299161" y="137.500056" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="172.565804" y="170.93982" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="122.302524" y="121.308313" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="127.800628" y="132.039242" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="118.621226" y="196.080498" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m657761999e" x="95.049608" y="144.143307" style="fill: #1f77b4; stroke: #1f77b4"/>
+</g>
+</g>
+<g id="PathCollection_2">
+<defs>
+<path id="mff5c0a9fd5" d="M -2.12132 2.12132 
+L 2.12132 2.12132 
+L 2.12132 -2.12132 
+L -2.12132 -2.12132 
+z
+" style="stroke: #ff7f0e"/>
+</defs>
+<g clip-path="url(#p03d7b0baf1)">
+<use xlink:href="#mff5c0a9fd5" x="202.794129" y="77.780925" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="241.946001" y="90.913576" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="252.243639" y="115.739697" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="249.492094" y="90.734116" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="200.990942" y="146.175753" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="213.558826" y="99.829494" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="221.614151" y="111.228376" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="263.745802" y="63.02398" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="184.699727" y="50.507286" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="242.583482" y="87.312765" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="240.526533" y="77.231575" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="173.817822" y="81.164105" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="220.25355" y="117.677006" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="255.035375" y="99.922107" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="203.195069" y="109.375303" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="209.729327" y="128.681916" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="232.044644" y="58.28902" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="262.894123" y="116.877216" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="246.815586" y="109.475817" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="197.279783" y="157.528394" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="180.483081" y="136.123086" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="243.408825" y="113.617646" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="269.414283" y="110.333698" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="238.641452" y="108.17061" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="219.980075" y="113.7951" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="165.304206" y="116.416856" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="191.796248" y="134.413406" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="283.882693" y="93.347672" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="228.688312" y="81.956003" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="267.911494" y="120.702493" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="238.602895" y="110.413523" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="207.866866" y="137.863111" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="220.571698" y="99.712464" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="184.002909" y="118.947464" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="197.415353" y="134.964555" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="216.467653" y="87.338602" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="188.878427" y="97.237969" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="225.70119" y="114.821865" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="143.063691" y="121.080352" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mff5c0a9fd5" x="222.688446" y="99.075877" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+</g>
+</g>
+<g id="PathCollection_3">
+<defs>
+<path id="C0_0_317fef5e95" d="M 0 5.244044 
+C 1.390737 5.244044 2.7247 4.691499 3.708099 3.708099 
+C 4.691499 2.7247 5.244044 1.390737 5.244044 -0 
+C 5.244044 -1.390737 4.691499 -2.7247 3.708099 -3.708099 
+C 2.7247 -4.691499 1.390737 -5.244044 0 -5.244044 
+C -1.390737 -5.244044 -2.7247 -4.691499 -3.708099 -3.708099 
+C -4.691499 -2.7247 -5.244044 -1.390737 -5.244044 0 
+C -5.244044 1.390737 -4.691499 2.7247 -3.708099 3.708099 
+C -2.7247 4.691499 -1.390737 5.244044 0 5.244044 
+z
+"/>
+</defs>
+<g clip-path="url(#p03d7b0baf1)">
+<use xlink:href="#C0_0_317fef5e95" x="169.130479" y="147.05031" style="fill: none; stroke: #d62728; stroke-width: 1.5"/>
+</g>
+<g clip-path="url(#p03d7b0baf1)">
+<use xlink:href="#C0_0_317fef5e95" x="157.354365" y="153.04936" style="fill: none; stroke: #d62728; stroke-width: 1.5"/>
+</g>
+<g clip-path="url(#p03d7b0baf1)">
+<use xlink:href="#C0_0_317fef5e95" x="112.602021" y="112.051566" style="fill: none; stroke: #d62728; stroke-width: 1.5"/>
+</g>
+<g clip-path="url(#p03d7b0baf1)">
+<use xlink:href="#C0_0_317fef5e95" x="176.016144" y="155.025572" style="fill: none; stroke: #d62728; stroke-width: 1.5"/>
+</g>
+<g clip-path="url(#p03d7b0baf1)">
+<use xlink:href="#C0_0_317fef5e95" x="137.030374" y="100.161782" style="fill: none; stroke: #d62728; stroke-width: 1.5"/>
+</g>
+<g clip-path="url(#p03d7b0baf1)">
+<use xlink:href="#C0_0_317fef5e95" x="211.019029" y="144.107184" style="fill: none; stroke: #d62728; stroke-width: 1.5"/>
+</g>
+<g clip-path="url(#p03d7b0baf1)">
+<use xlink:href="#C0_0_317fef5e95" x="198.612233" y="129.013709" style="fill: none; stroke: #d62728; stroke-width: 1.5"/>
+</g>
+<g clip-path="url(#p03d7b0baf1)">
+<use xlink:href="#C0_0_317fef5e95" x="202.936728" y="142.981492" style="fill: none; stroke: #d62728; stroke-width: 1.5"/>
+</g>
+<g clip-path="url(#p03d7b0baf1)">
+<use xlink:href="#C0_0_317fef5e95" x="200.990942" y="146.175753" style="fill: none; stroke: #d62728; stroke-width: 1.5"/>
+</g>
+<g clip-path="url(#p03d7b0baf1)">
+<use xlink:href="#C0_0_317fef5e95" x="197.279783" y="157.528394" style="fill: none; stroke: #d62728; stroke-width: 1.5"/>
+</g>
+<g clip-path="url(#p03d7b0baf1)">
+<use xlink:href="#C0_0_317fef5e95" x="180.483081" y="136.123086" style="fill: none; stroke: #d62728; stroke-width: 1.5"/>
+</g>
+<g clip-path="url(#p03d7b0baf1)">
+<use xlink:href="#C0_0_317fef5e95" x="165.304206" y="116.416856" style="fill: none; stroke: #d62728; stroke-width: 1.5"/>
+</g>
+<g clip-path="url(#p03d7b0baf1)">
+<use xlink:href="#C0_0_317fef5e95" x="191.796248" y="134.413406" style="fill: none; stroke: #d62728; stroke-width: 1.5"/>
+</g>
+<g clip-path="url(#p03d7b0baf1)">
+<use xlink:href="#C0_0_317fef5e95" x="197.415353" y="134.964555" style="fill: none; stroke: #d62728; stroke-width: 1.5"/>
+</g>
+<g clip-path="url(#p03d7b0baf1)">
+<use xlink:href="#C0_0_317fef5e95" x="143.063691" y="121.080352" style="fill: none; stroke: #d62728; stroke-width: 1.5"/>
+</g>
+</g>
+<g id="matplotlib.axis_1">
+<g id="xtick_1">
+<g id="line2d_1">
+<defs>
+<path id="ma44a6f56b5" d="M 0 0 
+L 0 3.5 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#ma44a6f56b5" x="59.432406" y="251.136" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_1">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="59.432406" y="266.494281" transform="rotate(-0 59.432406 266.494281)">−4</text>
+</g>
+</g>
+<g id="xtick_2">
+<g id="line2d_2">
+<g>
+<use xlink:href="#ma44a6f56b5" x="117.464406" y="251.136" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_2">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="117.464406" y="266.494281" transform="rotate(-0 117.464406 266.494281)">−2</text>
+</g>
+</g>
+<g id="xtick_3">
+<g id="line2d_3">
+<g>
+<use xlink:href="#ma44a6f56b5" x="175.496406" y="251.136" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_3">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="175.496406" y="266.494281" transform="rotate(-0 175.496406 266.494281)">0</text>
+</g>
+</g>
+<g id="xtick_4">
+<g id="line2d_4">
+<g>
+<use xlink:href="#ma44a6f56b5" x="233.528406" y="251.136" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_4">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="233.528406" y="266.494281" transform="rotate(-0 233.528406 266.494281)">2</text>
+</g>
+</g>
+<g id="xtick_5">
+<g id="line2d_5">
+<g>
+<use xlink:href="#ma44a6f56b5" x="291.560406" y="251.136" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_5">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="291.560406" y="266.494281" transform="rotate(-0 291.560406 266.494281)">4</text>
+</g>
+</g>
+</g>
+<g id="matplotlib.axis_2">
+<g id="ytick_1">
+<g id="line2d_6">
+<defs>
+<path id="mbacbe552b7" d="M 0 0 
+L -3.5 0 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#mbacbe552b7" x="30.416406" y="226.7424" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_6">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="23.416406" y="230.921541" transform="rotate(-0 23.416406 230.921541)">−4</text>
+</g>
+</g>
+<g id="ytick_2">
+<g id="line2d_7">
+<g>
+<use xlink:href="#mbacbe552b7" x="30.416406" y="177.9552" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_7">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="23.416406" y="182.134341" transform="rotate(-0 23.416406 182.134341)">−2</text>
+</g>
+</g>
+<g id="ytick_3">
+<g id="line2d_8">
+<g>
+<use xlink:href="#mbacbe552b7" x="30.416406" y="129.168" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_8">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="23.416406" y="133.347141" transform="rotate(-0 23.416406 133.347141)">0</text>
+</g>
+</g>
+<g id="ytick_4">
+<g id="line2d_9">
+<g>
+<use xlink:href="#mbacbe552b7" x="30.416406" y="80.3808" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_9">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="23.416406" y="84.559941" transform="rotate(-0 23.416406 84.559941)">2</text>
+</g>
+</g>
+<g id="ytick_5">
+<g id="line2d_10">
+<g>
+<use xlink:href="#mbacbe552b7" x="30.416406" y="31.5936" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_10">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="23.416406" y="35.772741" transform="rotate(-0 23.416406 35.772741)">4</text>
+</g>
+</g>
+</g>
+<g id="QuadContourSet_1">
+<path d="M 30.416406 36.760975 
+L 264.423676 251.136 
+L 264.423676 251.136 
+" clip-path="url(#p03d7b0baf1)" style="fill: none; stroke-dasharray: 5.55,2.4; stroke-dashoffset: 0; stroke: #808080; stroke-width: 1.5"/>
+<path d="M 30.416406 9.000396 
+L 294.726541 251.136 
+L 294.726541 251.136 
+" clip-path="url(#p03d7b0baf1)" style="fill: none; stroke: #000000; stroke-width: 1.5"/>
+<path d="M 58.753996 7.2 
+L 320.576406 247.05659 
+L 320.576406 247.05659 
+" clip-path="url(#p03d7b0baf1)" style="fill: none; stroke-dasharray: 5.55,2.4; stroke-dashoffset: 0; stroke: #808080; stroke-width: 1.5"/>
+</g>
+<g id="patch_3">
+<path d="M 30.416406 251.136 
+L 30.416406 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_4">
+<path d="M 320.576406 251.136 
+L 320.576406 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_5">
+<path d="M 30.416406 251.136 
+L 320.576406 251.136 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_6">
+<path d="M 30.416406 7.2 
+L 320.576406 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="legend_1">
+<g id="patch_7">
+<path d="M 38.116406 32.145938 
+L 159.668125 32.145938 
+Q 161.868125 32.145938 161.868125 29.945938 
+L 161.868125 14.9 
+Q 161.868125 12.7 159.668125 12.7 
+L 38.116406 12.7 
+Q 35.916406 12.7 35.916406 14.9 
+L 35.916406 29.945938 
+Q 35.916406 32.145938 38.116406 32.145938 
+L 38.116406 32.145938 
+z
+" style="fill: none; opacity: 0.35; stroke: currentColor; stroke-linejoin: miter"/>
+</g>
+<g id="PathCollection_4">
+<path d="M 51.316406 27.814825 
+C 52.707143 27.814825 54.041106 27.26228 55.024505 26.27888 
+C 56.007905 25.295481 56.56045 23.961518 56.56045 22.570781 
+C 56.56045 21.180044 56.007905 19.846081 55.024505 18.862682 
+C 54.041106 17.879283 52.707143 17.326737 51.316406 17.326737 
+C 49.925669 17.326737 48.591706 17.879283 47.608307 18.862682 
+C 46.624908 19.846081 46.072362 21.180044 46.072362 22.570781 
+C 46.072362 23.961518 46.624908 25.295481 47.608307 26.27888 
+C 48.591706 27.26228 49.925669 27.814825 51.316406 27.814825 
+L 51.316406 27.814825 
+z
+" style="fill: none; stroke: #d62728; stroke-width: 1.5"/>
+</g>
+<g id="text_11">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="71.116406" y="25.458281" transform="rotate(-0 71.116406 25.458281)">support vectors</text>
+</g>
+</g>
+</g>
+</g>
+<defs>
+<clipPath id="p03d7b0baf1">
+<rect x="30.416406" y="7.2" width="290.16" height="243.936"/>
+</clipPath>
+</defs>
+</svg></div><figcaption>الرسم الذي يظهر عندما تشغّل الكود.</figcaption></figure><h3>حين لا يكفي الخط: القمران</h3><div class="code "><div class="code-head"><span class="path">svm_rbf.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_moons</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_pipeline</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">StandardScaler</span>
+
+<span class="n">Xm</span><span class="p">,</span> <span class="n">ym</span> <span class="o">=</span> <span class="n">make_moons</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">X_tr</span><span class="p">,</span> <span class="n">X_te</span><span class="p">,</span> <span class="n">y_tr</span><span class="p">,</span> <span class="n">y_te</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">Xm</span><span class="p">,</span> <span class="n">ym</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">kernel</span><span class="p">,</span> <span class="n">gamma</span> <span class="ow">in</span> <span class="p">[(</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span> <span class="s2">&quot;scale&quot;</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;rbf&quot;</span><span class="p">,</span> <span class="s2">&quot;scale&quot;</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;rbf&quot;</span><span class="p">,</span> <span class="mi">100</span><span class="p">)]:</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="n">kernel</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="n">gamma</span><span class="p">))</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_tr</span><span class="p">,</span> <span class="n">y_tr</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">kernel</span><span class="si">:</span><span class="s2">6</span><span class="si">}</span><span class="s2"> gamma=</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">gamma</span><span class="p">)</span><span class="si">:</span><span class="s2">5</span><span class="si">}</span><span class="s2">  train = </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_tr</span><span class="p">,</span><span class="w"> </span><span class="n">y_tr</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">   test = </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_te</span><span class="p">,</span><span class="w"> </span><span class="n">y_te</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>linear gamma=scale  train = 0.848   test = 0.856
+rbf    gamma=scale  train = 0.962   test = 0.989
+rbf    gamma=100    train = 0.995   test = 0.911</pre></div><div class="blk"><p>الخطي لا يستطيع أن ينحني حول القمرين. ونواة الدالة الشعاعية تنحني وتصل إلى دقة عالية جداً.</p><p>ومع قيمة كبيرة جداً للمعامل الشعاعي: التدريب شبه كامل، والاختبار أسوأ. النموذج حفظ النقاط.</p></div><div class="callout warn"><div class="ct">التوحيد ضروري هنا أيضاً</div><div class="blk"><p>آلة المتجهات الداعمة تعتمد على المسافات والضرب النقطي. مثل أقرب الجيران، الميزة ذات الأرقام الكبيرة تسيطر.</p><p>ضعها دائماً في خط معالجة بعد التوحيد القياسي.</p></div></div><div class="callout tip"><div class="ct">متى تستخدمها اليوم؟</div><div class="blk"><p>كانت من أقوى الخوارزميات قبل انتشار التعلّم العميق.</p><p>اليوم: ممتازة مع بيانات صغيرة ومتوسطة، وميزات كثيرة، مثل تصنيف النصوص بحقيبة الكلمات.</p><p>لكنها بطيئة مع مئات آلاف الأمثلة، لأن النواة تقارن كل نقطة بكل نقطة.</p></div></div><div class="callout interview"><div class="ct">سؤال مقابلة</div><div class="blk"><p>سؤال قد تسمعه في المقابلة:</p></div><div class="en" dir="ltr"><p>What is the kernel trick in SVMs?</p></div><div class="blk"><p>جواب قصير وجيد:</p></div><div class="en" dir="ltr"><p>The SVM only needs dot products between data points. A kernel function computes the dot product as if the points were mapped to a higher-dimensional space, without computing that mapping. So a linear boundary in that space becomes a curved boundary in the original space. The RBF kernel is the most common; its gamma controls how local the influence of each point is.</p></div></div><section class="summary"><div class="ct">الخلاصة</div><ul class="l"><li>آلة المتجهات الداعمة تختار الحد الذي يترك أوسع هامش بين الفئتين.</li><li>المتجهات الداعمة هي النقاط على حافة الهامش أو داخله، وهي وحدها تحدد الحد.</li><li>خسارة المفصلة: صفر للنقاط الآمنة، وتكبر كلما دخلت النقطة الهامش.</li><li>المعامل الموازن: صغير يعطي هامشاً واسعاً، وكبير يحاول ألا يخطئ أبداً.</li><li>النواة تجعل الحد منحنياً، بدون أن ننقل البيانات فعلاً. ولا تنسَ التوحيد.</li></ul></section><section class="quiz" data-quiz="l22-q"><h2>اختبر فهمك</h2><div class="q" data-answer="1"><div class="qt"><span class="qn">1.</span>ما هي المتجهات الداعمة؟</div><div class="opts"><button type="button" class="opt">كل نقاط التدريب</button><button type="button" class="opt">النقاط على حافة الهامش أو داخله، التي تحدد مكان الحد</button><button type="button" class="opt">مراكز الفئات</button></div><div class="explain" hidden><span class="verdict"></span><p>لو حذفت النقاط البعيدة، لا يتغير الحد.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">2.</span>نقطة من الفئة +1، وقيمة الدالة عندها 0.5. ما خسارة المفصلة؟</div><div class="opts"><button type="button" class="opt">صفر</button><button type="button" class="opt">0.5</button><button type="button" class="opt">1.5</button></div><div class="explain" hidden><span class="verdict"></span><p>واحد ناقص 0.5. النقطة في جهتها الصحيحة، لكنها داخل الهامش.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">3.</span>الأوزان <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>w</mi><mo>=</mo><mo stretchy="false">(</mo><mn>3</mn><mo separator="true">,</mo><mn>4</mn><mo stretchy="false">)</mo></mrow></math></bdi>. ما عرض الشارع؟</div><div class="opts"><button type="button" class="opt">2</button><button type="button" class="opt">0.4</button><button type="button" class="opt">5</button></div><div class="explain" hidden><span class="verdict"></span><p>طول الأوزان 5، والعرض 2 مقسوماً على 5.</p></div></div><div class="q" data-answer="0"><div class="qt"><span class="qn">4.</span>زدت المعامل الموازن كثيراً. ماذا تتوقع؟</div><div class="opts"><button type="button" class="opt">هامشاً أضيق، ومحاولة لتصنيف كل نقطة تدريب بشكل صحيح</button><button type="button" class="opt">هامشاً أوسع</button><button type="button" class="opt">لا تغيير</button></div><div class="explain" hidden><span class="verdict"></span><p>المعامل الكبير يجعل أخطاء التدريب مكلفة.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">5.</span>لماذا تسمى حيلة النواة حيلة؟</div><div class="opts"><button type="button" class="opt">لأنها تجعل البيانات أصغر</button><button type="button" class="opt">لأنها تحسب الضرب النقطي كأن البيانات في فضاء أكبر، بدون أن تنقلها إليه</button><button type="button" class="opt">لأنها تحذف النقاط الشاذة</button></div><div class="explain" hidden><span class="verdict"></span><p>الحساب يبقى في الفضاء الأصلي، والنتيجة كأننا في فضاء أكبر.</p></div></div><div class="row"><span class="score"></span><button type="button" class="btn ghost quiz-reset">أعد المحاولة</button></div></section><section class="exercise"><div class="xt">تمرين: نقاط جديدة على نفس الحد</div><div class="blk"><p>الحد <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><msub><mi>x</mi><mn>1</mn></msub><mo>+</mo><msub><mi>x</mi><mn>2</mn></msub><mo>−</mo><mn>3</mn></mrow></math></bdi>. احسب لكل نقطة: قيمة الدالة، وخسارة المفصلة، ومكانها بالنسبة للشارع.</p></div><div class="tablewrap"><table><thead><tr><th>النقطة</th><th>الفئة</th></tr></thead><tbody><tr><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>3</mn><mo separator="true">,</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></math></bdi></td><td>+1</td></tr><tr><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>1.5</mn><mo separator="true">,</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></math></bdi></td><td>−1</td></tr><tr><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">)</mo></mrow></math></bdi></td><td>+1</td></tr></tbody></table></div><div class="blk"><p>ثم بالكود: درّب نواة شعاعية على بيانات القمرين، وجرّب ثلاث قيم للمعامل الموازن: 0.1 و 1 و 100. اطبع دقة التدريب والاختبار لكل قيمة.</p></div><details><summary>تلميح</summary><div class="dbody"><div class="blk"><p>النقطة الأخيرة من الفئة الموجبة، لكن الدالة عندها سالبة.</p></div></div></details><details class="sol"><summary>الحل (افتحه بعد أن تحاول)</summary><div class="dbody"><div class="tablewrap"><table><thead><tr><th>النقطة</th><th><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></math></bdi></th><th><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>y</mi><mo>⋅</mo><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></math></bdi></th><th>الخسارة</th><th>المكان</th></tr></thead><tbody><tr><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>3</mn><mo separator="true">,</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></math></bdi></td><td>1</td><td>1</td><td>0</td><td>على الحافة: متجه داعم</td></tr><tr><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>1.5</mn><mo separator="true">,</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></math></bdi></td><td>−0.5</td><td>0.5</td><td>0.5</td><td>داخل الشارع، لكن في جهتها الصحيحة</td></tr><tr><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">)</mo></mrow></math></bdi></td><td>−3</td><td>−3</td><td>4</td><td>على الجهة الخاطئة، وبعيدة: عقوبة كبيرة</td></tr></tbody></table></div><div class="code "><div class="code-head"><span class="path"></span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="k">for</span> <span class="n">C</span> <span class="ow">in</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">]:</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;rbf&quot;</span><span class="p">,</span> <span class="n">C</span><span class="o">=</span><span class="n">C</span><span class="p">))</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_tr</span><span class="p">,</span> <span class="n">y_tr</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;C = </span><span class="si">{</span><span class="n">C</span><span class="si">:</span><span class="s2">&lt;5</span><span class="si">}</span><span class="s2"> train = </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_tr</span><span class="p">,</span><span class="w"> </span><span class="n">y_tr</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">   test = </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_te</span><span class="p">,</span><span class="w"> </span><span class="n">y_te</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>C = 0.1   train = 0.910   test = 0.878
+C = 1     train = 0.962   test = 0.989
+C = 100   train = 0.971   test = 1.000</pre></div><div class="blk"><p>كلما كبر المعامل، ارتفعت دقة التدريب. وهنا ارتفعت دقة الاختبار أيضاً.</p><p>لكن هذا ليس مضموناً: مع بيانات فيها ضجيج أكثر، المعامل الكبير جداً يحفظ الضجيج.</p><p>وانتبه: مجموعة الاختبار هنا 90 مثالاً فقط. الفرق بين 0.989 و 1.000 مثال واحد! لا تستنتج الكثير من فرق صغير كهذا.</p><p>أفضل قيمة نختارها بالتحقق المتقاطع، في الدرس 33.</p></div></div></details><div class="askbox" data-kind="review" hidden><div class="al">اطلب من كلود أن يراجع حلّك</div><div class="ah">اكتب إجابتك أو الصق الكود. سيقارنه بالحل ويشرح لك بالعربي. هذا يستهلك من رصيد استخدامك.</div><textarea id="rv-l22-1" dir="auto" placeholder="اكتب إجابتك هنا"></textarea><div class="row"><button type="button" class="btn ask-go">راجع حلّي</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></div><pre hidden class="x-task">الحد $f(x) = x_1 + x_2 - 3$. احسب لكل نقطة: قيمة الدالة، وخسارة المفصلة، ومكانها بالنسبة للشارع.
+
+| النقطة | الفئة |
+|---|---|
+| $(3, 1)$ | +1 |
+| $(1.5, 1)$ | −1 |
+| $(0, 0)$ | +1 |
+
+ثم بالكود: درّب نواة شعاعية على بيانات القمرين، وجرّب ثلاث قيم للمعامل الموازن: 0.1 و 1 و 100. اطبع دقة التدريب والاختبار لكل قيمة.</pre><pre hidden class="x-solution">| النقطة | $f(x)$ | $y \cdot f(x)$ | الخسارة | المكان |
+|---|---|---|---|---|
+| $(3, 1)$ | 1 | 1 | 0 | على الحافة: متجه داعم |
+| $(1.5, 1)$ | −0.5 | 0.5 | 0.5 | داخل الشارع، لكن في جهتها الصحيحة |
+| $(0, 0)$ | −3 | −3 | 4 | على الجهة الخاطئة، وبعيدة: عقوبة كبيرة |
+
+```python
+for C in [0.1, 1, 100]:
+    model = make_pipeline(StandardScaler(), SVC(kernel="rbf", C=C)).fit(X_tr, y_tr)
+    print(f"C = {C:&lt;5} train = {model.score(X_tr, y_tr):.3f}   test = {model.score(X_te, y_te):.3f}")
+```
+
+كلما كبر المعامل، ارتفعت دقة التدريب. وهنا ارتفعت دقة الاختبار أيضاً.
+لكن هذا ليس مضموناً: مع بيانات فيها ضجيج أكثر، المعامل الكبير جداً يحفظ الضجيج.
+وانتبه: مجموعة الاختبار هنا 90 مثالاً فقط. الفرق بين 0.989 و 1.000 مثال واحد! لا تستنتج الكثير من فرق صغير كهذا.
+أفضل قيمة نختارها بالتحقق المتقاطع، في الدرس 33.</pre></section></article><section class="askbox" data-kind="ask" hidden><div class="al">عندك سؤال عن هذا الدرس؟ اسأل كلود</div><div class="ah">اكتب سؤالك بالعربي. كلود يقرأ نص الدرس ويجيبك. هذا يستهلك من رصيد استخدامك.</div><textarea id="ask-l22" dir="auto" placeholder="مثلاً: لماذا نضرب هنا في المشتقة؟"></textarea><div class="row"><button type="button" class="btn ask-go">اسأل</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></section><div class="donebox"><span class="dmsg"></span><button type="button" class="btn">أنهيت هذا الدرس</button></div><nav class="pager" aria-label="التنقل بين الدروس"><a class="prev" href="#l21"><small>الدرس السابق</small>الغابات العشوائية والتعزيز</a><a class="next" href="#l23"><small>الدرس التالي</small>التجميع بخوارزمية كي-مينز</a></nav></div>

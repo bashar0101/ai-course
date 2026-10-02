@@ -1,0 +1,2225 @@
+<div class="page"><article><div class="eyebrow">الجزء الرابع · التعلم العميق</div><h1>محاربة الإفراط في الشبكات العصبية</h1><div class="meta"><span>الدرس 40 من 59</span><span>المدة: حوالي 50 دقيقة</span><span class="nbdl-slot"></span></div><div class="chips" dir="ltr"><bdi class="chip">overfitting</bdi><bdi class="chip">memorization</bdi><bdi class="chip">weight decay</bdi><bdi class="chip">AdamW</bdi><bdi class="chip">dropout</bdi><bdi class="chip">early stopping</bdi><bdi class="chip">patience</bdi><bdi class="chip">data augmentation</bdi><bdi class="chip">label noise</bdi></div><div class="goals"><b>بعد هذا الدرس ستعرف:</b><ul><li>ترى بعينك أن الشبكة تستطيع حفظ أي شيء، حتى الأجوبة العشوائية</li><li>تفهم تقليص الأوزان، والفرق بين آدم وآدم دبليو</li><li>تحسب الإسقاط بيدك، وتفهم لماذا نكبّر العصبونات الباقية</li><li>تطبّق الإيقاف المبكر مع الصبر، وتسترجع أفضل الأوزان</li><li>تقارن الأدوات في تجربة حقيقية على أرقام مكتوبة بخط اليد</li></ul></div><h2>الشبكة تستطيع حفظ أي شيء</h2><div class="blk"><p>في الدرس 27 رأينا الإفراط في التعلّم: نموذج يحفظ التدريب، ويفشل في البيانات الجديدة.</p><p>الشبكات العصبية فيها معاملات كثيرة جداً، فهي قادرة على الحفظ أكثر من أي نموذج رأيناه.</p></div><div class="blk"><p>تجربة مشهورة: خذ صور أرقام، واستبدل كل الأجوبة بأرقام <b>عشوائية</b> لا معنى لها. ثم درّب شبكة.</p><p>النتيجة: الشبكة تصل إلى دقة 100% على التدريب! حفظت كل صورة مع جوابها العشوائي.</p><p>وعلى البيانات الجديدة؟ حوالي 10%، أي تخمين عشوائي. سنجربها بالكود.</p></div><div class="key">دقة تدريب عالية لا تعني شيئاً وحدها. الشبكة تستطيع أن تحفظ حتى الضجيج. المقياس الحقيقي دائماً بيانات التحقق.</div><div class="blk"><div class="term" dir="ltr"><code>memorization</code></div></div><h2>الأدوات</h2><div class="tablewrap"><table><thead><tr><th>الأداة</th><th>الفكرة</th></tr></thead><tbody><tr><td>بيانات أكثر</td><td>الحل الأقوى دائماً، إن كان ممكناً</td></tr><tr><td>زيادة البيانات</td><td>أمثلة جديدة من القديمة، مثل إزاحة الصورة أو قلبها. نراها مع الصور في الدرس القادم</td></tr><tr><td>تقليص الأوزان</td><td>يُبقي الأوزان صغيرة، مثل التنظيم في الدرس 32</td></tr><tr><td>الإسقاط</td><td>يطفئ عصبونات عشوائية أثناء التدريب</td></tr><tr><td>الإيقاف المبكر</td><td>يتوقف قبل أن يبدأ الحفظ، ويسترجع أفضل الأوزان</td></tr><tr><td>شبكة أصغر</td><td>معاملات أقل، قدرة حفظ أقل</td></tr></tbody></table></div><div class="blk"><div class="term" dir="ltr"><code>data augmentation · weight decay · dropout · early stopping</code></div></div><h2>تقليص الأوزان، وآدم دبليو</h2><div class="blk"><p>في الدرس 32 أضفنا عقوبة على مربعات الأوزان. تدرّج هذه العقوبة <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>λ</mi><mi>w</mi></mrow></math></bdi>.</p><p>مع النزول العادي، خطوة التدريب تصبح:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>w</mi><mo>←</mo><mi>w</mi><mo>−</mo><mi>η</mi><mo stretchy="false">(</mo><mi>g</mi><mo>+</mo><mi>λ</mi><mi>w</mi><mo stretchy="false">)</mo><mo>=</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>η</mi><mi>λ</mi><mo stretchy="false">)</mo><mtext> </mtext><mi>w</mi><mo>−</mo><mi>η</mi><mtext> </mtext><mi>g</mi></mrow></math></div></div><div class="blk"><p>أي: قبل كل خطوة، نضرب الوزن في رقم أصغر قليلاً من واحد. لذلك اسمها <b>تقليص الأوزان</b>.</p></div><div class="blk"><div class="term" dir="ltr"><code>weight decay</code></div></div><div class="blk"><p>لكن مع آدم تظهر مشكلة: آدم يقسم التدرّج كله على حجمه المعتاد، بما فيه جزء العقوبة.</p><p>فالأوزان ذات التدرّجات الكبيرة تتقلص أقل من غيرها. التنظيم يصبح غير متساوٍ.</p></div><div class="blk"><p>الحل: <b>آدم دبليو</b> يفصل التقليص عن التدرّج. يأخذ خطوة آدم العادية، ثم يقلّص الوزن مباشرة:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>w</mi><mo>←</mo><mi>w</mi><mo>−</mo><mi>η</mi><mtext> </mtext><mfrac><mover accent="true"><mi>m</mi><mo>^</mo></mover><mrow><msqrt><mover accent="true"><mi>s</mi><mo>^</mo></mover></msqrt><mo>+</mo><mi>ϵ</mi></mrow></mfrac><mo>−</mo><mi>η</mi><mi>λ</mi><mi>w</mi></mrow></math></div></div><div class="blk"><div class="term" dir="ltr"><code>AdamW</code></div></div><div class="blk"><p>هذا المحسِّن المستخدم في تدريب كل النماذج اللغوية الحديثة تقريباً.</p></div><h2>الإسقاط</h2><div class="blk"><p>في كل خطوة تدريب، نطفئ كل عصبون مخفي باحتمال <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>p</mi></mrow></math></bdi>، مثلاً نصف العصبونات. عصبون مطفأ مخرجه صفر في هذه الخطوة.</p><p>في الخطوة التالية نطفئ مجموعة عشوائية أخرى.</p></div><div class="blk"><div class="term" dir="ltr"><code>dropout</code></div></div><div class="blk"><p>لماذا يفيد؟</p></div><ul class="l"><li>لا يستطيع أي عصبون أن يعتمد على عصبون آخر بعينه، لأنه قد يختفي. فتتعلّم الشبكة صفات أقوى وأكثر توزيعاً.</li><li>كل خطوة تدرّب شبكة فرعية مختلفة. والشبكة النهائية تشبه متوسط آلاف الشبكات الفرعية، مثل الغابة العشوائية في الدرس 21.</li></ul><h3>التكبير: لكي لا يتغير المجموع</h3><div class="blk"><p>إذا أطفأنا ربع العصبونات، ينقص مجموع ما يصل للطبقة التالية تقريباً بالربع.</p><p>وفي التقييم نشغّل كل العصبونات، فيعود المجموع كاملاً. الطبقة التالية سترى مقاييس مختلفة بين التدريب والتقييم!</p></div><div class="blk"><p>الحل: أثناء التدريب، نقسم كل عصبون باقٍ على <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1</mn><mo>−</mo><mi>p</mi></mrow></math></bdi>. فيبقى المتوقع كما هو:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi mathvariant="double-struck">E</mi><mo stretchy="false">[</mo><mtext>out</mtext><mo stretchy="false">]</mo><mo>=</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><mo stretchy="false">)</mo><mo>×</mo><mfrac><mi>h</mi><mrow><mn>1</mn><mo>−</mo><mi>p</mi></mrow></mfrac><mo>+</mo><mi>p</mi><mo>×</mo><mn>0</mn><mo>=</mo><mi>h</mi></mrow></math></div></div><div class="blk"><p>وفي التقييم: لا إطفاء، ولا تكبير.</p></div><div class="key">الإسقاط يعمل في التدريب فقط. لذلك الأمران من الدرس 38 مهمان هنا: وضع التدريب يشغّل الإسقاط، ووضع التقييم يوقفه.</div><div class="widget" data-widget="dropout" data-args="{}"><div class="w-fallback">هنا أداة تفاعلية. إذا لم تظهر، حدّث الصفحة.</div></div><h2>الإيقاف المبكر</h2><div class="blk"><p>راقب خسارة التحقق بعد كل حقبة. في البداية تنزل مع خسارة التدريب. ثم تتوقف، وتبدأ بالصعود: بدأ الحفظ.</p><p>الإيقاف المبكر: احفظ الأوزان عند أفضل خسارة تحقق. وإذا مرت عدة حقب بدون تحسن، أوقف التدريب واسترجع الأوزان المحفوظة.</p></div><div class="blk"><div class="term" dir="ltr"><code>early stopping · patience</code></div></div><div class="blk"><p>عدد الحقب التي ننتظرها اسمه <b>الصبر</b>. لا نوقف عند أول ارتفاع، لأن خسارة التحقق فيها ضجيج، وقد تنزل مرة أخرى.</p></div><section class="hand"><div class="hand-h"><span class="hand-tag">مثال محلول باليد</span><div class="hand-t">الأدوات الثلاث بالأرقام</div></div><div class="hand-body"><div class="step">الإسقاط</div><div class="blk"><p>مخرجات أربعة عصبونات: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>h</mi><mo>=</mo><mo stretchy="false">(</mo><mn>2</mn><mo separator="true">,</mo><mn>4</mn><mo separator="true">,</mo><mn>6</mn><mo separator="true">,</mo><mn>8</mn><mo stretchy="false">)</mo></mrow></math></bdi>، واحتمال الإسقاط <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>p</mi><mo>=</mo><mn>0.25</mn></mrow></math></bdi>.</p><p>القناع العشوائي في هذه الخطوة: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>1</mn><mo separator="true">,</mo><mn>0</mn><mo separator="true">,</mo><mn>1</mn><mo separator="true">,</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></math></bdi>، أي أن العصبون الثاني مطفأ.</p><p>الباقون يُقسمون على <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1</mn><mo>−</mo><mn>0.25</mn><mo>=</mo><mn>0.75</mn></mrow></math></bdi>، أي يُضربون في 1.333:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mo stretchy="false">(</mo><mn>2</mn><mo separator="true">,</mo><mn>4</mn><mo separator="true">,</mo><mn>6</mn><mo separator="true">,</mo><mn>8</mn><mo stretchy="false">)</mo><mo>→</mo><mrow><mo fence="true">(</mo><mfrac><mn>2</mn><mn>0.75</mn></mfrac><mo separator="true">,</mo><mtext> </mtext><mn>0</mn><mo separator="true">,</mo><mtext> </mtext><mfrac><mn>6</mn><mn>0.75</mn></mfrac><mo separator="true">,</mo><mtext> </mtext><mfrac><mn>8</mn><mn>0.75</mn></mfrac><mo fence="true">)</mo></mrow><mo>=</mo><mo stretchy="false">(</mo><mn>2.667</mn><mo separator="true">,</mo><mtext> </mtext><mn>0</mn><mo separator="true">,</mo><mtext> </mtext><mn>8</mn><mo separator="true">,</mo><mtext> </mtext><mn>10.667</mn><mo stretchy="false">)</mo></mrow></math></div></div><div class="blk"><p>وفي التقييم يبقى <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>2</mn><mo separator="true">,</mo><mn>4</mn><mo separator="true">,</mo><mn>6</mn><mo separator="true">,</mo><mn>8</mn><mo stretchy="false">)</mo></mrow></math></bdi> كما هو.</p></div><div class="step">تقليص الأوزان</div><div class="blk"><p>معدل التعلّم 0.1، وقوة التقليص 0.01. في كل خطوة يُضرب الوزن في:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mn>1</mn><mo>−</mo><mn>0.1</mn><mo>×</mo><mn>0.01</mn><mo>=</mo><mn>0.999</mn></mrow></math></div></div><div class="blk"><p>يبدو صغيراً جداً. لكن بعد 1000 خطوة، إذا لم يدفعه التدرّج:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msup><mn>0.999</mn><mn>1000</mn></msup><mo>≈</mo><mn>0.368</mn></mrow></math></div></div><div class="blk"><p>الوزن انكمش إلى حوالي ثلث قيمته. الأوزان التي لا تحتاجها الخسارة تذوب تدريجياً.</p></div><div class="step">الإيقاف المبكر، بصبر 3</div><div class="tablewrap"><table><thead><tr><th>الحقبة</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th></tr></thead><tbody><tr><td>خسارة التحقق</td><td>0.90</td><td>0.60</td><td>0.45</td><td>0.40</td><td>0.41</td><td>0.39</td><td>0.42</td><td>0.44</td><td>0.47</td></tr></tbody></table></div><ul class="l"><li>الحقبة 5 أسوأ من 4، لكن الصبر 3، فنكمل.</li><li>الحقبة 6 أفضل رقم حتى الآن، 0.39. نحفظ الأوزان، ونبدأ العدّ من جديد.</li><li>الحقب 7 و 8 و 9 كلها أسوأ من 0.39. ثلاث حقب بدون تحسن: نتوقف بعد الحقبة 9.</li><li>نسترجع أوزان الحقبة 6.</li></ul></div></section><h2>تجربة: أرقام بخط اليد، وأجوبة فيها أخطاء</h2><div class="blk"><p>البيانات: 1797 صورة صغيرة لأرقام مكتوبة بخط اليد، كل صورة 8 في 8 بكسل. موجودة داخل سايكت-ليرن.</p><p>نأخذ 300 صورة فقط للتدريب، لكي يظهر الإفراط بوضوح.</p></div><div class="blk"><p>ونضيف مشكلة واقعية جداً: 20% من أجوبة التدريب نستبدلها بأرقام عشوائية.</p><p>في البيانات الحقيقية، الأجوبة يكتبها بشر متعبون، وفيها أخطاء دائماً. بيانات التحقق والاختبار نتركها صحيحة.</p></div><div class="blk"><div class="term" dir="ltr"><code>label noise</code></div></div><div class="code "><div class="code-head"><span class="path">digits_setup.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">nn</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_digits</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
+
+<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">load_digits</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>          <span class="c1"># 1797 images, 8x8 pixels, digits 0-9</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">X</span> <span class="o">/</span> <span class="mf">16.0</span>                                  <span class="c1"># pixels 0..16 -&gt; 0..1</span>
+<span class="n">X_tr</span><span class="p">,</span> <span class="n">X_rest</span><span class="p">,</span> <span class="n">y_tr</span><span class="p">,</span> <span class="n">y_rest</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">train_size</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">stratify</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">X_val</span><span class="p">,</span> <span class="n">X_te</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">y_te</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X_rest</span><span class="p">,</span> <span class="n">y_rest</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+                                            <span class="n">stratify</span><span class="o">=</span><span class="n">y_rest</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">to_t</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+
+<span class="n">X_tr</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">X_te</span> <span class="o">=</span> <span class="n">to_t</span><span class="p">(</span><span class="n">X_tr</span><span class="p">),</span> <span class="n">to_t</span><span class="p">(</span><span class="n">X_val</span><span class="p">),</span> <span class="n">to_t</span><span class="p">(</span><span class="n">X_te</span><span class="p">)</span>
+<span class="n">y_tr</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">y_te</span> <span class="o">=</span> <span class="n">to_t</span><span class="p">(</span><span class="n">y_tr</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">),</span> <span class="n">to_t</span><span class="p">(</span><span class="n">y_val</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">),</span> <span class="n">to_t</span><span class="p">(</span><span class="n">y_te</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">long</span><span class="p">)</span>
+
+<span class="c1"># replace 20% of the training labels with random digits</span>
+<span class="n">g</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Generator</span><span class="p">()</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">y_noisy</span> <span class="o">=</span> <span class="n">y_tr</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+<span class="n">flip</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y_noisy</span><span class="p">),</span> <span class="n">generator</span><span class="o">=</span><span class="n">g</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.2</span>
+<span class="n">y_noisy</span><span class="p">[</span><span class="n">flip</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">flip</span><span class="o">.</span><span class="n">sum</span><span class="p">()),),</span> <span class="n">generator</span><span class="o">=</span><span class="n">g</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;train / val / test:&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_tr</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_val</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_te</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;wrong training labels:&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">((</span><span class="n">y_noisy</span> <span class="o">!=</span> <span class="n">y_tr</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>train / val / test: 300 748 749
+wrong training labels: 56</pre></div><figure class="plot"><div class="svgwrap"><svg xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 638.64 185.449977" xmlns="http://www.w3.org/2000/svg" version="1.1">
+<defs>
+</defs>
+<g id="figure_1">
+<g id="patch_1">
+<path d="M 0 185.449977 
+L 638.64 185.449977 
+L 638.64 0 
+L 0 0 
+L 0 185.449977 
+z
+" style="fill: none"/>
+</g>
+<g id="axes_1">
+<g clip-path="url(#p8ae6323863)">
+<image xlink:href="data:image/png;base64,
+iVBORw0KGgoAAAANSUhEUgAAAF4AAABeCAYAAACq0qNuAAABrUlEQVR4nO3cQY2EQBQGYWazApCABCQgAQcgARwgAQlIQAoSkIAD9rLXTfhJOpVN6ju/IZNKn15oPvd931Uh67pG8/M8l/kjv4ZheDy7bVu5P1JV1VfRp+tPhocYHmJ4iOEhhocYHmJ4iOEhhocYHvIpuatpmiaa3/c9mr+uK5ofx/Hx7LIsxZ5dVZ54jOEhhocYHmJ4iOEhhocYHmJ4iOEhhod8pz9I9inp/qJt22g+lbznk+6N3NX8E4aHGB5ieIjhIYaHGB5ieIjhIYaHxCuD4zgez5ZeAaTqun48m76akvLEQwwPMTzE8BDDQwwPMTzE8BDDQwwPMTwk3tV0Xfd4Nr3O0vd9NF9Sstd5wxMPMTzE8BDDQwwPMTzE8BDDQwwPMTzE8JB4V5N+qqSk8zyj+WmaHs8m7w+94YmHGB5ieIjhIYaHGB5ieIjhIYaHGB5ieEj8idtkV5PeI0rvTKW7muQ9n/QzKClPPMTwEMNDDA8xPMTwEMNDDA8xPMTwkPj1juSKSnq1Jl0ZJNeC3jy/JE88xPAQw0MMDzE8xPAQw0MMDzE8xPAQw0N+AFApQHhSMZJ8AAAAAElFTkSuQmCC" id="image5627c23cec" transform="scale(1 -1) translate(0 -67.68)" x="7.2" y="-19.993594" width="67.68" height="67.68"/>
+</g>
+<g id="text_1">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="41.0175" y="14.038594" transform="rotate(-0 41.0175 14.038594)">label 0</text>
+</g>
+</g>
+<g id="axes_2">
+<g clip-path="url(#p1ed40cf9fb)">
+<image xlink:href="data:image/png;base64,
+iVBORw0KGgoAAAANSUhEUgAAAF4AAABeCAYAAACq0qNuAAABrElEQVR4nO3dUY2DQBRG4elmBSABB0UKEpCABCTgAOqgEpCABCTggLXA3+zk9OF8z3dJczJPNwP7uK7rKpWc5xnN930fze/7Hs03TXN7dpqm6NnDMETzP9G0/o3hIYaHGB5ieIjhIYaHGB5ieIjhIYaHPGruatL9RWqe52h+27bbs+lvT/dSnniI4SGGhxgeYniI4SGGhxgeYniI4SGGh/ymf3Acx+3Z1+sVPXtZlmg+uSdTSild11V7dsoTDzE8xPAQw0MMDzE8xPAQw0MMDzE8JF4ZpNcYEuM4RvPv9zuab9v29mx6dSTliYcYHmJ4iOEhhocYHmJ4iOEhhocYHmJ4SLyrqXntIbk6Ukr2ak0p2fWOZK/zCU88xPAQw0MMDzE8xPAQw0MMDzE8xPAQw0PiXU2yw3g+n9Gz091L+kncb+KJhxgeYniI4SGGhxgeYniI4SGGhxgeYnhI1U/crusazafvHaX/juibeOIhhocYHmJ4iOEhhocYHmJ4iOEhhodUXRmkn1hJP5uSvFrzyfNr8sRDDA8xPMTwEMNDDA8xPMTwEMNDDA8xPOQPwCVIXvtZdvkAAAAASUVORK5CYII=" id="imagef60108f4f0" transform="scale(1 -1) translate(0 -67.68)" x="86.715" y="-19.993594" width="67.68" height="67.68"/>
+</g>
+<g id="text_2">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="120.5325" y="14.038594" transform="rotate(-0 120.5325 14.038594)">label 6</text>
+</g>
+</g>
+<g id="axes_3">
+<g clip-path="url(#p3849d0ef53)">
+<image xlink:href="data:image/png;base64,
+iVBORw0KGgoAAAANSUhEUgAAAF4AAABeCAYAAACq0qNuAAABnElEQVR4nO3dQY2EQBgF4Z7NCEACEpCABCRgAQdIQAIOACVYwAl73csmvEOnZjf1nf8QUulTpxte933f5UN0XRfNX9dVbb5pmujZqa+qT9evDA8xPMTwEMNDDA8xPMTwEMNDDA8xPORNv8BP4zhG89M0RfP7vld7l5QrHmJ4iOEhhocYHmJ4iOEhhocYHmJ4iOEh8V5NcjZlGIbo2X3fR/OpdV0fz7pX808ZHmJ4iOEhhocYHmJ4iOEhhocYHvJKr+Isy/J4Nj1+8UnO84zm02tErniI4SGGhxgeYniI4SGGhxgeYniI4SGGh8THO9I9icS2bdF8clyjlFKO43g8m1zbKcW9mj/D8BDDQwwPMTzE8BDDQwwPMTzE8BDDQ+JzNYn0Kk76Wdl0r2ae58ez6VWctm2jeVc8xPAQw0MMDzE8xPAQw0MMDzE8xPAQw0Oq7tWkvwuq/Tui2r8YSrjiIYaHGB5ieIjhIYaHGB5ieIjhIYaHVN0ySKVbBunxkeR4R22ueIjhIYaHGB5ieIjhIYaHGB5ieIjhIYaHfAPCbEXNbsiC6wAAAABJRU5ErkJggg==" id="image1528936800" transform="scale(1 -1) translate(0 -67.68)" x="166.23" y="-19.993594" width="67.68" height="67.68"/>
+</g>
+<g id="text_3">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="200.0475" y="14.038594" transform="rotate(-0 200.0475 14.038594)">label 4</text>
+</g>
+</g>
+<g id="axes_4">
+<g clip-path="url(#p3b6c1bbae3)">
+<image xlink:href="data:image/png;base64,
+iVBORw0KGgoAAAANSUhEUgAAAF4AAABeCAYAAACq0qNuAAABnUlEQVR4nO3dXW2EUBRFYaapACTgAAkEB0hAAlJGAjgYHCABCeAAB9TC7Ka3K5ms7/mEkJX7dMLP477vuypkmqZoftu2aL5pmmi+rusis1VVVc/nM5r/iqb1ZwwPMTzE8BDDQwwPMTzE8BDDQwwPMTzkUXJXk+5SzvMscyO/0LZtNL/vezTviYcYHmJ4iOEhhocYHmJ4iOEhhocYHmJ4SNFdTfqcTN/30Xy6T3m9Xm/PpnumlCceYniI4SGGhxgeYniI4SGGhxgeYnhI0ZXBdV3R/DiO0Xy6kkjvpyRPPMTwEMNDDA8xPMTwEMNDDA8xPMTwEMNDvktePP30yDAM0fy6rtH8cRxvz/p4x4cyPMTwEMNDDA8xPMTwEMNDDA8xPMTwkHhXk362NpHudlKl9y8JTzzE8BDDQwwPMTzE8BDDQwwPMTzE8BDDQ+JdTfIe0bIs6eUjXdcVvX5JnniI4SGGhxgeYniI4SGGhxgeYniI4SHxyiD9U28i/bPMPM9F7uM/eOIhhocYHmJ4iOEhhocYHmJ4iOEhhocYHvIDZdU/NCMwlQoAAAAASUVORK5CYII=" id="imagef5eb5255ef" transform="scale(1 -1) translate(0 -67.68)" x="245.745" y="-19.993594" width="67.68" height="67.68"/>
+</g>
+<g id="text_4">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="279.5625" y="14.038594" transform="rotate(-0 279.5625 14.038594)">label 2</text>
+</g>
+</g>
+<g id="axes_5">
+<g clip-path="url(#p3127b34896)">
+<image xlink:href="data:image/png;base64,
+iVBORw0KGgoAAAANSUhEUgAAAF4AAABeCAYAAACq0qNuAAABx0lEQVR4nO3dQY3CUBRG4cdkBOAAC0jAQZFQHCABB60DKqESKqEoKDhoFXS2s5mk/6I5yeR865uGnLwNN49yWNd1LTvpui6av91u0XxVVdH8/X7fPHu5XKJnp752fbr+ZHiI4SGGhxgeYniI4SGGhxgeYniI4SGHPXc1x+Mxmh+GIZrv+z6ab9t2l9lSSqnrOpr3xEMMDzE8xPAQw0MMDzE8xPAQw0MMDzE85Jv+AL+lu53r9RrNp/uXPXniIYaHGB5ieIjhIYaHGB5ieIjhIYaH7LoySL/Sp/Pv9zuaT36Kk17XSHniIYaHGB5ieIjhIYaHGB5ieIjhIYaHGB4S/xRnnufNs+mrR16vVzR/Op2i+XEcN8+mV01SnniI4SGGhxgeYniI4SGGhxgeYniI4SGGh8T3apJXlaT3XqZpiuYfj0c0fz6fN88me51S8t2OJx5ieIjhIYaHGB5ieIjhIYaHGB5ieIjhIfGuJtlJLMsSPTvdj6Q+n8/m2fSzpHeIPPEQw0MMDzE8xPAQw0MMDzE8xPAQw0PilUHyapOmaaJnp68qSa9UPJ/PzbP+g/E/ZXiI4SGGhxgeYniI4SGGhxgeYniI4SE/mZpMRdg8yIQAAAAASUVORK5CYII=" id="image1119d0b738" transform="scale(1 -1) translate(0 -67.68)" x="325.26" y="-19.993594" width="67.68" height="67.68"/>
+</g>
+<g id="text_5">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="359.0775" y="14.038594" transform="rotate(-0 359.0775 14.038594)">label 8</text>
+</g>
+</g>
+<g id="axes_6">
+<g clip-path="url(#pdc54dd2f04)">
+<image xlink:href="data:image/png;base64,
+iVBORw0KGgoAAAANSUhEUgAAAF4AAABeCAYAAACq0qNuAAABs0lEQVR4nO3dUY2DQBhFYbpZAUgABSChDhocIAEJSKgEJFQCDpo6qIOCAtYCN9nJ6cP5nv9MyMm8dDLQy3EcR1XIuq7R/P1+j+bf73c0/3q9Ts/ebrdo7cfjEc3/RNP6N4aHGB5ieIjhIYaHGB5ieIjhIYaHGB7yW3Lx9KymaZpofpqmYuu3bRutvW1bNO+OhxgeYniI4SGGhxgeYniI4SGGhxgeYnjIpeS9mm+T3MO5Xq/F1q4qdzzG8BDDQwwPMTzE8BDDQwwPMTzE8JCi1ztS6RWJ9Gd6ct0kPTJIueMhhocYHmJ4iOEhhocYHmJ4iOEhhocYHlL0rCb9DMo8z9H8vu/RfOL5fBZbu6rc8RjDQwwPMTzE8BDDQwwPMTzE8BDDQwwPiV/FSe6y9H0fPcyyLNF8ahiG07Ofzydau67raN4dDzE8xPAQw0MMDzE8xPAQw0MMDzE8xPCQovdq0vOL9J2m9Cyo67rTs+mzp9zxEMNDDA8xPMTwEMNDDA8xPMTwEMNDin5pNf1X33Eco/n0Z33yPOlxRModDzE8xPAQw0MMDzE8xPAQw0MMDzE8xPCQP5KPTjF3jM1KAAAAAElFTkSuQmCC" id="imagea82103f69e" transform="scale(1 -1) translate(0 -67.68)" x="404.775" y="-19.993594" width="67.68" height="67.68"/>
+</g>
+<g id="text_6">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="438.5925" y="14.038594" transform="rotate(-0 438.5925 14.038594)">label 9</text>
+</g>
+</g>
+<g id="axes_7">
+<g clip-path="url(#p4a1c72ad7c)">
+<image xlink:href="data:image/png;base64,
+iVBORw0KGgoAAAANSUhEUgAAAF4AAABeCAYAAACq0qNuAAABkklEQVR4nO3dQY2EQBBA0WYzd5CABCTgBAtIAAdYwAESkIAEJIAC5jICtg6VP5v971zpdH76Mh1gqud5npLkPM/Q/DiOofm2bUPzy7KE5jP90Bv4rwwPMTzE8BDDQwwPMTzE8BDDQwwPMTykyryrmaYpND/Pc2i+ruvQ/HVdoflMnniI4SGGhxgeYniI4SGGhxgeYniI4SGGh7wyF48+VxN133fq+pk88RDDQwwPMTzE8BDDQwwPMTzE8BDDQ1KvDJqmyVz+T/PEQwwPMTzE8BDDQwwPMTzE8BDDQwwPMTwk9a7mm159KaWUfd9/Pdv3fdo+SvHEYwwPMTzE8BDDQwwPMTzE8BDDQwwPMTwk9a6m67rQ/LquORv5iHxC9ziOtH2U4onHGB5ieIjhIYaHGB5ieIjhIYaHGB5ieEjqJ26jqqpKXT/ySdzoXU30r5E88RDDQwwPMTzE8BDDQwwPMTzE8BDDQ1If79i2LTQ/DENoPvoz/VvWLsUTjzE8xPAQw0MMDzE8xPAQw0MMDzE8xPCQN4BoMUu8/2BBAAAAAElFTkSuQmCC" id="imagef469de6f21" transform="scale(1 -1) translate(0 -67.68)" x="484.29" y="-19.993594" width="67.68" height="67.68"/>
+</g>
+<g id="text_7">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="518.1075" y="14.038594" transform="rotate(-0 518.1075 14.038594)">label 1</text>
+</g>
+</g>
+<g id="axes_8">
+<g clip-path="url(#pd4b6b5479c)">
+<image xlink:href="data:image/png;base64,
+iVBORw0KGgoAAAANSUhEUgAAAF4AAABeCAYAAACq0qNuAAABrklEQVR4nO3dQY2EQBQG4Z7JCEACEpCABCQgBRwgAQlIQAISkIADRsEk/IdOJZP6zi+dTaUv+9LLvu77vksl+75H89M0RfPHcUTzy7I8nh3HMTo79a56un4yPMTwEMNDDA8xPMTwEMNDDA8xPMTwkE/Nw9N9R9d10Xyyeykl2wU1TROdPQxDNO+NhxgeYniI4SGGhxgeYniI4SGGhxgeYnhIvKtJ3rJc1xWdva5rNJ/uU5JdUPomKOWNhxgeYniI4SGGhxgeYniI4SGGhxgeEq8Mtm17PJv+Sn+eZzSfPgdJVhjpuiPljYcYHmJ4iOEhhocYHmJ4iOEhhocYHmJ4SLyr6fv+8ew8z9HZyR6olHxXk+6OavLGQwwPMTzE8BDDQwwPMTzE8BDDQwwPMTwk3tXU3He0bVvt7FKyz6ykfxaU8sZDDA8xPMTwEMNDDA8xPMTwEMNDDA8xPORV898RpZ+4Td/VJG98Ssk+heLfQP0pw0MMDzE8xPAQw0MMDzE8xPAQw0OqrgxqfwYlfQ6SPNlIf5aUNx5ieIjhIYaHGB5ieIjhIYaHGB5ieIjhIV9ZLkkbEi6IIwAAAABJRU5ErkJggg==" id="image9546cc968f" transform="scale(1 -1) translate(0 -67.68)" x="563.805" y="-19.993594" width="67.68" height="67.68"/>
+</g>
+<g id="text_8">
+<text style="font-weight: 700; font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #d62728" x="597.6225" y="14.038594" transform="rotate(-0 597.6225 14.038594)">label 3 ✗</text>
+</g>
+</g>
+<g id="axes_9">
+<g clip-path="url(#p6401799ccc)">
+<image xlink:href="data:image/png;base64,
+iVBORw0KGgoAAAANSUhEUgAAAF4AAABeCAYAAACq0qNuAAABnklEQVR4nO3dUY2DQBRG4e1mBdRBkUAVYKESqAQcVEIl1AFIqBUUgANWwSb8m9ychpzv+WZCTualk4Getm3bvoq83+9ovu/7aH6e52i+67rds+mzp75LV9efDA8xPMTwEMNDDA8xPMTwEMNDDA8xPORUeVaTnr00TRPN3263aP56ve6eXZYlWvt8Pkfz7niI4SGGhxgeYniI4SGGhxgeYniI4SGGh/xULv56vSqXj9e/XC41D/IP7niI4SGGhxgeYniI4SGGhxgeYniI4SGlRwapaZqi+fv9Hs2P47h7Nr2ukXLHQwwPMTzE8BDDQwwPMTzE8BDDQwwPMTyk9FWcVPoqTtu20XxyHcSzmoMyPMTwEMNDDA8xPMTwEMNDDA8xPMTwkNKzmupXcR6PRzSffGbl+XxGa6fc8RDDQwwPMTzE8BDDQwwPMTzE8BDDQwwPKT2rSe/JVH/idhiG3bN+4vagDA8xPMTwEMNDDA8xPMTwEMNDDA/5qOsd6fy6rtF88rPefzA+KMNDDA8xPMTwEMNDDA8xPMTwEMNDDA/5BY41STBBVOWrAAAAAElFTkSuQmCC" id="imagedb3960dc40" transform="scale(1 -1) translate(0 -67.68)" x="7.2" y="-110.569977" width="67.68" height="67.68"/>
+</g>
+<g id="text_9">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="41.0175" y="104.614977" transform="rotate(-0 41.0175 104.614977)">label 3</text>
+</g>
+</g>
+<g id="axes_10">
+<g clip-path="url(#p3f37f72fc0)">
+<image xlink:href="data:image/png;base64,
+iVBORw0KGgoAAAANSUhEUgAAAF4AAABeCAYAAACq0qNuAAABm0lEQVR4nO3dQY2DUBRGYTrpHiQgASngBAlIQAISkIADkIAEHDCr2fdfvJy2c771DWlO3qY3r/Rx3/ddvYmu64rOL8sSzZf0Q3+A/8rwEMNDDA8xPMTwEMNDDA8xPMTwEMNDHu+0q1nXNZofhiGa3/f95dl0D5TyxEMMDzE8xPAQw0MMDzE8xPAQw0MMDzE85Fny4X3fR/PXdRX5HH+SXZC7mi9leIjhIYaHGB5ieIjhIYaHGB5ieEh8vSP52p1evyitruuXZ4/jiJ7dtm0074mHGB5ieIjhIYaHGB5ieIjhIYaHGB5ieEjR6x2p9FdB27ZF88l1k/M8o2e7q/kQhocYHmJ4iOEhhocYHmJ4iOEhhocYHhLvapJ9R3KPpaqqap7naH4cx2g+2e2ku5qUJx5ieIjhIYaHGB5ieIjhIYaHGB5ieIjhIUVfcTtNUzSf/l1Q+julpmmi+ZI88RDDQwwPMTzE8BDDQwwPMTzE8BDDQ4quDNI3p6ZvZk3n0+sgJXniIYaHGB5ieIjhIYaHGB5ieIjhIYaHGB7yC+C9SDTnWOIPAAAAAElFTkSuQmCC" id="image3171776f14" transform="scale(1 -1) translate(0 -67.68)" x="86.715" y="-110.569977" width="67.68" height="67.68"/>
+</g>
+<g id="text_10">
+<text style="font-weight: 700; font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #d62728" x="120.5325" y="104.614977" transform="rotate(-0 120.5325 104.614977)">label 2 ✗</text>
+</g>
+</g>
+<g id="axes_11">
+<g clip-path="url(#p30688ac7e6)">
+<image xlink:href="data:image/png;base64,
+iVBORw0KGgoAAAANSUhEUgAAAF4AAABeCAYAAACq0qNuAAABoElEQVR4nO3dQY2EQBQG4WYzd5CABCTgAKQgAUmMAyQgAQfggLXAn2yn9lDf+Q2HSl/mpZlpnud5SiXHcUTz67pG89/vN5pv2/b17LZt0bPHcYzmf6Jp/RnDQwwPMTzE8BDDQwwPMTzE8BDDQwwP+aQfuO/79ew8z9Gzh2GI5q/riuaT3dGyLNWeXYonHmN4iOEhhocYHmJ4iOEhhocYHmJ4iOEhTc17NU3TRPPTNEXz6W4n2ackO6lSStn3PZr3xEMMDzE8xPAQw0MMDzE8xPAQw0MMD4mvdySSV19KKaXrumg+/Vrf9/3r2fR6R8oTDzE8xPAQw0MMDzE8xPAQw0MMDzE8xPCQqtc70t1L+jpLsnv5bzzxEMNDDA8xPMTwEMNDDA8xPMTwEMNDDA+peq8m3aW4q1F1hocYHmJ4iOEhhocYHmJ4iOEhhocYHlJ1V5P+RU/6d0Sp9Cd3a/LEQwwPMTzE8BDDQwwPMTzE8BDDQwwPqfoqznme0Xztr/TJr6GmrxGlPPEQw0MMDzE8xPAQw0MMDzE8xPAQw0MMD/kFp5lEO38VoPMAAAAASUVORK5CYII=" id="image882e4a2e39" transform="scale(1 -1) translate(0 -67.68)" x="166.23" y="-110.569977" width="67.68" height="67.68"/>
+</g>
+<g id="text_11">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="200.0475" y="104.614977" transform="rotate(-0 200.0475 104.614977)">label 6</text>
+</g>
+</g>
+<g id="axes_12">
+<g clip-path="url(#p51ad48f2b8)">
+<image xlink:href="data:image/png;base64,
+iVBORw0KGgoAAAANSUhEUgAAAF4AAABeCAYAAACq0qNuAAABmUlEQVR4nO3dUW2EQBRG4W5TAUhAAjhAChKQgBQkIAEUgAScUAVN+B9uz7Y53/PNhJzMy04Y9nXf9/3xJsZxjObP84zml2V5PNt1XbR26rN0df3I8BDDQwwPMTzE8BDDQwwPMTzE8BDDQ74qF5/nOZq/riuaH4Yhmu/7/vHscRzR2unZjjseYniI4SGGhxgeYniI4SGGhxgeYniI4SHxWU3yLsu2bdHa67pG803TRPPJs6fP4lnNH2F4iOEhhocYHmJ4iOEhhocYHmJ4SOmRQfozOj0CSE3T9Hg2veaTcsdDDA8xPMTwEMNDDA8xPMTwEMNDDA8xPCQ+q2nb9vFs8pmS31B9/pJwx0MMDzE8xPAQw0MMDzE8xPAQw0MMDzE8pPSzKfu+R/Pp1Z30vZ3k7Cj95EvKHQ8xPMTwEMNDDA8xPMTwEMNDDA8xPMTwkFfl3xGld5qq70wln9D1DtQ/ZXiI4SGGhxgeYniI4SGGhxgeYnhI6esd6c/ud/oH42rueIjhIYaHGB5ieIjhIYaHGB5ieIjhIYaHfAOVrkUi8kyklwAAAABJRU5ErkJggg==" id="image5d0e1076d5" transform="scale(1 -1) translate(0 -67.68)" x="245.745" y="-110.569977" width="67.68" height="67.68"/>
+</g>
+<g id="text_12">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="279.5625" y="104.614977" transform="rotate(-0 279.5625 104.614977)">label 0</text>
+</g>
+</g>
+<g id="axes_13">
+<g clip-path="url(#p67e9f342e9)">
+<image xlink:href="data:image/png;base64,
+iVBORw0KGgoAAAANSUhEUgAAAF4AAABeCAYAAACq0qNuAAABtElEQVR4nO3dwY2CUABFUZzMXkugBDrQEuxAqQBKsAMpATuADrQD7YQOmMU0wEvm587invWLITd/RQB367quVSHLskT76/Ua7ed5jvaJruui/TAM0f4rWuvPGB5ieIjhIYaHGB5ieIjhIYaHGB5ieMh3yR8/n8/R/vV6Rfv7/R7tx3GM9iV54iGGhxgeYniI4SGGhxgeYniI4SGGhxgeEt+reb/fm7fpvZf9fl/sWqqqqj6fz+Zt3/fRb6c88RDDQwwPMTzE8BDDQwwPMTzE8BDDQ+JbBunrNYnD4RDtH49HtL9cLpu36WtBKU88xPAQw0MMDzE8xPAQw0MMDzE8xPAQw0PiezV1XRe4jF/pIxWn0ynaN00T7UvyxEMMDzE8xPAQw0MMDzE8xPAQw0MMDzE8JL5Xkz77kng+n9G+9OsyJXniIYaHGB5ieIjhIYaHGB5ieIjhIYaHGB6yK/l3ROknZdu2jfbH4zHa3263zdv0mZ2UJx5ieIjhIYaHGB5ieIjhIYaHGB5ieEjRf8VJPz2Sfjl1mqZo/5944iGGhxgeYniI4SGGhxgeYniI4SGGhxge8gNosD0SEDxBFQAAAABJRU5ErkJggg==" id="imageee2ad7bae8" transform="scale(1 -1) translate(0 -67.68)" x="325.26" y="-110.569977" width="67.68" height="67.68"/>
+</g>
+<g id="text_13">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="359.0775" y="104.614977" transform="rotate(-0 359.0775 104.614977)">label 6</text>
+</g>
+</g>
+<g id="axes_14">
+<g clip-path="url(#p9f817bcc0e)">
+<image xlink:href="data:image/png;base64,
+iVBORw0KGgoAAAANSUhEUgAAAF4AAABeCAYAAACq0qNuAAABlklEQVR4nO3dUY2DQBRGYbqpgFrAARJwAg5InWABB3UAEpCAhFYB+7AG+JO9ObvJ+Z5vyORkXpgM7e08z7Mpsu97NN/3fTT/+Xyi+cS6rtF8uvavaFq/xvAQw0MMDzE8xPAQw0MMDzE8xPAQw0PulQ8fxzGaT89ehmGI5pdluTxbfc7kjocYHmJ4iOEhhocYHmJ4iOEhhocYHmJ4yC29V3Mcx+XZtm3T9ZSapuny7DzPdQtp3PEYw0MMDzE8xPAQw0MMDzE8xPAQw0NKr3ekklf6pql/ra/kjocYHmJ4iOEhhocYHmJ4iOEhhocYHmJ4SHxW83g8CpbxI7k68t+54yGGhxgeYniI4SGGhxgeYniI4SGGhxgeEn+Kk+i6LppPz2rS+cpzppQ7HmJ4iOEhhocYHmJ4iOEhhocYHmJ4iOEhf+onbp/PZ+nzX69XNF/JHQ8xPMTwEMNDDA8xPMTwEMNDDA8xPKT0ekd6/SL9Z5n3+x3Nb9t2eTa9mpJyx0MMDzE8xPAQw0MMDzE8xPAQw0MMDzE85BsvuUREYh1o6AAAAABJRU5ErkJggg==" id="image46b521adce" transform="scale(1 -1) translate(0 -67.68)" x="404.775" y="-110.569977" width="67.68" height="67.68"/>
+</g>
+<g id="text_14">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="438.5925" y="104.614977" transform="rotate(-0 438.5925 104.614977)">label 6</text>
+</g>
+</g>
+<g id="axes_15">
+<g clip-path="url(#pf52c33b157)">
+<image xlink:href="data:image/png;base64,
+iVBORw0KGgoAAAANSUhEUgAAAF4AAABeCAYAAACq0qNuAAABu0lEQVR4nO3dQY3CQBxG8WGz91pAAhKog6KASkACDkACEiqhdVAcVAJV0FWwSb/D5HF4v/OfCXmZ04QZDtu2bSUwDMPu2cvlkixd3ePx2D17u93qfZFSyk/V1fUvw0MMDzE8xPAQw0MMDzE8xPAQw0MMDznUPKtZliX6MqfTKZrvui6aPx6Pu2fneY7WTrnjIYaHGB5ieIjhIYaHGB5ieIjhIYaHGB7ym34gPR9JfD6faH5d12g+PQuqyR0PMTzE8BDDQwwPMTzE8BDDQwwPMTwkPjKo6fl8Vl2/7/uq6yfc8RDDQwwPMTzE8BDDQwwPMTzE8BDDQwwPia/i1DSOYzTftm00f71ed8++Xq9o7ZQ7HmJ4iOEhhocYHmJ4iOEhhocYHmJ4iOEhX3VWk17FSa8FJU+hpM+mJE+ylOKOxxgeYniI4SGGhxgeYniI4SGGhxgeYnhIfAcquUeUPnGbnr2cz+dofpqm3bPp72ru93s0746HGB5ieIjhIYaHGB5ieIjhIYaHGB4S/7wjuS6T/gvw+/2O5lNN0+yeTa8Fpa+4uuMhhocYHmJ4iOEhhocYHmJ4iOEhhocYHvIHLjVQsAQdEK4AAAAASUVORK5CYII=" id="image07adbfb7b9" transform="scale(1 -1) translate(0 -67.68)" x="484.29" y="-110.569977" width="67.68" height="67.68"/>
+</g>
+<g id="text_15">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="518.1075" y="104.614977" transform="rotate(-0 518.1075 104.614977)">label 3</text>
+</g>
+</g>
+<g id="axes_16">
+<g clip-path="url(#pe23e672fe2)">
+<image xlink:href="data:image/png;base64,
+iVBORw0KGgoAAAANSUhEUgAAAF4AAABeCAYAAACq0qNuAAABrUlEQVR4nO3dUY2DQBhFYdhUABKoAnBQJCABCUhAAhKQgASk4KCtAtYCN9nJySbne/5DyMm8tBlm6uu6rqqQ8zyj+Xmeo/njOKL57/d7e/b1ehV9l59oWn/G8BDDQwwPMTzE8BDDQwwPMTzE8BDDQx4lHz6OYzQ/TVM0v+97NJ/8d/R8PqNnp1zxEMNDDA8xPMTwEMNDDA8xPMTwEMNDDA+pS+6rKe3z+UTzy7IUe/a2bdG8Kx5ieIjhIYaHGB5ieIjhIYaHGB5ieEjR7R2l9X0fzQ/DcHt2Xdfo2SlXPMTwEMNDDA8xPMTwEMNDDA8xPMTwEMND/vX2jrquo/n3+317tmma8G0yrniI4SGGhxgeYniI4SGGhxgeYniI4SGGh8T7apKjR9K9Kel813XRfHLMSnqES8oVDzE8xPAQw0MMDzE8xPAQw0MMDzE8xPCQeF9NcpxI8s1RVVVV27bRfPoNVHJlUHq9UMoVDzE8xPAQw0MMDzE8xPAQw0MMDzE8JN7ekXyikv7sTm8wTreDpLf0lOSKhxgeYniI4SGGhxgeYniI4SGGhxgeYnjIL0d3S/FzB456AAAAAElFTkSuQmCC" id="image070659a5af" transform="scale(1 -1) translate(0 -67.68)" x="563.805" y="-110.569977" width="67.68" height="67.68"/>
+</g>
+<g id="text_16">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="597.6225" y="104.614977" transform="rotate(-0 597.6225 104.614977)">label 3</text>
+</g>
+</g>
+</g>
+<defs>
+<clipPath id="p8ae6323863">
+<rect x="7.2" y="20.038594" width="67.635" height="67.635"/>
+</clipPath>
+<clipPath id="p1ed40cf9fb">
+<rect x="86.715" y="20.038594" width="67.635" height="67.635"/>
+</clipPath>
+<clipPath id="p3849d0ef53">
+<rect x="166.23" y="20.038594" width="67.635" height="67.635"/>
+</clipPath>
+<clipPath id="p3b6c1bbae3">
+<rect x="245.745" y="20.038594" width="67.635" height="67.635"/>
+</clipPath>
+<clipPath id="p3127b34896">
+<rect x="325.26" y="20.038594" width="67.635" height="67.635"/>
+</clipPath>
+<clipPath id="pdc54dd2f04">
+<rect x="404.775" y="20.038594" width="67.635" height="67.635"/>
+</clipPath>
+<clipPath id="p4a1c72ad7c">
+<rect x="484.29" y="20.038594" width="67.635" height="67.635"/>
+</clipPath>
+<clipPath id="pd4b6b5479c">
+<rect x="563.805" y="20.038594" width="67.635" height="67.635"/>
+</clipPath>
+<clipPath id="p6401799ccc">
+<rect x="7.2" y="110.614977" width="67.635" height="67.635"/>
+</clipPath>
+<clipPath id="p3f37f72fc0">
+<rect x="86.715" y="110.614977" width="67.635" height="67.635"/>
+</clipPath>
+<clipPath id="p30688ac7e6">
+<rect x="166.23" y="110.614977" width="67.635" height="67.635"/>
+</clipPath>
+<clipPath id="p51ad48f2b8">
+<rect x="245.745" y="110.614977" width="67.635" height="67.635"/>
+</clipPath>
+<clipPath id="p67e9f342e9">
+<rect x="325.26" y="110.614977" width="67.635" height="67.635"/>
+</clipPath>
+<clipPath id="p9f817bcc0e">
+<rect x="404.775" y="110.614977" width="67.635" height="67.635"/>
+</clipPath>
+<clipPath id="pf52c33b157">
+<rect x="484.29" y="110.614977" width="67.635" height="67.635"/>
+</clipPath>
+<clipPath id="pe23e672fe2">
+<rect x="563.805" y="110.614977" width="67.635" height="67.635"/>
+</clipPath>
+</defs>
+</svg></div><figcaption>أول 16 صورة تدريب مع أجوبتها. العلامة بجانب الجواب تعني أنه من الأجوبة التي أفسدناها.</figcaption></figure><details class="setup"><summary>كود الرسم</summary><div class="dbody"><div class="code "><div class="code-head"><span class="path">digits_plot.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mf">2.8</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axes</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="nb">range</span><span class="p">(</span><span class="mi">16</span><span class="p">)):</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">X_tr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;gray_r&quot;</span><span class="p">)</span>
+    <span class="n">wrong</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">y_noisy</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">y_tr</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">style</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;C3&quot;</span><span class="p">,</span> <span class="s2">&quot;fontweight&quot;</span><span class="p">:</span> <span class="s2">&quot;bold&quot;</span><span class="p">}</span> <span class="k">if</span> <span class="n">wrong</span> <span class="k">else</span> <span class="p">{}</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;label </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">y_noisy</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="p">(</span><span class="s2">&quot; ✗&quot;</span> <span class="k">if</span> <span class="n">wrong</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">),</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="o">**</span><span class="n">style</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></pre></div></div></details><h3>دالة التدريب، مع الإيقاف المبكر</h3><div class="code "><div class="code-head"><span class="path">train_fn.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="n">loss_fn</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">make_model</span><span class="p">(</span><span class="n">p_drop</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
+    <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span>
+        <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="mi">256</span><span class="p">),</span> <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span> <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">p_drop</span><span class="p">),</span>
+        <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">),</span> <span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">(),</span> <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">p_drop</span><span class="p">),</span>
+        <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">256</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">evaluate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>                                          <span class="c1"># dropout OFF</span>
+    <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+        <span class="n">logits</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">(),</span> <span class="p">(</span><span class="n">logits</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">train</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">labels</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">patience</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">):</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Generator</span><span class="p">()</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">history</span><span class="p">,</span> <span class="n">best</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">{</span><span class="s2">&quot;loss&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)}</span>
+    <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">epochs</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>                                     <span class="c1"># dropout ON</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">torch</span><span class="o">.</span><span class="n">randperm</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X_tr</span><span class="p">),</span> <span class="n">generator</span><span class="o">=</span><span class="n">g</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">batch_size</span><span class="p">):</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">model</span><span class="p">(</span><span class="n">X_tr</span><span class="p">[</span><span class="n">idx</span><span class="p">]),</span> <span class="n">labels</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+            <span class="n">opt</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">();</span> <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">();</span> <span class="n">opt</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+        <span class="n">val_loss</span><span class="p">,</span> <span class="n">val_acc</span> <span class="o">=</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">y_val</span><span class="p">)</span>
+        <span class="n">history</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">evaluate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">X_tr</span><span class="p">,</span> <span class="n">labels</span><span class="p">)[</span><span class="mi">1</span><span class="p">],</span> <span class="n">val_loss</span><span class="p">,</span> <span class="n">val_acc</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">val_loss</span> <span class="o">&lt;</span> <span class="n">best</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">]:</span>                        <span class="c1"># remember the best weights</span>
+            <span class="n">best</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;loss&quot;</span><span class="p">:</span> <span class="n">val_loss</span><span class="p">,</span> <span class="s2">&quot;epoch&quot;</span><span class="p">:</span> <span class="n">epoch</span><span class="p">,</span> <span class="s2">&quot;acc&quot;</span><span class="p">:</span> <span class="n">val_acc</span><span class="p">,</span>
+                    <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">())}</span>
+        <span class="k">elif</span> <span class="n">patience</span> <span class="ow">and</span> <span class="n">epoch</span> <span class="o">-</span> <span class="n">best</span><span class="p">[</span><span class="s2">&quot;epoch&quot;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">patience</span><span class="p">:</span>
+            <span class="k">break</span>                                         <span class="c1"># early stopping</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">history</span><span class="p">),</span> <span class="n">best</span></pre></div><div class="blk"><p>لاحظ النسخ العميق عند حفظ أفضل الأوزان:</p></div><div class="blk"><div class="term" dir="ltr"><code>copy.deepcopy(model.state_dict())</code></div></div><div class="blk"><p>بدونه، القاموس المحفوظ يبقى مرتبطاً بالأوزان الحالية، ويتغير معها.</p></div><h3>الأجوبة العشوائية: الشبكة تحفظ الضجيج</h3><div class="code "><div class="code-head"><span class="path">random_labels.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="n">y_random</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X_tr</span><span class="p">),),</span> <span class="n">generator</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">Generator</span><span class="p">()</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">make_model</span><span class="p">()</span>
+<span class="n">history</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">train</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">),</span> <span class="n">y_random</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+<span class="n">first</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">history</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mf">0.999</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;train acc </span><span class="si">{</span><span class="n">history</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> (100% from epoch </span><span class="si">{</span><span class="n">first</span><span class="si">}</span><span class="s2">), val acc </span><span class="si">{</span><span class="n">history</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>train acc 1.000 (100% from epoch 72), val acc 0.091</pre></div><div class="blk"><p>حفظت 300 جواب عشوائي بالكامل. وعلى التحقق: تخمين عشوائي. هذا حفظ خالص، بدون أي تعلّم.</p></div><h3>ثلاث طرق على الأجوبة المشوّشة</h3><div class="code "><div class="code-head"><span class="path">compare.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="n">configs</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;baseline&quot;</span><span class="p">:</span>         <span class="nb">dict</span><span class="p">(</span><span class="n">p_drop</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="mf">0.0</span><span class="p">),</span>
+    <span class="s2">&quot;weight decay 1.0&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">p_drop</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="mf">1.0</span><span class="p">),</span>
+    <span class="s2">&quot;dropout 0.5&quot;</span><span class="p">:</span>      <span class="nb">dict</span><span class="p">(</span><span class="n">p_drop</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="mf">0.0</span><span class="p">),</span>
+<span class="p">}</span>
+<span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">cfg</span> <span class="ow">in</span> <span class="n">configs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">make_model</span><span class="p">(</span><span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;p_drop&quot;</span><span class="p">])</span>
+    <span class="n">opt</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">AdamW</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;weight_decay&quot;</span><span class="p">])</span>
+    <span class="n">history</span><span class="p">,</span> <span class="n">best</span> <span class="o">=</span> <span class="n">train</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">y_noisy</span><span class="p">)</span>
+    <span class="n">results</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">history</span><span class="p">,</span> <span class="n">best</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">:</span><span class="s2">16</span><span class="si">}</span><span class="s2">: train acc </span><span class="si">{</span><span class="n">history</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> | final val acc </span><span class="si">{</span><span class="n">history</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> | &quot;</span>
+          <span class="sa">f</span><span class="s2">&quot;best epoch </span><span class="si">{</span><span class="n">best</span><span class="p">[</span><span class="s1">&#39;epoch&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">3</span><span class="si">}</span><span class="s2">, val acc there </span><span class="si">{</span><span class="n">best</span><span class="p">[</span><span class="s1">&#39;acc&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>baseline        : train acc 1.000 | final val acc 0.778 | best epoch  23, val acc there 0.904
+weight decay 1.0: train acc 0.977 | final val acc 0.799 | best epoch  41, val acc there 0.896
+dropout 0.5     : train acc 0.993 | final val acc 0.856 | best epoch  57, val acc there 0.913</pre></div><figure class="plot"><div class="svgwrap"><svg xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 710.678125 249.531875" xmlns="http://www.w3.org/2000/svg" version="1.1">
+<defs>
+</defs>
+<g id="figure_1">
+<g id="patch_1">
+<path d="M 0 249.531875 
+L 710.678125 249.531875 
+L 710.678125 0 
+L 0 0 
+L 0 249.531875 
+z
+" style="fill: none"/>
+</g>
+<g id="axes_1">
+<g id="patch_2">
+<path d="M 53.338125 210.04 
+L 352.838125 210.04 
+L 352.838125 7.2 
+L 53.338125 7.2 
+L 53.338125 210.04 
+z
+" style="fill: none"/>
+</g>
+<g id="matplotlib.axis_1">
+<g id="xtick_1">
+<g id="line2d_1">
+<path d="M 65.583557 210.04 
+L 65.583557 7.2 
+" clip-path="url(#p374b0551c6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_2">
+<defs>
+<path id="m738a8349b0" d="M 0 0 
+L 0 3.5 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#m738a8349b0" x="65.583557" y="210.04" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_1">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="65.583557" y="225.398281" transform="rotate(-0 65.583557 225.398281)">0</text>
+</g>
+</g>
+<g id="xtick_2">
+<g id="line2d_3">
+<path d="M 99.788673 210.04 
+L 99.788673 7.2 
+" clip-path="url(#p374b0551c6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_4">
+<g>
+<use xlink:href="#m738a8349b0" x="99.788673" y="210.04" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_2">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="99.788673" y="225.398281" transform="rotate(-0 99.788673 225.398281)">25</text>
+</g>
+</g>
+<g id="xtick_3">
+<g id="line2d_5">
+<path d="M 133.99379 210.04 
+L 133.99379 7.2 
+" clip-path="url(#p374b0551c6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_6">
+<g>
+<use xlink:href="#m738a8349b0" x="133.99379" y="210.04" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_3">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="133.99379" y="225.398281" transform="rotate(-0 133.99379 225.398281)">50</text>
+</g>
+</g>
+<g id="xtick_4">
+<g id="line2d_7">
+<path d="M 168.198906 210.04 
+L 168.198906 7.2 
+" clip-path="url(#p374b0551c6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_8">
+<g>
+<use xlink:href="#m738a8349b0" x="168.198906" y="210.04" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_4">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="168.198906" y="225.398281" transform="rotate(-0 168.198906 225.398281)">75</text>
+</g>
+</g>
+<g id="xtick_5">
+<g id="line2d_9">
+<path d="M 202.404023 210.04 
+L 202.404023 7.2 
+" clip-path="url(#p374b0551c6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_10">
+<g>
+<use xlink:href="#m738a8349b0" x="202.404023" y="210.04" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_5">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="202.404023" y="225.398281" transform="rotate(-0 202.404023 225.398281)">100</text>
+</g>
+</g>
+<g id="xtick_6">
+<g id="line2d_11">
+<path d="M 236.609139 210.04 
+L 236.609139 7.2 
+" clip-path="url(#p374b0551c6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_12">
+<g>
+<use xlink:href="#m738a8349b0" x="236.609139" y="210.04" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_6">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="236.609139" y="225.398281" transform="rotate(-0 236.609139 225.398281)">125</text>
+</g>
+</g>
+<g id="xtick_7">
+<g id="line2d_13">
+<path d="M 270.814256 210.04 
+L 270.814256 7.2 
+" clip-path="url(#p374b0551c6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_14">
+<g>
+<use xlink:href="#m738a8349b0" x="270.814256" y="210.04" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_7">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="270.814256" y="225.398281" transform="rotate(-0 270.814256 225.398281)">150</text>
+</g>
+</g>
+<g id="xtick_8">
+<g id="line2d_15">
+<path d="M 305.019372 210.04 
+L 305.019372 7.2 
+" clip-path="url(#p374b0551c6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_16">
+<g>
+<use xlink:href="#m738a8349b0" x="305.019372" y="210.04" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_8">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="305.019372" y="225.398281" transform="rotate(-0 305.019372 225.398281)">175</text>
+</g>
+</g>
+<g id="xtick_9">
+<g id="line2d_17">
+<path d="M 339.224489 210.04 
+L 339.224489 7.2 
+" clip-path="url(#p374b0551c6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_18">
+<g>
+<use xlink:href="#m738a8349b0" x="339.224489" y="210.04" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_9">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="339.224489" y="225.398281" transform="rotate(-0 339.224489 225.398281)">200</text>
+</g>
+</g>
+<g id="text_10">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="203.088125" y="240.044219" transform="rotate(-0 203.088125 240.044219)">epoch</text>
+</g>
+</g>
+<g id="matplotlib.axis_2">
+<g id="ytick_1">
+<g id="line2d_19">
+<path d="M 53.338125 190.895208 
+L 352.838125 190.895208 
+" clip-path="url(#p374b0551c6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_20">
+<defs>
+<path id="m713c84dba7" d="M 0 0 
+L -3.5 0 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#m713c84dba7" x="53.338125" y="190.895208" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_11">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="46.338125" y="195.074349" transform="rotate(-0 46.338125 195.074349)">0.50</text>
+</g>
+</g>
+<g id="ytick_2">
+<g id="line2d_21">
+<path d="M 53.338125 165.829662 
+L 352.838125 165.829662 
+" clip-path="url(#p374b0551c6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_22">
+<g>
+<use xlink:href="#m713c84dba7" x="53.338125" y="165.829662" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_12">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="46.338125" y="170.008802" transform="rotate(-0 46.338125 170.008802)">0.75</text>
+</g>
+</g>
+<g id="ytick_3">
+<g id="line2d_23">
+<path d="M 53.338125 140.764115 
+L 352.838125 140.764115 
+" clip-path="url(#p374b0551c6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_24">
+<g>
+<use xlink:href="#m713c84dba7" x="53.338125" y="140.764115" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_13">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="46.338125" y="144.943256" transform="rotate(-0 46.338125 144.943256)">1.00</text>
+</g>
+</g>
+<g id="ytick_4">
+<g id="line2d_25">
+<path d="M 53.338125 115.698569 
+L 352.838125 115.698569 
+" clip-path="url(#p374b0551c6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_26">
+<g>
+<use xlink:href="#m713c84dba7" x="53.338125" y="115.698569" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_14">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="46.338125" y="119.87771" transform="rotate(-0 46.338125 119.87771)">1.25</text>
+</g>
+</g>
+<g id="ytick_5">
+<g id="line2d_27">
+<path d="M 53.338125 90.633022 
+L 352.838125 90.633022 
+" clip-path="url(#p374b0551c6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_28">
+<g>
+<use xlink:href="#m713c84dba7" x="53.338125" y="90.633022" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_15">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="46.338125" y="94.812163" transform="rotate(-0 46.338125 94.812163)">1.50</text>
+</g>
+</g>
+<g id="ytick_6">
+<g id="line2d_29">
+<path d="M 53.338125 65.567476 
+L 352.838125 65.567476 
+" clip-path="url(#p374b0551c6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_30">
+<g>
+<use xlink:href="#m713c84dba7" x="53.338125" y="65.567476" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_16">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="46.338125" y="69.746617" transform="rotate(-0 46.338125 69.746617)">1.75</text>
+</g>
+</g>
+<g id="ytick_7">
+<g id="line2d_31">
+<path d="M 53.338125 40.50193 
+L 352.838125 40.50193 
+" clip-path="url(#p374b0551c6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_32">
+<g>
+<use xlink:href="#m713c84dba7" x="53.338125" y="40.50193" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_17">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="46.338125" y="44.68107" transform="rotate(-0 46.338125 44.68107)">2.00</text>
+</g>
+</g>
+<g id="ytick_8">
+<g id="line2d_33">
+<path d="M 53.338125 15.436383 
+L 352.838125 15.436383 
+" clip-path="url(#p374b0551c6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_34">
+<g>
+<use xlink:href="#m713c84dba7" x="53.338125" y="15.436383" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_18">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="46.338125" y="19.615524" transform="rotate(-0 46.338125 19.615524)">2.25</text>
+</g>
+</g>
+<g id="text_19">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="15.558281" y="108.62" transform="rotate(-90 15.558281 108.62)">validation loss</text>
+</g>
+</g>
+<g id="line2d_35">
+<path d="M 66.951761 22.633869 
+L 68.319966 45.632225 
+L 69.688171 81.72757 
+L 71.056375 121.160848 
+L 72.42458 152.340266 
+L 73.792785 165.927909 
+L 75.160989 176.528749 
+L 77.897399 183.676758 
+L 79.265603 185.5822 
+L 80.633808 185.647578 
+L 82.002013 188.127519 
+L 83.370217 190.328227 
+L 84.738422 190.62733 
+L 86.106627 192.05223 
+L 87.474831 189.957362 
+L 88.843036 191.140458 
+L 90.211241 193.169643 
+L 91.579445 192.34949 
+L 92.94765 193.076114 
+L 94.315855 192.442481 
+L 95.684059 192.455085 
+L 97.052264 194.477801 
+L 98.420469 193.100464 
+L 99.788673 192.484523 
+L 101.156878 193.367281 
+L 103.893287 192.362139 
+L 105.261492 192.028786 
+L 106.629696 193.604272 
+L 107.997901 192.613941 
+L 109.366106 191.277475 
+L 110.73431 191.437574 
+L 112.102515 192.415209 
+L 113.47072 190.467989 
+L 114.838924 190.038147 
+L 116.207129 188.948855 
+L 117.575334 190.028316 
+L 118.943538 190.505955 
+L 120.311743 187.610336 
+L 121.679948 191.767036 
+L 123.048152 190.292729 
+L 124.416357 189.812783 
+L 125.784562 189.619378 
+L 127.152766 186.394906 
+L 128.520971 186.566797 
+L 129.889176 185.923793 
+L 131.25738 187.967198 
+L 132.625585 185.487801 
+L 133.99379 187.468009 
+L 136.730199 185.747779 
+L 138.098404 187.161364 
+L 139.466608 184.898266 
+L 140.834813 183.193765 
+L 142.203018 181.968457 
+L 143.571222 184.286977 
+L 144.939427 182.572968 
+L 146.307632 181.720885 
+L 147.675836 181.849485 
+L 149.044041 181.176069 
+L 150.412246 183.284058 
+L 151.78045 179.284911 
+L 153.148655 180.480727 
+L 154.51686 180.317131 
+L 155.885064 179.798556 
+L 157.253269 177.922487 
+L 158.621474 177.554922 
+L 159.989678 180.084948 
+L 161.357883 177.657053 
+L 162.726088 176.453098 
+L 164.094292 175.700666 
+L 165.462497 177.763822 
+L 166.830702 176.632458 
+L 168.198906 174.952041 
+L 169.567111 173.016677 
+L 170.935315 173.914173 
+L 172.30352 174.089278 
+L 173.671725 172.840783 
+L 175.039929 170.718428 
+L 176.408134 172.267084 
+L 177.776339 171.890662 
+L 179.144543 170.221038 
+L 180.512748 168.085726 
+L 181.880953 167.407171 
+L 183.249157 171.020214 
+L 184.617362 168.317652 
+L 185.985567 168.88164 
+L 187.353771 167.442997 
+L 188.721976 165.71106 
+L 190.090181 168.210178 
+L 191.458385 166.076098 
+L 192.82659 166.428377 
+L 194.194795 165.884337 
+L 195.562999 166.497502 
+L 196.931204 163.46307 
+L 198.299409 164.363744 
+L 199.667613 163.942854 
+L 201.035818 162.34459 
+L 202.404023 163.692546 
+L 203.772227 162.381582 
+L 205.140432 162.822223 
+L 206.508637 161.778606 
+L 207.876841 160.279964 
+L 209.245046 162.193114 
+L 210.613251 159.715791 
+L 211.981455 159.399046 
+L 213.34966 162.047997 
+L 214.717865 157.867553 
+L 216.086069 159.806544 
+L 218.822479 157.378852 
+L 220.190683 156.641271 
+L 221.558888 157.876422 
+L 222.927093 155.713172 
+L 225.663502 155.596638 
+L 227.031707 155.435302 
+L 228.399911 153.650948 
+L 229.768116 154.593103 
+L 231.136321 154.666944 
+L 232.504525 154.129239 
+L 233.87273 153.298418 
+L 236.609139 152.778349 
+L 237.977344 151.378414 
+L 239.345548 152.200521 
+L 240.713753 151.253657 
+L 243.450162 149.767797 
+L 244.818367 150.866137 
+L 246.186572 149.626528 
+L 247.554776 150.574743 
+L 248.922981 149.524056 
+L 250.291186 149.105712 
+L 251.65939 149.313034 
+L 253.027595 147.650521 
+L 254.3958 148.511886 
+L 255.764004 147.070016 
+L 257.132209 148.379192 
+L 261.236823 146.441869 
+L 262.605028 146.633576 
+L 263.973232 146.102457 
+L 265.341437 145.710078 
+L 266.709642 144.550059 
+L 268.077846 145.317503 
+L 269.446051 143.540554 
+L 270.814256 144.103813 
+L 272.18246 143.122233 
+L 273.550665 144.000838 
+L 274.91887 144.337197 
+L 276.287074 140.892799 
+L 277.655279 143.849619 
+L 279.023484 142.749128 
+L 280.391688 142.656594 
+L 281.759893 141.959244 
+L 283.128098 141.834075 
+L 287.232712 140.569916 
+L 288.600916 140.883739 
+L 289.969121 139.628789 
+L 291.337326 139.549367 
+L 292.70553 139.678355 
+L 294.073735 138.629168 
+L 295.44194 139.82257 
+L 296.810144 139.148108 
+L 298.178349 139.000344 
+L 299.546554 138.660232 
+L 300.914758 138.720005 
+L 302.282963 138.135017 
+L 303.651167 137.048887 
+L 305.019372 138.549914 
+L 306.387577 136.252943 
+L 309.123986 136.987213 
+L 310.492191 136.573249 
+L 313.2286 135.185673 
+L 314.596805 136.679731 
+L 315.965009 135.804796 
+L 317.333214 135.360007 
+L 318.701419 135.519138 
+L 320.069623 134.98129 
+L 321.437828 135.048521 
+L 322.806033 134.528135 
+L 324.174237 134.449155 
+L 325.542442 133.656343 
+L 326.910647 133.424937 
+L 328.278851 133.67794 
+L 329.647056 133.140451 
+L 331.015261 133.035295 
+L 332.383465 133.118997 
+L 333.75167 131.690675 
+L 335.119875 131.747364 
+L 336.488079 132.624666 
+L 337.856284 130.723205 
+L 339.224489 131.692886 
+L 339.224489 131.692886 
+" clip-path="url(#p374b0551c6)" style="fill: none; stroke: #1f77b4; stroke-width: 1.5; stroke-linecap: square"/>
+</g>
+<g id="line2d_36">
+<defs>
+<path id="mf6f65ae81c" d="M 0 3 
+C 0.795609 3 1.55874 2.683901 2.12132 2.12132 
+C 2.683901 1.55874 3 0.795609 3 0 
+C 3 -0.795609 2.683901 -1.55874 2.12132 -2.12132 
+C 1.55874 -2.683901 0.795609 -3 0 -3 
+C -0.795609 -3 -1.55874 -2.683901 -2.12132 -2.12132 
+C -2.683901 -1.55874 -3 -0.795609 -3 0 
+C -3 0.795609 -2.683901 1.55874 -2.12132 2.12132 
+C -1.55874 2.683901 -0.795609 3 0 3 
+z
+" style="stroke: #1f77b4"/>
+</defs>
+<g clip-path="url(#p374b0551c6)">
+<use xlink:href="#mf6f65ae81c" x="97.052264" y="194.477801" style="fill: #1f77b4; stroke: #1f77b4"/>
+</g>
+</g>
+<g id="line2d_37">
+<path d="M 66.951761 22.332243 
+L 68.319966 44.148756 
+L 69.688171 77.943723 
+L 71.056375 115.468011 
+L 72.42458 146.255809 
+L 73.792785 160.382627 
+L 75.160989 171.535676 
+L 76.529194 175.627704 
+L 77.897399 178.971357 
+L 79.265603 180.980979 
+L 80.633808 181.051085 
+L 82.002013 183.5279 
+L 83.370217 185.660576 
+L 84.738422 186.315944 
+L 86.106627 187.654732 
+L 87.474831 185.389895 
+L 88.843036 187.292581 
+L 90.211241 188.794122 
+L 91.579445 188.425283 
+L 92.94765 188.906419 
+L 94.315855 188.206296 
+L 95.684059 188.94255 
+L 97.052264 190.733465 
+L 98.420469 189.771135 
+L 99.788673 189.548819 
+L 101.156878 189.775032 
+L 102.525083 189.787605 
+L 103.893287 189.321596 
+L 105.261492 189.571474 
+L 106.629696 190.977535 
+L 107.997901 190.527093 
+L 109.366106 189.00944 
+L 110.73431 190.036241 
+L 112.102515 190.757674 
+L 113.47072 189.641597 
+L 114.838924 189.188986 
+L 116.207129 188.33915 
+L 117.575334 189.015178 
+L 118.943538 189.965448 
+L 120.311743 187.763264 
+L 121.679948 191.43441 
+L 123.048152 190.678653 
+L 124.416357 190.374493 
+L 125.784562 190.644422 
+L 127.152766 188.628226 
+L 128.520971 188.678072 
+L 129.889176 187.056262 
+L 131.25738 190.317087 
+L 132.625585 187.751611 
+L 133.99379 189.913952 
+L 135.361994 188.949584 
+L 136.730199 189.660446 
+L 138.098404 190.864706 
+L 139.466608 190.72642 
+L 140.834813 187.103294 
+L 142.203018 188.971821 
+L 143.571222 189.610402 
+L 144.939427 189.566669 
+L 146.307632 187.663463 
+L 147.675836 189.120327 
+L 149.044041 189.248383 
+L 150.412246 190.384157 
+L 151.78045 188.684024 
+L 153.148655 188.842391 
+L 154.51686 188.322309 
+L 155.885064 189.461508 
+L 157.253269 188.005308 
+L 158.621474 187.192452 
+L 159.989678 189.345643 
+L 161.357883 188.290618 
+L 162.726088 188.137774 
+L 164.094292 188.166782 
+L 165.462497 189.611807 
+L 166.830702 189.342841 
+L 168.198906 188.024796 
+L 169.567111 185.893811 
+L 170.935315 187.247372 
+L 172.30352 187.208456 
+L 173.671725 188.467367 
+L 175.039929 186.56504 
+L 176.408134 186.789358 
+L 177.776339 187.291224 
+L 179.144543 187.953184 
+L 180.512748 185.410022 
+L 181.880953 185.914703 
+L 183.249157 184.163589 
+L 184.617362 188.031913 
+L 185.985567 187.261183 
+L 187.353771 186.157572 
+L 188.721976 186.440528 
+L 190.090181 187.060236 
+L 191.458385 186.451667 
+L 192.82659 187.309864 
+L 194.194795 186.791456 
+L 195.562999 187.591182 
+L 196.931204 185.643449 
+L 198.299409 187.003117 
+L 201.035818 184.456095 
+L 202.404023 185.945899 
+L 203.772227 186.62189 
+L 205.140432 186.514279 
+L 206.508637 186.028883 
+L 207.876841 184.056665 
+L 209.245046 186.638217 
+L 210.613251 185.550723 
+L 211.981455 186.287749 
+L 213.34966 184.921752 
+L 214.717865 184.292696 
+L 217.454274 186.480723 
+L 218.822479 183.841209 
+L 220.190683 184.655541 
+L 221.558888 185.95904 
+L 222.927093 184.372967 
+L 224.295297 183.9149 
+L 225.663502 184.187559 
+L 227.031707 185.389734 
+L 228.399911 183.023805 
+L 229.768116 184.776258 
+L 231.136321 184.673714 
+L 232.504525 185.194441 
+L 233.87273 181.143045 
+L 235.240935 184.875007 
+L 236.609139 181.850315 
+L 237.977344 184.909489 
+L 239.345548 182.493241 
+L 240.713753 184.051149 
+L 242.081958 184.384973 
+L 243.450162 184.308647 
+L 244.818367 182.782066 
+L 246.186572 182.893998 
+L 247.554776 183.765276 
+L 248.922981 184.017951 
+L 250.291186 183.622555 
+L 251.65939 183.415454 
+L 253.027595 182.220666 
+L 254.3958 182.688588 
+L 255.764004 182.985313 
+L 257.132209 184.696232 
+L 258.500414 185.025419 
+L 259.868618 181.176385 
+L 261.236823 183.280771 
+L 262.605028 182.843458 
+L 263.973232 182.180883 
+L 265.341437 184.220912 
+L 266.709642 181.666347 
+L 268.077846 182.169618 
+L 269.446051 183.321211 
+L 270.814256 180.046623 
+L 272.18246 183.081008 
+L 273.550665 184.32725 
+L 276.287074 181.147712 
+L 277.655279 180.880013 
+L 279.023484 183.706824 
+L 280.391688 181.5298 
+L 281.759893 182.356012 
+L 283.128098 183.023655 
+L 284.496302 183.011888 
+L 285.864507 182.430851 
+L 287.232712 181.127376 
+L 288.600916 182.389514 
+L 289.969121 179.531502 
+L 291.337326 181.787208 
+L 292.70553 180.119012 
+L 294.073735 182.186465 
+L 295.44194 178.535485 
+L 296.810144 181.948718 
+L 298.178349 182.11713 
+L 299.546554 179.210729 
+L 300.914758 182.202672 
+L 302.282963 181.366748 
+L 303.651167 182.326658 
+L 305.019372 181.87826 
+L 306.387577 180.316288 
+L 307.755781 180.925025 
+L 309.123986 181.770056 
+L 310.492191 181.531258 
+L 311.860395 178.244993 
+L 313.2286 180.520378 
+L 314.596805 176.736358 
+L 315.965009 183.156838 
+L 317.333214 181.556041 
+L 318.701419 180.268384 
+L 320.069623 182.207751 
+L 321.437828 178.874365 
+L 322.806033 182.139833 
+L 324.174237 177.587402 
+L 325.542442 181.801939 
+L 326.910647 177.737993 
+L 328.278851 181.006449 
+L 329.647056 179.661195 
+L 331.015261 181.126987 
+L 332.383465 180.645924 
+L 333.75167 178.847269 
+L 335.119875 180.060458 
+L 336.488079 179.579867 
+L 337.856284 178.44625 
+L 339.224489 178.894283 
+L 339.224489 178.894283 
+" clip-path="url(#p374b0551c6)" style="fill: none; stroke: #ff7f0e; stroke-width: 1.5; stroke-linecap: square"/>
+</g>
+<g id="line2d_38">
+<defs>
+<path id="mae700573e9" d="M 0 3 
+C 0.795609 3 1.55874 2.683901 2.12132 2.12132 
+C 2.683901 1.55874 3 0.795609 3 0 
+C 3 -0.795609 2.683901 -1.55874 2.12132 -2.12132 
+C 1.55874 -2.683901 0.795609 -3 0 -3 
+C -0.795609 -3 -1.55874 -2.683901 -2.12132 -2.12132 
+C -2.683901 -1.55874 -3 -0.795609 -3 0 
+C -3 0.795609 -2.683901 1.55874 -2.12132 2.12132 
+C -1.55874 2.683901 -0.795609 3 0 3 
+z
+" style="stroke: #ff7f0e"/>
+</defs>
+<g clip-path="url(#p374b0551c6)">
+<use xlink:href="#mae700573e9" x="121.679948" y="191.43441" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+</g>
+</g>
+<g id="line2d_39">
+<path d="M 66.951761 16.42 
+L 68.319966 25.570855 
+L 69.688171 40.604718 
+L 71.056375 62.944378 
+L 73.792785 117.334464 
+L 75.160989 139.330164 
+L 76.529194 153.839279 
+L 77.897399 162.795887 
+L 79.265603 168.565373 
+L 80.633808 172.102413 
+L 82.002013 175.981524 
+L 86.106627 182.663177 
+L 88.843036 185.103144 
+L 90.211241 185.929817 
+L 91.579445 187.969403 
+L 92.94765 189.612685 
+L 94.315855 190.335099 
+L 95.684059 190.464619 
+L 97.052264 192.105131 
+L 98.420469 193.376093 
+L 99.788673 192.694415 
+L 101.156878 191.793388 
+L 103.893287 191.123426 
+L 105.261492 192.790472 
+L 106.629696 193.611707 
+L 107.997901 194.915379 
+L 109.366106 194.847028 
+L 110.73431 195.061611 
+L 112.102515 196.021823 
+L 113.47072 193.635103 
+L 114.838924 194.088046 
+L 116.207129 196.69404 
+L 117.575334 196.227645 
+L 118.943538 194.82402 
+L 120.311743 195.137663 
+L 121.679948 196.756706 
+L 123.048152 197.648354 
+L 124.416357 197.651389 
+L 125.784562 197.161687 
+L 127.152766 197.696064 
+L 128.520971 196.266827 
+L 129.889176 196.828248 
+L 131.25738 195.937623 
+L 132.625585 197.087919 
+L 133.99379 198.574779 
+L 135.361994 198.543112 
+L 136.730199 197.754836 
+L 139.466608 197.768395 
+L 140.834813 197.466417 
+L 142.203018 198.751606 
+L 143.571222 200.82 
+L 144.939427 197.914726 
+L 146.307632 196.325286 
+L 147.675836 197.71159 
+L 149.044041 196.064405 
+L 150.412246 198.551105 
+L 151.78045 199.729312 
+L 153.148655 198.395801 
+L 154.51686 198.257942 
+L 155.885064 198.99558 
+L 157.253269 199.028747 
+L 158.621474 197.962086 
+L 161.357883 199.207612 
+L 162.726088 197.361552 
+L 164.094292 197.035156 
+L 165.462497 198.223167 
+L 166.830702 198.21625 
+L 168.198906 196.513013 
+L 169.567111 195.321583 
+L 170.935315 195.832133 
+L 172.30352 197.604746 
+L 173.671725 197.817241 
+L 175.039929 197.75581 
+L 176.408134 196.955551 
+L 177.776339 196.997441 
+L 179.144543 196.920149 
+L 180.512748 195.661856 
+L 181.880953 195.887447 
+L 183.249157 196.638406 
+L 185.985567 195.34117 
+L 187.353771 195.340043 
+L 188.721976 195.227152 
+L 190.090181 198.366955 
+L 191.458385 198.549249 
+L 192.82659 195.958291 
+L 194.194795 196.640196 
+L 195.562999 196.114395 
+L 196.931204 195.794396 
+L 198.299409 195.823458 
+L 199.667613 195.270783 
+L 201.035818 197.515941 
+L 202.404023 196.412067 
+L 203.772227 196.396413 
+L 205.140432 197.309321 
+L 206.508637 196.035612 
+L 207.876841 195.588478 
+L 209.245046 192.729414 
+L 210.613251 196.475886 
+L 211.981455 196.536902 
+L 213.34966 195.62994 
+L 214.717865 195.011268 
+L 217.454274 197.574582 
+L 218.822479 196.784103 
+L 220.190683 196.25697 
+L 221.558888 197.131266 
+L 222.927093 196.325008 
+L 224.295297 195.016805 
+L 225.663502 194.911127 
+L 227.031707 196.316079 
+L 228.399911 194.736491 
+L 229.768116 193.682302 
+L 231.136321 193.966432 
+L 232.504525 194.10921 
+L 235.240935 193.705331 
+L 236.609139 193.928962 
+L 237.977344 192.84486 
+L 239.345548 193.55067 
+L 240.713753 193.9158 
+L 242.081958 192.425162 
+L 243.450162 192.801752 
+L 244.818367 192.723008 
+L 246.186572 191.754845 
+L 248.922981 192.513579 
+L 250.291186 192.837782 
+L 251.65939 192.311001 
+L 253.027595 191.63059 
+L 254.3958 192.099005 
+L 255.764004 190.800649 
+L 257.132209 192.604284 
+L 258.500414 192.775708 
+L 259.868618 192.241843 
+L 261.236823 191.207262 
+L 262.605028 190.765198 
+L 263.973232 191.019828 
+L 265.341437 190.299225 
+L 266.709642 190.388137 
+L 268.077846 190.233756 
+L 269.446051 191.039713 
+L 270.814256 189.952468 
+L 272.18246 189.121474 
+L 273.550665 188.58922 
+L 274.91887 190.954918 
+L 276.287074 190.250394 
+L 277.655279 190.210599 
+L 279.023484 190.578738 
+L 281.759893 188.413827 
+L 283.128098 189.249739 
+L 284.496302 189.907516 
+L 285.864507 188.116929 
+L 287.232712 187.357218 
+L 288.600916 189.150464 
+L 289.969121 188.598435 
+L 291.337326 187.756553 
+L 292.70553 186.719838 
+L 294.073735 186.58482 
+L 295.44194 187.546649 
+L 296.810144 187.254603 
+L 298.178349 186.632599 
+L 299.546554 187.078242 
+L 300.914758 186.629701 
+L 302.282963 187.178892 
+L 303.651167 189.711918 
+L 306.387577 186.199679 
+L 307.755781 184.47514 
+L 309.123986 184.213101 
+L 310.492191 184.875072 
+L 311.860395 183.323105 
+L 313.2286 184.018567 
+L 314.596805 186.074809 
+L 317.333214 188.566104 
+L 318.701419 187.492864 
+L 320.069623 185.668901 
+L 321.437828 184.590939 
+L 322.806033 186.69196 
+L 325.542442 185.590566 
+L 326.910647 185.880335 
+L 328.278851 184.007153 
+L 329.647056 184.951656 
+L 331.015261 184.402119 
+L 332.383465 184.362007 
+L 333.75167 182.691014 
+L 336.488079 183.569069 
+L 337.856284 184.199153 
+L 339.224489 184.514798 
+L 339.224489 184.514798 
+" clip-path="url(#p374b0551c6)" style="fill: none; stroke: #2ca02c; stroke-width: 1.5; stroke-linecap: square"/>
+</g>
+<g id="line2d_40">
+<defs>
+<path id="ma446b50ab8" d="M 0 3 
+C 0.795609 3 1.55874 2.683901 2.12132 2.12132 
+C 2.683901 1.55874 3 0.795609 3 0 
+C 3 -0.795609 2.683901 -1.55874 2.12132 -2.12132 
+C 1.55874 -2.683901 0.795609 -3 0 -3 
+C -0.795609 -3 -1.55874 -2.683901 -2.12132 -2.12132 
+C -2.683901 -1.55874 -3 -0.795609 -3 0 
+C -3 0.795609 -2.683901 1.55874 -2.12132 2.12132 
+C -1.55874 2.683901 -0.795609 3 0 3 
+z
+" style="stroke: #2ca02c"/>
+</defs>
+<g clip-path="url(#p374b0551c6)">
+<use xlink:href="#ma446b50ab8" x="143.571222" y="200.82" style="fill: #2ca02c; stroke: #2ca02c"/>
+</g>
+</g>
+<g id="patch_3">
+<path d="M 53.338125 210.04 
+L 53.338125 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_4">
+<path d="M 352.838125 210.04 
+L 352.838125 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_5">
+<path d="M 53.338125 210.04 
+L 352.838125 210.04 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_6">
+<path d="M 53.338125 7.2 
+L 352.838125 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="legend_1">
+<g id="patch_7">
+<path d="M 215.314062 64.437813 
+L 345.138125 64.437813 
+Q 347.338125 64.437813 347.338125 62.237813 
+L 347.338125 14.9 
+Q 347.338125 12.7 345.138125 12.7 
+L 215.314062 12.7 
+Q 213.114062 12.7 213.114062 14.9 
+L 213.114062 62.237813 
+Q 213.114062 64.437813 215.314062 64.437813 
+L 215.314062 64.437813 
+z
+" style="fill: none; opacity: 0.35; stroke: currentColor; stroke-linejoin: miter"/>
+</g>
+<g id="line2d_41">
+<path d="M 217.514062 21.608281 
+L 228.514062 21.608281 
+L 239.514062 21.608281 
+" style="fill: none; stroke: #1f77b4; stroke-width: 1.5; stroke-linecap: square"/>
+</g>
+<g id="text_20">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="248.314063" y="25.458281" transform="rotate(-0 248.314063 25.458281)">baseline</text>
+</g>
+<g id="line2d_42">
+<path d="M 217.514062 37.754219 
+L 228.514062 37.754219 
+L 239.514062 37.754219 
+" style="fill: none; stroke: #ff7f0e; stroke-width: 1.5; stroke-linecap: square"/>
+</g>
+<g id="text_21">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="248.314063" y="41.604219" transform="rotate(-0 248.314063 41.604219)">weight decay 1.0</text>
+</g>
+<g id="line2d_43">
+<path d="M 217.514062 53.900156 
+L 228.514062 53.900156 
+L 239.514062 53.900156 
+" style="fill: none; stroke: #2ca02c; stroke-width: 1.5; stroke-linecap: square"/>
+</g>
+<g id="text_22">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="248.314063" y="57.750156" transform="rotate(-0 248.314063 57.750156)">dropout 0.5</text>
+</g>
+</g>
+</g>
+<g id="axes_2">
+<g id="patch_8">
+<path d="M 403.978125 210.04 
+L 703.478125 210.04 
+L 703.478125 7.2 
+L 403.978125 7.2 
+L 403.978125 210.04 
+z
+" style="fill: none"/>
+</g>
+<g id="matplotlib.axis_3">
+<g id="xtick_10">
+<g id="line2d_44">
+<path d="M 416.223557 210.04 
+L 416.223557 7.2 
+" clip-path="url(#pe0395cee11)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_45">
+<g>
+<use xlink:href="#m738a8349b0" x="416.223557" y="210.04" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_23">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="416.223557" y="225.398281" transform="rotate(-0 416.223557 225.398281)">0</text>
+</g>
+</g>
+<g id="xtick_11">
+<g id="line2d_46">
+<path d="M 450.428673 210.04 
+L 450.428673 7.2 
+" clip-path="url(#pe0395cee11)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_47">
+<g>
+<use xlink:href="#m738a8349b0" x="450.428673" y="210.04" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_24">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="450.428673" y="225.398281" transform="rotate(-0 450.428673 225.398281)">25</text>
+</g>
+</g>
+<g id="xtick_12">
+<g id="line2d_48">
+<path d="M 484.63379 210.04 
+L 484.63379 7.2 
+" clip-path="url(#pe0395cee11)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_49">
+<g>
+<use xlink:href="#m738a8349b0" x="484.63379" y="210.04" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_25">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="484.63379" y="225.398281" transform="rotate(-0 484.63379 225.398281)">50</text>
+</g>
+</g>
+<g id="xtick_13">
+<g id="line2d_50">
+<path d="M 518.838906 210.04 
+L 518.838906 7.2 
+" clip-path="url(#pe0395cee11)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_51">
+<g>
+<use xlink:href="#m738a8349b0" x="518.838906" y="210.04" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_26">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="518.838906" y="225.398281" transform="rotate(-0 518.838906 225.398281)">75</text>
+</g>
+</g>
+<g id="xtick_14">
+<g id="line2d_52">
+<path d="M 553.044023 210.04 
+L 553.044023 7.2 
+" clip-path="url(#pe0395cee11)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_53">
+<g>
+<use xlink:href="#m738a8349b0" x="553.044023" y="210.04" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_27">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="553.044023" y="225.398281" transform="rotate(-0 553.044023 225.398281)">100</text>
+</g>
+</g>
+<g id="xtick_15">
+<g id="line2d_54">
+<path d="M 587.249139 210.04 
+L 587.249139 7.2 
+" clip-path="url(#pe0395cee11)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_55">
+<g>
+<use xlink:href="#m738a8349b0" x="587.249139" y="210.04" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_28">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="587.249139" y="225.398281" transform="rotate(-0 587.249139 225.398281)">125</text>
+</g>
+</g>
+<g id="xtick_16">
+<g id="line2d_56">
+<path d="M 621.454256 210.04 
+L 621.454256 7.2 
+" clip-path="url(#pe0395cee11)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_57">
+<g>
+<use xlink:href="#m738a8349b0" x="621.454256" y="210.04" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_29">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="621.454256" y="225.398281" transform="rotate(-0 621.454256 225.398281)">150</text>
+</g>
+</g>
+<g id="xtick_17">
+<g id="line2d_58">
+<path d="M 655.659372 210.04 
+L 655.659372 7.2 
+" clip-path="url(#pe0395cee11)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_59">
+<g>
+<use xlink:href="#m738a8349b0" x="655.659372" y="210.04" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_30">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="655.659372" y="225.398281" transform="rotate(-0 655.659372 225.398281)">175</text>
+</g>
+</g>
+<g id="xtick_18">
+<g id="line2d_60">
+<path d="M 689.864489 210.04 
+L 689.864489 7.2 
+" clip-path="url(#pe0395cee11)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_61">
+<g>
+<use xlink:href="#m738a8349b0" x="689.864489" y="210.04" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_31">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="689.864489" y="225.398281" transform="rotate(-0 689.864489 225.398281)">200</text>
+</g>
+</g>
+<g id="text_32">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="553.728125" y="240.044219" transform="rotate(-0 553.728125 240.044219)">epoch</text>
+</g>
+</g>
+<g id="matplotlib.axis_4">
+<g id="ytick_9">
+<g id="line2d_62">
+<path d="M 403.978125 205.150607 
+L 703.478125 205.150607 
+" clip-path="url(#pe0395cee11)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_63">
+<g>
+<use xlink:href="#m713c84dba7" x="403.978125" y="205.150607" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_33">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="396.978125" y="209.329748" transform="rotate(-0 396.978125 209.329748)">0.2</text>
+</g>
+</g>
+<g id="ytick_10">
+<g id="line2d_64">
+<path d="M 403.978125 179.027274 
+L 703.478125 179.027274 
+" clip-path="url(#pe0395cee11)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_65">
+<g>
+<use xlink:href="#m713c84dba7" x="403.978125" y="179.027274" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_34">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="396.978125" y="183.206415" transform="rotate(-0 396.978125 183.206415)">0.3</text>
+</g>
+</g>
+<g id="ytick_11">
+<g id="line2d_66">
+<path d="M 403.978125 152.903941 
+L 703.478125 152.903941 
+" clip-path="url(#pe0395cee11)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_67">
+<g>
+<use xlink:href="#m713c84dba7" x="403.978125" y="152.903941" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_35">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="396.978125" y="157.083081" transform="rotate(-0 396.978125 157.083081)">0.4</text>
+</g>
+</g>
+<g id="ytick_12">
+<g id="line2d_68">
+<path d="M 403.978125 126.780608 
+L 703.478125 126.780608 
+" clip-path="url(#pe0395cee11)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_69">
+<g>
+<use xlink:href="#m713c84dba7" x="403.978125" y="126.780608" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_36">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="396.978125" y="130.959748" transform="rotate(-0 396.978125 130.959748)">0.5</text>
+</g>
+</g>
+<g id="ytick_13">
+<g id="line2d_70">
+<path d="M 403.978125 100.657274 
+L 703.478125 100.657274 
+" clip-path="url(#pe0395cee11)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_71">
+<g>
+<use xlink:href="#m713c84dba7" x="403.978125" y="100.657274" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_37">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="396.978125" y="104.836415" transform="rotate(-0 396.978125 104.836415)">0.6</text>
+</g>
+</g>
+<g id="ytick_14">
+<g id="line2d_72">
+<path d="M 403.978125 74.533941 
+L 703.478125 74.533941 
+" clip-path="url(#pe0395cee11)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_73">
+<g>
+<use xlink:href="#m713c84dba7" x="403.978125" y="74.533941" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_38">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="396.978125" y="78.713082" transform="rotate(-0 396.978125 78.713082)">0.7</text>
+</g>
+</g>
+<g id="ytick_15">
+<g id="line2d_74">
+<path d="M 403.978125 48.410608 
+L 703.478125 48.410608 
+" clip-path="url(#pe0395cee11)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_75">
+<g>
+<use xlink:href="#m713c84dba7" x="403.978125" y="48.410608" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_39">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="396.978125" y="52.589748" transform="rotate(-0 396.978125 52.589748)">0.8</text>
+</g>
+</g>
+<g id="ytick_16">
+<g id="line2d_76">
+<path d="M 403.978125 22.287275 
+L 703.478125 22.287275 
+" clip-path="url(#pe0395cee11)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_77">
+<g>
+<use xlink:href="#m713c84dba7" x="403.978125" y="22.287275" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_40">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="396.978125" y="26.466415" transform="rotate(-0 396.978125 26.466415)">0.9</text>
+</g>
+</g>
+<g id="text_41">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="373.197031" y="108.62" transform="rotate(-90 373.197031 108.62)">validation accuracy</text>
+</g>
+</g>
+<g id="line2d_78">
+<path d="M 417.591761 103.381366 
+L 418.959966 54.836672 
+L 420.328171 47.851818 
+L 421.696375 45.057886 
+L 423.06458 35.977572 
+L 424.432785 31.786666 
+L 425.800989 26.897273 
+L 427.169194 23.404854 
+L 428.537399 22.706367 
+L 429.905603 19.563183 
+L 431.273808 24.452576 
+L 432.642013 21.309393 
+L 434.010217 20.610906 
+L 435.378422 21.658644 
+L 436.746627 17.467723 
+L 438.114831 23.404854 
+L 439.483036 21.309393 
+L 440.851241 18.515461 
+L 442.219445 22.00788 
+L 443.58765 20.960157 
+L 444.955855 21.309393 
+L 446.324059 23.055602 
+L 447.692264 21.309393 
+L 449.060469 22.357116 
+L 450.428673 24.452576 
+L 451.796878 23.404854 
+L 453.165083 24.103341 
+L 454.533287 24.103341 
+L 455.901492 26.897273 
+L 457.269696 25.84955 
+L 458.637901 25.84955 
+L 460.006106 26.548037 
+L 461.37431 30.389692 
+L 462.742515 26.198786 
+L 464.11072 30.040456 
+L 465.478924 30.040456 
+L 466.847129 31.786666 
+L 468.215334 31.43743 
+L 469.583538 31.43743 
+L 470.951743 36.326823 
+L 472.319948 31.088179 
+L 473.688152 31.43743 
+L 475.056357 33.882126 
+L 476.424562 34.231362 
+L 477.792766 38.422268 
+L 479.160971 37.723797 
+L 480.529176 39.819242 
+L 481.89738 35.977572 
+L 483.265585 38.073032 
+L 484.63379 37.02531 
+L 486.001994 38.422268 
+L 487.370199 40.168493 
+L 488.738404 40.168493 
+L 491.474813 42.263938 
+L 492.843018 41.914703 
+L 494.211222 40.517729 
+L 495.579427 41.216216 
+L 496.947632 44.010148 
+L 498.315836 42.61319 
+L 499.684041 44.010148 
+L 501.052246 41.216216 
+L 502.42045 44.010148 
+L 503.788655 43.660912 
+L 505.15686 42.962425 
+L 506.525064 43.660912 
+L 507.893269 46.105609 
+L 509.261474 46.105609 
+L 510.629678 43.660912 
+L 511.997883 44.359399 
+L 513.366088 45.407122 
+L 514.734292 45.756373 
+L 516.102497 46.454844 
+L 517.470702 44.708635 
+L 518.838906 46.804096 
+L 520.207111 47.851818 
+L 521.575315 46.804096 
+L 522.94352 47.502583 
+L 524.311725 47.502583 
+L 525.679929 49.947279 
+L 527.048134 48.550305 
+L 528.416339 48.899541 
+L 529.784543 47.502583 
+L 531.152748 51.344237 
+L 532.520953 50.296515 
+L 533.889157 47.502583 
+L 535.257362 48.899541 
+L 536.625567 49.598028 
+L 539.361976 48.20107 
+L 540.730181 51.693489 
+L 542.098385 49.598028 
+L 543.46659 50.995002 
+L 544.834795 49.598028 
+L 546.202999 51.344237 
+L 547.571204 50.995002 
+L 550.307613 50.995002 
+L 551.675818 49.598028 
+L 553.044023 51.693489 
+L 554.412227 50.645766 
+L 555.780432 52.391976 
+L 558.516841 53.090462 
+L 559.885046 52.741211 
+L 561.253251 51.693489 
+L 562.621455 52.741211 
+L 563.98966 52.042724 
+L 565.357865 54.138185 
+L 566.726069 50.995002 
+L 569.462479 53.090462 
+L 570.830683 51.344237 
+L 572.198888 52.391976 
+L 573.567093 52.741211 
+L 574.935297 51.693489 
+L 576.303502 54.138185 
+L 577.671707 53.090462 
+L 579.039911 52.391976 
+L 580.408116 51.344237 
+L 581.776321 52.042724 
+L 583.144525 52.042724 
+L 584.51273 53.439698 
+L 585.880935 52.391976 
+L 587.249139 52.391976 
+L 588.617344 53.439698 
+L 589.985548 53.090462 
+L 591.353753 52.391976 
+L 592.721958 53.090462 
+L 594.090162 55.884395 
+L 595.458367 53.090462 
+L 596.826572 53.439698 
+L 598.194776 52.391976 
+L 599.562981 53.090462 
+L 600.931186 53.439698 
+L 602.29939 54.487421 
+L 603.667595 54.138185 
+L 605.0358 51.693489 
+L 606.404004 54.138185 
+L 609.140414 52.042724 
+L 610.508618 53.788934 
+L 613.245028 53.090462 
+L 614.613232 54.138185 
+L 615.981437 53.788934 
+L 617.349642 54.138185 
+L 618.717846 53.090462 
+L 620.086051 53.788934 
+L 621.454256 53.788934 
+L 622.82246 54.836672 
+L 624.190665 54.487421 
+L 625.55887 52.741211 
+L 626.927074 55.884395 
+L 628.295279 52.042724 
+L 629.663484 53.439698 
+L 631.031688 53.090462 
+L 632.399893 53.439698 
+L 633.768098 52.042724 
+L 635.136302 55.185908 
+L 636.504507 54.487421 
+L 637.872712 52.391976 
+L 639.240916 53.090462 
+L 640.609121 54.487421 
+L 641.977326 53.788934 
+L 643.34553 54.836672 
+L 644.713735 54.487421 
+L 646.08194 53.439698 
+L 647.450144 53.090462 
+L 648.818349 53.439698 
+L 650.186554 55.535159 
+L 651.554758 54.487421 
+L 652.922963 55.535159 
+L 654.291167 55.185908 
+L 655.659372 52.741211 
+L 657.027577 56.932117 
+L 658.395781 53.090462 
+L 662.500395 54.138185 
+L 663.8686 54.138185 
+L 665.236805 54.836672 
+L 666.605009 53.788934 
+L 667.973214 53.439698 
+L 670.709623 54.138185 
+L 672.077828 53.439698 
+L 673.446033 53.788934 
+L 674.814237 54.836672 
+L 676.182442 54.138185 
+L 677.550647 55.884395 
+L 678.918851 54.487421 
+L 681.655261 53.788934 
+L 683.023465 54.138185 
+L 684.39167 53.788934 
+L 687.128079 55.185908 
+L 688.496284 54.836672 
+L 689.864489 54.138185 
+L 689.864489 54.138185 
+" clip-path="url(#pe0395cee11)" style="fill: none; stroke: #1f77b4; stroke-width: 1.5; stroke-linecap: square"/>
+</g>
+<g id="line2d_79">
+<path d="M 417.591761 103.730601 
+L 418.959966 53.788934 
+L 420.328171 48.20107 
+L 421.696375 46.804096 
+L 423.06458 37.723797 
+L 424.432785 33.18364 
+L 425.800989 26.897273 
+L 427.169194 24.452576 
+L 428.537399 23.055602 
+L 429.905603 20.960157 
+L 431.273808 26.198786 
+L 432.642013 22.357116 
+L 434.010217 21.658644 
+L 435.378422 22.706367 
+L 436.746627 16.42 
+L 438.114831 23.404854 
+L 439.483036 20.960157 
+L 440.851241 17.467723 
+L 442.219445 18.864696 
+L 443.58765 20.960157 
+L 444.955855 21.658644 
+L 446.324059 20.26167 
+L 447.692264 20.610906 
+L 449.060469 20.26167 
+L 450.428673 20.26167 
+L 451.796878 22.357116 
+L 453.165083 21.658644 
+L 454.533287 21.309393 
+L 455.901492 22.706367 
+L 457.269696 22.706367 
+L 458.637901 20.610906 
+L 460.006106 23.055602 
+L 461.37431 22.357116 
+L 462.742515 23.055602 
+L 464.11072 22.706367 
+L 465.478924 24.452576 
+L 466.847129 21.309393 
+L 468.215334 24.452576 
+L 469.583538 23.404854 
+L 470.951743 27.59576 
+L 472.319948 23.404854 
+L 473.688152 22.706367 
+L 475.056357 23.404854 
+L 476.424562 24.801828 
+L 479.160971 26.198786 
+L 480.529176 27.944995 
+L 483.265585 25.151063 
+L 484.63379 27.944995 
+L 486.001994 28.643482 
+L 487.370199 27.59576 
+L 490.106608 26.897273 
+L 491.474813 30.389692 
+L 492.843018 29.69122 
+L 494.211222 28.294247 
+L 495.579427 28.643482 
+L 496.947632 33.18364 
+L 498.315836 28.992734 
+L 499.684041 30.389692 
+L 501.052246 30.040456 
+L 502.42045 28.992734 
+L 503.788655 29.341969 
+L 505.15686 29.341969 
+L 506.525064 30.738943 
+L 507.893269 30.738943 
+L 509.261474 33.532875 
+L 510.629678 31.43743 
+L 511.997883 34.231362 
+L 513.366088 31.43743 
+L 514.734292 32.485153 
+L 516.102497 32.135917 
+L 517.470702 32.135917 
+L 518.838906 32.834388 
+L 520.207111 35.628336 
+L 521.575315 34.231362 
+L 522.94352 35.2791 
+L 524.311725 32.834388 
+L 525.679929 34.580613 
+L 527.048134 31.43743 
+L 528.416339 33.532875 
+L 529.784543 35.2791 
+L 531.152748 34.580613 
+L 532.520953 37.374546 
+L 533.889157 39.120755 
+L 535.257362 34.231362 
+L 536.625567 35.2791 
+L 537.993771 33.18364 
+L 539.361976 35.977572 
+L 540.730181 33.532875 
+L 542.098385 38.073032 
+L 543.46659 35.628336 
+L 544.834795 35.628336 
+L 546.202999 35.2791 
+L 547.571204 36.326823 
+L 548.939409 36.326823 
+L 551.675818 39.120755 
+L 553.044023 36.326823 
+L 554.412227 36.326823 
+L 555.780432 35.977572 
+L 557.148637 36.326823 
+L 558.516841 39.120755 
+L 559.885046 34.929849 
+L 561.253251 38.422268 
+L 562.621455 38.073032 
+L 563.98966 38.073032 
+L 565.357865 37.374546 
+L 566.726069 38.422268 
+L 568.094274 36.326823 
+L 569.462479 40.168493 
+L 570.830683 38.771519 
+L 572.198888 38.073032 
+L 573.567093 39.819242 
+L 574.935297 39.120755 
+L 576.303502 39.120755 
+L 577.671707 38.073032 
+L 579.039911 40.517729 
+L 580.408116 37.723797 
+L 581.776321 39.120755 
+L 583.144525 38.771519 
+L 584.51273 42.61319 
+L 585.880935 35.977572 
+L 587.249139 41.565452 
+L 588.617344 39.120755 
+L 589.985548 39.819242 
+L 591.353753 41.914703 
+L 592.721958 38.422268 
+L 594.090162 39.470006 
+L 595.458367 39.470006 
+L 596.826572 40.168493 
+L 598.194776 38.073032 
+L 599.562981 41.565452 
+L 600.931186 40.517729 
+L 602.29939 38.422268 
+L 603.667595 43.311661 
+L 605.0358 39.120755 
+L 606.404004 43.311661 
+L 607.772209 37.723797 
+L 609.140414 39.470006 
+L 610.508618 42.61319 
+L 611.876823 38.422268 
+L 614.613232 41.914703 
+L 615.981437 39.819242 
+L 617.349642 41.565452 
+L 618.717846 44.359399 
+L 620.086051 41.216216 
+L 621.454256 44.708635 
+L 622.82246 38.422268 
+L 624.190665 40.517729 
+L 625.55887 40.866965 
+L 626.927074 45.057886 
+L 628.295279 42.61319 
+L 629.663484 39.120755 
+L 631.031688 42.61319 
+L 632.399893 38.771519 
+L 633.768098 41.216216 
+L 635.136302 41.216216 
+L 636.504507 43.311661 
+L 637.872712 45.057886 
+L 639.240916 40.517729 
+L 640.609121 45.057886 
+L 641.977326 41.914703 
+L 643.34553 47.153331 
+L 644.713735 40.866965 
+L 646.08194 45.756373 
+L 647.450144 39.819242 
+L 648.818349 44.359399 
+L 650.186554 41.914703 
+L 651.554758 41.914703 
+L 652.922963 41.216216 
+L 654.291167 42.263938 
+L 655.659372 42.61319 
+L 657.027577 45.407122 
+L 658.395781 43.660912 
+L 659.763986 44.359399 
+L 661.132191 41.565452 
+L 662.500395 47.851818 
+L 663.8686 45.756373 
+L 665.236805 45.057886 
+L 666.605009 40.517729 
+L 667.973214 44.010148 
+L 669.341419 46.454844 
+L 670.709623 42.962425 
+L 672.077828 44.708635 
+L 673.446033 41.914703 
+L 674.814237 46.105609 
+L 676.182442 44.708635 
+L 677.550647 45.756373 
+L 678.918851 43.660912 
+L 680.287056 45.407122 
+L 681.655261 43.311661 
+L 683.023465 43.660912 
+L 684.39167 46.105609 
+L 685.759875 45.756373 
+L 687.128079 45.057886 
+L 688.496284 47.851818 
+L 689.864489 48.550305 
+L 689.864489 48.550305 
+" clip-path="url(#pe0395cee11)" style="fill: none; stroke: #ff7f0e; stroke-width: 1.5; stroke-linecap: square"/>
+</g>
+<g id="line2d_80">
+<path d="M 417.591761 200.82 
+L 418.959966 85.220752 
+L 420.328171 66.012432 
+L 421.696375 56.582882 
+L 423.06458 40.517729 
+L 424.432785 36.676059 
+L 425.800989 31.786666 
+L 427.169194 28.992734 
+L 428.537399 28.992734 
+L 429.905603 29.69122 
+L 431.273808 27.59576 
+L 432.642013 25.84955 
+L 434.010217 24.801828 
+L 435.378422 24.103341 
+L 436.746627 24.452576 
+L 438.114831 18.515461 
+L 439.483036 23.404854 
+L 440.851241 23.055602 
+L 442.219445 20.26167 
+L 443.58765 21.658644 
+L 444.955855 21.309393 
+L 446.324059 19.563183 
+L 447.692264 19.912419 
+L 449.060469 17.118487 
+L 450.428673 18.864696 
+L 451.796878 19.213948 
+L 453.165083 23.754089 
+L 454.533287 17.118487 
+L 455.901492 20.26167 
+L 457.269696 19.213948 
+L 458.637901 20.26167 
+L 460.006106 20.610906 
+L 461.37431 20.610906 
+L 462.742515 19.912419 
+L 464.11072 19.563183 
+L 465.478924 20.960157 
+L 466.847129 18.864696 
+L 468.215334 18.864696 
+L 469.583538 19.563183 
+L 470.951743 20.960157 
+L 472.319948 17.816974 
+L 473.688152 16.42 
+L 475.056357 19.912419 
+L 476.424562 19.912419 
+L 477.792766 18.515461 
+L 479.160971 21.309393 
+L 480.529176 19.213948 
+L 481.89738 20.26167 
+L 483.265585 18.864696 
+L 484.63379 19.912419 
+L 486.001994 19.912419 
+L 487.370199 20.26167 
+L 488.738404 22.357116 
+L 490.106608 21.658644 
+L 491.474813 19.912419 
+L 492.843018 20.960157 
+L 494.211222 18.864696 
+L 495.579427 21.658644 
+L 496.947632 21.309393 
+L 498.315836 19.213948 
+L 499.684041 25.500299 
+L 501.052246 19.912419 
+L 502.42045 19.912419 
+L 503.788655 23.055602 
+L 505.15686 22.00788 
+L 506.525064 24.103341 
+L 507.893269 23.055602 
+L 509.261474 22.706367 
+L 510.629678 22.00788 
+L 511.997883 25.151063 
+L 513.366088 25.151063 
+L 514.734292 24.452576 
+L 516.102497 24.103341 
+L 517.470702 24.801828 
+L 518.838906 25.84955 
+L 520.207111 27.944995 
+L 521.575315 26.548037 
+L 522.94352 27.59576 
+L 524.311725 26.198786 
+L 525.679929 25.151063 
+L 527.048134 28.992734 
+L 528.416339 28.992734 
+L 532.520953 26.897273 
+L 533.889157 27.59576 
+L 535.257362 29.69122 
+L 536.625567 29.341969 
+L 537.993771 29.69122 
+L 539.361976 32.485153 
+L 540.730181 28.643482 
+L 542.098385 27.59576 
+L 543.46659 31.088179 
+L 544.834795 31.088179 
+L 546.202999 25.84955 
+L 547.571204 31.43743 
+L 548.939409 32.485153 
+L 550.307613 30.040456 
+L 551.675818 27.944995 
+L 553.044023 29.69122 
+L 554.412227 30.738943 
+L 555.780432 30.738943 
+L 557.148637 30.040456 
+L 558.516841 28.992734 
+L 559.885046 33.532875 
+L 561.253251 32.135917 
+L 562.621455 30.389692 
+L 563.98966 31.088179 
+L 565.357865 32.135917 
+L 566.726069 30.738943 
+L 568.094274 32.135917 
+L 569.462479 30.738943 
+L 574.935297 32.135917 
+L 576.303502 32.135917 
+L 577.671707 31.088179 
+L 579.039911 34.231362 
+L 580.408116 33.18364 
+L 581.776321 31.43743 
+L 583.144525 33.18364 
+L 584.51273 33.532875 
+L 585.880935 32.135917 
+L 587.249139 32.485153 
+L 588.617344 33.532875 
+L 589.985548 33.18364 
+L 591.353753 33.532875 
+L 592.721958 35.2791 
+L 594.090162 34.929849 
+L 595.458367 33.532875 
+L 596.826572 34.580613 
+L 598.194776 33.882126 
+L 600.931186 35.2791 
+L 602.29939 34.929849 
+L 603.667595 35.977572 
+L 605.0358 35.628336 
+L 606.404004 34.929849 
+L 609.140414 34.231362 
+L 610.508618 33.532875 
+L 613.245028 36.326823 
+L 614.613232 34.929849 
+L 615.981437 33.18364 
+L 617.349642 35.628336 
+L 618.717846 35.977572 
+L 620.086051 33.882126 
+L 621.454256 37.02531 
+L 622.82246 36.676059 
+L 624.190665 33.18364 
+L 625.55887 33.532875 
+L 626.927074 34.929849 
+L 628.295279 34.580613 
+L 631.031688 35.2791 
+L 632.399893 34.580613 
+L 633.768098 35.2791 
+L 635.136302 35.628336 
+L 636.504507 34.580613 
+L 637.872712 37.374546 
+L 639.240916 35.628336 
+L 640.609121 37.374546 
+L 641.977326 39.470006 
+L 643.34553 36.676059 
+L 644.713735 38.073032 
+L 646.08194 37.374546 
+L 647.450144 36.326823 
+L 648.818349 33.882126 
+L 650.186554 34.929849 
+L 651.554758 34.580613 
+L 652.922963 35.977572 
+L 654.291167 31.43743 
+L 655.659372 35.2791 
+L 657.027577 34.580613 
+L 658.395781 35.2791 
+L 661.132191 35.977572 
+L 662.500395 37.723797 
+L 663.8686 37.374546 
+L 665.236805 34.580613 
+L 666.605009 33.532875 
+L 667.973214 34.929849 
+L 670.709623 34.231362 
+L 672.077828 37.02531 
+L 673.446033 33.532875 
+L 674.814237 33.18364 
+L 676.182442 37.723797 
+L 677.550647 34.929849 
+L 678.918851 33.18364 
+L 680.287056 37.02531 
+L 681.655261 36.676059 
+L 683.023465 35.977572 
+L 684.39167 39.120755 
+L 685.759875 39.120755 
+L 687.128079 37.02531 
+L 688.496284 35.977572 
+L 689.864489 33.882126 
+L 689.864489 33.882126 
+" clip-path="url(#pe0395cee11)" style="fill: none; stroke: #2ca02c; stroke-width: 1.5; stroke-linecap: square"/>
+</g>
+<g id="patch_9">
+<path d="M 403.978125 210.04 
+L 403.978125 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_10">
+<path d="M 703.478125 210.04 
+L 703.478125 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_11">
+<path d="M 403.978125 210.04 
+L 703.478125 210.04 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_12">
+<path d="M 403.978125 7.2 
+L 703.478125 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+</g>
+</g>
+<defs>
+<clipPath id="p374b0551c6">
+<rect x="53.338125" y="7.2" width="299.5" height="202.84"/>
+</clipPath>
+<clipPath id="pe0395cee11">
+<rect x="403.978125" y="7.2" width="299.5" height="202.84"/>
+</clipPath>
+</defs>
+</svg></div><figcaption>يسار: خسارة التحقق. النقطة على كل منحنى هي أفضل حقبة. بعدها تصعد الخسارة: الشبكة تحفظ الأجوبة الخاطئة. يمين: دقة التحقق تنزل مع الحفظ، وأقل مع الإسقاط.</figcaption></figure><details class="setup"><summary>كود الرسم</summary><div class="dbody"><div class="code "><div class="code-head"><span class="path">compare_plot.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mf">3.6</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">best</span><span class="p">)</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">line</span><span class="p">,</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">h</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">h</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">best</span><span class="p">[</span><span class="s2">&quot;epoch&quot;</span><span class="p">],</span> <span class="n">best</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">],</span> <span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">line</span><span class="o">.</span><span class="n">get_color</span><span class="p">())</span>
+    <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">h</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">h</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;validation loss&quot;</span><span class="p">);</span> <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;validation accuracy&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axes</span><span class="p">:</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;epoch&quot;</span><span class="p">);</span> <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></pre></div></div></details><div class="blk"><p>اقرأ الأرقام:</p></div><ul class="l"><li>الشبكة العادية وصلت دقة تدريب 100%، أي أنها حفظت حتى الأجوبة الخاطئة. ودقة التحقق نزلت كثيراً عن أفضل حقبة.</li><li>تقليص الأوزان ساعد قليلاً هنا.</li><li>الإسقاط منع أغلب الحفظ: دقة التحقق النهائية أعلى بكثير.</li><li>وفي كل الحالات، أفضل حقبة كانت مبكرة. الإيقاف المبكر وحده كان سيحمينا.</li></ul><h3>الإسقاط مع الإيقاف المبكر، ثم الاختبار مرة واحدة</h3><div class="code "><div class="code-head"><span class="path">final_model.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="n">model</span> <span class="o">=</span> <span class="n">make_model</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">opt</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">AdamW</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+<span class="n">history</span><span class="p">,</span> <span class="n">best</span> <span class="o">=</span> <span class="n">train</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">y_noisy</span><span class="p">,</span> <span class="n">patience</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;stopped after epoch </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">history</span><span class="p">)</span><span class="si">}</span><span class="s2">, best epoch </span><span class="si">{</span><span class="n">best</span><span class="p">[</span><span class="s1">&#39;epoch&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">best</span><span class="p">[</span><span class="s2">&quot;state&quot;</span><span class="p">])</span>
+<span class="n">test_loss</span><span class="p">,</span> <span class="n">test_acc</span> <span class="o">=</span> <span class="n">evaluate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">X_te</span><span class="p">,</span> <span class="n">y_te</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;test accuracy: </span><span class="si">{</span><span class="n">test_acc</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>stopped after epoch 77, best epoch 57
+test accuracy: 0.897</pre></div><div class="blk"><p>توقف وحده، واسترجع أفضل الأوزان، ثم اختبرنا مرة واحدة فقط على بيانات لم يرها أي قرار، كما في الدرس 26.</p><p>شبكة تدربت على 300 صورة، خُمس أجوبتها خاطئة، وصلت إلى هذه الدقة على بيانات جديدة.</p></div><h3>الإسقاط في الوضعين</h3><div class="code "><div class="code-head"><span class="path">dropout_modes.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="n">drop</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
+<span class="n">h</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="mf">6.0</span><span class="p">,</span> <span class="mf">8.0</span><span class="p">])</span>
+<span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;train mode:&quot;</span><span class="p">,</span> <span class="n">drop</span><span class="p">(</span><span class="n">h</span><span class="p">))</span>
+<span class="n">drop</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;eval mode :&quot;</span><span class="p">,</span> <span class="n">drop</span><span class="p">(</span><span class="n">h</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>train mode: tensor([ 2.6667,  0.0000,  8.0000, 10.6667])
+eval mode : tensor([2., 4., 6., 8.])</pre></div><div class="blk"><p>نفس المثال المحلول باليد.</p></div><div class="callout mistake"><div class="ct">نسيان وضع التقييم</div><div class="blk"><p>إذا قيّمت الشبكة وهي في وضع التدريب، يبقى الإسقاط يعمل: التوقعات عشوائية، والدقة أقل من الحقيقية، وتتغير كل مرة.</p><p>قاعدة: وضع التقييم قبل أي تقييم أو استخدام، ووضع التدريب قبل التدريب.</p></div></div><div class="callout interview"><div class="ct">سؤال مقابلة</div><div class="blk"><p>سؤال قد تسمعه في المقابلة:</p></div><div class="en" dir="ltr"><p>How does dropout work, and why does it help?</p></div><div class="blk"><p>جواب قصير وجيد:</p></div><div class="en" dir="ltr"><p>During training, dropout sets each activation to zero with probability p and scales the survivors by 1/(1 - p), so the expected value is unchanged. At inference it does nothing. It prevents neurons from co-adapting, forcing redundant and robust features, and it acts like training an ensemble of many thinned sub-networks that share weights.</p></div><div class="blk"><p>سؤال قد تسمعه في المقابلة:</p></div><div class="en" dir="ltr"><p>What is the difference between Adam with L2 regularization and AdamW?</p></div><div class="blk"><p>جواب قصير وجيد:</p></div><div class="en" dir="ltr"><p>With L2 in the loss, the penalty gradient is added to the gradient and then rescaled by Adam's per-parameter normalization, so weights with large gradients are regularized less. AdamW decouples weight decay: it applies the decay directly to the weights, separately from the adaptive gradient step. This gives more consistent regularization and usually better generalization.</p></div><div class="blk"><p>سؤال قد تسمعه في المقابلة:</p></div><div class="en" dir="ltr"><p>How does early stopping work?</p></div><div class="blk"><p>جواب قصير وجيد:</p></div><div class="en" dir="ltr"><p>Monitor the validation loss each epoch, save the weights whenever it improves, and stop when it has not improved for a number of epochs called the patience. Then restore the best saved weights.</p></div></div><section class="summary"><div class="ct">الخلاصة</div><ul class="l"><li>الشبكات تستطيع حفظ أي شيء، حتى الأجوبة العشوائية. دقة التدريب وحدها لا تعني شيئاً.</li><li>تقليص الأوزان: ضرب كل وزن في رقم أصغر قليلاً من واحد في كل خطوة. ومع آدم، استخدم آدم دبليو.</li><li>الإسقاط: إطفاء عصبونات عشوائية في التدريب فقط، وتكبير الباقي بالقسمة على <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1</mn><mo>−</mo><mi>p</mi></mrow></math></bdi>.</li><li>الإيقاف المبكر: احفظ أفضل أوزان حسب التحقق، وتوقف بعد عدد حقب الصبر بدون تحسن.</li><li>وضع التقييم قبل أي تقييم، لكي يتوقف الإسقاط.</li></ul></section><section class="quiz" data-quiz="l40-q"><h2>اختبر فهمك</h2><div class="q" data-answer="2"><div class="qt"><span class="qn">1.</span>إسقاط باحتمال 0.5. عصبون بقي يعمل، ومخرجه قبل الإسقاط 3. كم يصبح أثناء التدريب؟</div><div class="opts"><button type="button" class="opt">3</button><button type="button" class="opt">1.5</button><button type="button" class="opt">6</button></div><div class="explain" hidden><span class="verdict"></span><p>يُقسم على <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1</mn><mo>−</mo><mn>0.5</mn></mrow></math></bdi>.</p></div></div><div class="q" data-answer="0"><div class="qt"><span class="qn">2.</span>ماذا يفعل الإسقاط وقت التقييم؟</div><div class="opts"><button type="button" class="opt">لا شيء: كل العصبونات تعمل، بدون تكبير</button><button type="button" class="opt">يطفئ نفس العصبونات التي أطفأها آخر مرة</button><button type="button" class="opt">يطفئ نصف العصبونات ويكبّر الباقي</button></div><div class="explain" hidden><span class="verdict"></span><p>التكبير أثناء التدريب جعل المقاييس متطابقة.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">3.</span>خسائر التحقق للحقب من 1 إلى 5: 1.0، ثم 0.8، ثم 0.7، ثم 0.72، ثم 0.75. والصبر 2. متى نتوقف، وأي أوزان نسترجع؟</div><div class="opts"><button type="button" class="opt">نتوقف بعد الحقبة 4، ونسترجع الحقبة 4</button><button type="button" class="opt">نتوقف بعد الحقبة 5، ونسترجع الحقبة 3</button><button type="button" class="opt">لا نتوقف أبداً</button></div><div class="explain" hidden><span class="verdict"></span><p>أفضل رقم في الحقبة 3. بعده حقبتان بدون تحسن.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">4.</span>لماذا نفضّل آدم دبليو على آدم مع عقوبة المربعات في الخسارة؟</div><div class="opts"><button type="button" class="opt">لأنه أسرع في الحساب</button><button type="button" class="opt">لأن آدم يقسم تدرّج العقوبة على حجم التدرّجات، فيصبح التنظيم غير متساوٍ بين الأوزان</button><button type="button" class="opt">لأن آدم لا يقبل أي تنظيم</button></div><div class="explain" hidden><span class="verdict"></span><p>آدم دبليو يطبّق التقليص مباشرة على الوزن.</p></div></div><div class="q" data-answer="2"><div class="qt"><span class="qn">5.</span>دقة التدريب 100%، ودقة التحقق تنزل من حقبة لأخرى. أي خيار <b>لا</b> يساعد؟</div><div class="opts"><button type="button" class="opt">إسقاط، أو تقليص أوزان</button><button type="button" class="opt">الإيقاف المبكر</button><button type="button" class="opt">تدريب حقب أكثر</button></div><div class="explain" hidden><span class="verdict"></span><p>هذا إفراط في التعلّم. حقب أكثر تعني حفظاً أكثر.</p></div></div><div class="row"><span class="score"></span><button type="button" class="btn ghost quiz-reset">أعد المحاولة</button></div></section><section class="exercise"><div class="xt">تمرين: ما أفضل احتمال للإسقاط؟</div><div class="blk"><p>جرّب احتمالات الإسقاط 0.2، و 0.5، و 0.8، و 0.95 على نفس البيانات المشوّشة، بدون تقليص أوزان.</p></div><ol class="l"><li>لكل احتمال: اطبع دقة التدريب النهائية، ودقة التحقق النهائية، ودقة التحقق في أفضل حقبة.</li><li>أي احتمال أفضل هنا؟ وماذا حدث مع أكبر احتمال؟</li></ol><details><summary>تلميح</summary><div class="dbody"><div class="blk"><p>استخدم دالة التدريب نفسها، مع حلقة على الاحتمالات. وتذكّر أن الإسقاط الكبير جداً يطفئ أغلب الشبكة.</p></div></div></details><details class="sol"><summary>الحل (افتحه بعد أن تحاول)</summary><div class="dbody"><div class="code "><div class="code-head"><span class="path"></span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">[</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">]:</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">make_model</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+    <span class="n">opt</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">AdamW</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+    <span class="n">history</span><span class="p">,</span> <span class="n">best</span> <span class="o">=</span> <span class="n">train</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">y_noisy</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;p = </span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2">: train acc </span><span class="si">{</span><span class="n">history</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> | final val acc </span><span class="si">{</span><span class="n">history</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> | &quot;</span>
+          <span class="sa">f</span><span class="s2">&quot;best val acc </span><span class="si">{</span><span class="n">best</span><span class="p">[</span><span class="s1">&#39;acc&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>p = 0.2: train acc 1.000 | final val acc 0.797 | best val acc 0.906
+p = 0.5: train acc 0.993 | final val acc 0.856 | best val acc 0.913
+p = 0.8: train acc 0.843 | final val acc 0.922 | best val acc 0.922
+p = 0.95: train acc 0.700 | final val acc 0.787 | best val acc 0.787</pre></div><div class="blk"><p>حتى 0.8، كلما كبر الاحتمال قلّ الحفظ وتحسن التحقق. ودقة التدريب نزلت تحت 100%: الشبكة لم تعد تستطيع حفظ الأجوبة الخاطئة.</p><p>لكن 0.95 أطفأ تقريباً كل الشبكة في كل خطوة: دقة التدريب ودقة التحقق نزلتا معاً. هذه قلة تعلّم.</p></div><div class="blk"><p>لماذا كان 0.8 مناسباً هنا؟ الشبكة كبيرة جداً، 256 عصبوناً في كل طبقة، لـ 300 مثال فقط، وخُمس الأجوبة خاطئ.</p><p>مع بيانات أكثر وأنظف، القيم الشائعة بين 0.1 و 0.5.</p><p>لذلك الاحتمال معامل فائق: نختاره ببيانات التحقق، كما في الدرس 33.</p></div></div></details><div class="askbox" data-kind="review" hidden><div class="al">اطلب من كلود أن يراجع حلّك</div><div class="ah">اكتب إجابتك أو الصق الكود. سيقارنه بالحل ويشرح لك بالعربي. هذا يستهلك من رصيد استخدامك.</div><textarea id="rv-l40-1" dir="auto" placeholder="اكتب إجابتك هنا"></textarea><div class="row"><button type="button" class="btn ask-go">راجع حلّي</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></div><pre hidden class="x-task">جرّب احتمالات الإسقاط 0.2، و 0.5، و 0.8، و 0.95 على نفس البيانات المشوّشة، بدون تقليص أوزان.
+
+1. لكل احتمال: اطبع دقة التدريب النهائية، ودقة التحقق النهائية، ودقة التحقق في أفضل حقبة.
+2. أي احتمال أفضل هنا؟ وماذا حدث مع أكبر احتمال؟</pre><pre hidden class="x-solution">```python
+for p in [0.2, 0.5, 0.8, 0.95]:
+    model = make_model(p)
+    opt = torch.optim.AdamW(model.parameters(), lr=1e-3, weight_decay=0.0)
+    history, best = train(model, opt, y_noisy)
+    print(f"p = {p}: train acc {history[-1, 0]:.3f} | final val acc {history[-1, 2]:.3f} | "
+          f"best val acc {best['acc']:.3f}")
+```
+
+حتى 0.8، كلما كبر الاحتمال قلّ الحفظ وتحسن التحقق. ودقة التدريب نزلت تحت 100%: الشبكة لم تعد تستطيع حفظ الأجوبة الخاطئة.
+لكن 0.95 أطفأ تقريباً كل الشبكة في كل خطوة: دقة التدريب ودقة التحقق نزلتا معاً. هذه قلة تعلّم.
+
+لماذا كان 0.8 مناسباً هنا؟ الشبكة كبيرة جداً، 256 عصبوناً في كل طبقة، لـ 300 مثال فقط، وخُمس الأجوبة خاطئ.
+مع بيانات أكثر وأنظف، القيم الشائعة بين 0.1 و 0.5.
+لذلك الاحتمال معامل فائق: نختاره ببيانات التحقق، كما في الدرس 33.</pre></section></article><section class="askbox" data-kind="ask" hidden><div class="al">عندك سؤال عن هذا الدرس؟ اسأل كلود</div><div class="ah">اكتب سؤالك بالعربي. كلود يقرأ نص الدرس ويجيبك. هذا يستهلك من رصيد استخدامك.</div><textarea id="ask-l40" dir="auto" placeholder="مثلاً: لماذا نضرب هنا في المشتقة؟"></textarea><div class="row"><button type="button" class="btn ask-go">اسأل</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></section><div class="donebox"><span class="dmsg"></span><button type="button" class="btn">أنهيت هذا الدرس</button></div><nav class="pager" aria-label="التنقل بين الدروس"><a class="prev" href="#l39"><small>الدرس السابق</small>التدريب الجيد: المحسِّنات ومعدل التعلّم</a><a class="next" href="#l41"><small>الدرس التالي</small>الشبكات الالتفافية للصور</a></nav></div>

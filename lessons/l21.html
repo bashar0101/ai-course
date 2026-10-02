@@ -1,0 +1,880 @@
+<div class="page"><article><div class="eyebrow">الجزء الثاني · التعلم الآلي</div><h1>الغابات العشوائية والتعزيز</h1><div class="meta"><span>الدرس 21 من 59</span><span>المدة: حوالي 55 دقيقة</span><span class="nbdl-slot"></span></div><div class="chips" dir="ltr"><bdi class="chip">ensemble</bdi><bdi class="chip">bagging</bdi><bdi class="chip">bootstrap sample</bdi><bdi class="chip">random forest</bdi><bdi class="chip">boosting</bdi><bdi class="chip">gradient boosting</bdi><bdi class="chip">residual</bdi><bdi class="chip">learning rate</bdi><bdi class="chip">XGBoost</bdi><bdi class="chip">LightGBM</bdi></div><div class="goals"><b>بعد هذا الدرس ستعرف:</b><ul><li>تفهم لماذا يكون رأي مجموعة نماذج أفضل من نموذج واحد</li><li>تفهم التجميع بالعينات، والغابة العشوائية</li><li>تحسب جولتين من التعزيز بيدك، على البواقي</li><li>تبني التعزيز من الصفر بأشجار صغيرة</li><li>تقارن الشجرة والغابة والتعزيز، وتعرف أدوات مسابقات البيانات الجدولية</li></ul></div><h2>حكمة الجماعة</h2><div class="blk"><p>في مسابقة قديمة، طُلب من 800 شخص أن يخمّنوا وزن ثور.</p><p>التخمينات الفردية كانت متفرقة جداً. لكن <b>متوسطها</b> كان قريباً جداً من الوزن الحقيقي.</p></div><div class="blk"><p>السر: كل شخص أخطأ بطريقته. الأخطاء في اتجاهات مختلفة، فألغت بعضها في المتوسط.</p></div><div class="blk"><p>نفس الفكرة مع النماذج: نجمع توقعات نماذج كثيرة في توقع واحد. هذا اسمه:</p></div><div class="blk"><div class="term" dir="ltr"><code>ensemble</code></div></div><div class="blk"><p>لكن بشرط مهم: يجب أن تخطئ النماذج <b>بطرق مختلفة</b>.</p><p>مئة نسخة من نفس الشجرة تعطي نفس الخطأ مئة مرة، ولا فائدة من المتوسط.</p></div><div class="key">المتوسط يلغي الأخطاء المستقلة. كلما كانت أخطاء النماذج أقل ارتباطاً، زادت الفائدة.</div><div class="blk"><p>هناك طريقتان مشهورتان جداً: التجميع بالعينات، والتعزيز.</p></div><h2>الطريقة الأولى: التجميع بالعينات</h2><div class="blk"><p>من الدرس السابق: الشجرة الواحدة غير مستقرة. تغيير صغير في البيانات يغيّرها كثيراً.</p><p>هذا عيب... لكنه هنا ميزة! لأنه يعطينا أشجاراً مختلفة بسهولة.</p></div><div class="blk"><p>الخطوات:</p></div><ol class="l"><li>نسحب من البيانات عينة بنفس الحجم، <b>مع الإرجاع</b>: المثال الواحد قد يُسحب مرتين أو أكثر، وبعض الأمثلة لا تُسحب أبداً.</li><li>ندرّب شجرة على هذه العينة.</li><li>نكرر مئات المرات.</li><li>للتوقع: تصويت الأشجار في التصنيف، أو متوسطها في الانحدار.</li></ol><div class="blk"><p>مثال على عينة بالإرجاع من خمسة أمثلة:</p></div><div class="blk"><div class="term" dir="ltr"><code>[A, B, C, D, E]  →  [B, B, D, A, E]</code></div></div><div class="blk"><p>المثال C لم يُسحب، و B سُحب مرتين. في المتوسط، حوالي ثلث الأمثلة لا تدخل كل عينة.</p></div><div class="blk"><div class="term" dir="ltr"><code>bootstrap sample · bagging</code></div></div><h3>الغابة العشوائية</h3><div class="blk"><p>الأشجار في التجميع بالعينات ما زالت متشابهة: إذا كانت ميزة قوية جداً، فكل الأشجار تبدأ بها.</p><p>الغابة العشوائية تضيف حيلة ثانية: عند كل سؤال، تختار الشجرة من <b>مجموعة عشوائية صغيرة</b> من الميزات فقط.</p><p>هكذا تُجبر الأشجار على التنوع، فتصبح أخطاؤها أقل ارتباطاً.</p></div><div class="blk"><div class="term" dir="ltr"><code>random forest</code></div></div><div class="blk"><p>الغابة العشوائية من أقوى النماذج وأسهلها استخداماً: تعمل جيداً بدون ضبط كثير، ولا تحتاج توحيد مقياس.</p></div><h2>الطريقة الثانية: التعزيز</h2><div class="blk"><p>فكرة مختلفة تماماً: بدل نماذج مستقلة، نبني النماذج <b>واحداً بعد الآخر</b>.</p><p>كل نموذج جديد يركّز على ما أخطأ فيه النموذج الحالي.</p></div><div class="blk"><p>في الانحدار، الخطأ الذي بقي هو <b>الباقي</b>: الجواب ناقص التوقع الحالي.</p><p>التعزيز بالتدرّج يدرّب كل شجرة جديدة لتتوقع البواقي، ثم يضيف جزءاً من توقعها:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>F</mi><mtext>new</mtext></msub><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><msub><mi>F</mi><mtext>old</mtext></msub><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>+</mo><mi>η</mi><mo>⋅</mo><mtext>tree</mtext><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></math></div></div><div class="blk"><p>الرقم <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>η</mi></mrow></math></bdi> معدل تعلّم، مثل النزول بالتدرّج: خطوة صغيرة في كل جولة.</p><p>والأشجار هنا صغيرة جداً عادة: عمق واحد إلى ستة. كل شجرة ضعيفة وحدها، لكن مئات منها معاً قوية جداً.</p></div><div class="blk"><div class="term" dir="ltr"><code>boosting · gradient boosting</code></div></div><div class="callout note"><div class="ct">لماذا اسمه "بالتدرّج"؟</div><div class="blk"><p>البواقي في الانحدار هي بالضبط سالب تدرّج خسارة مربعات الأخطاء بالنسبة للتوقع، مقسوماً على اثنين.</p><p>إذن كل شجرة جديدة تخطو خطوة عكس التدرّج، لكن في <b>فضاء التوقعات</b> بدل فضاء المعاملات.</p><p>نفس فكرة الدرس 9، في مكان آخر.</p></div></div><section class="hand"><div class="hand-h"><span class="hand-tag">مثال محلول باليد</span><div class="hand-t">جولتان من التعزيز</div></div><div class="hand-body"><div class="blk"><p>أربعة أمثلة، وميزة واحدة:</p></div><div class="tablewrap"><table><thead><tr><th><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>x</mi></mrow></math></bdi></th><th>1</th><th>2</th><th>3</th><th>4</th></tr></thead><tbody><tr><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>y</mi></mrow></math></bdi></td><td>1</td><td>2</td><td>5</td><td>6</td></tr></tbody></table></div><div class="blk"><p>الأشجار: سؤال واحد فقط. ومعدل التعلّم 0.5.</p></div><div class="step">البداية: أبسط توقع ممكن</div><div class="blk"><p>نتوقع المتوسط للجميع: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>3.5</mn></mrow></math></bdi>.</p><p>البواقي: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mo>−</mo><mn>2.5</mn><mo separator="true">,</mo><mtext>  </mtext><mo>−</mo><mn>1.5</mn><mo separator="true">,</mo><mtext>  </mtext><mn>1.5</mn><mo separator="true">,</mo><mtext>  </mtext><mn>2.5</mn><mo stretchy="false">)</mo></mrow></math></bdi>. والخسارة:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mtext>MSE</mtext><mn>0</mn></msub><mo>=</mo><mfrac><mrow><mn>6.25</mn><mo>+</mo><mn>2.25</mn><mo>+</mo><mn>2.25</mn><mo>+</mo><mn>6.25</mn></mrow><mn>4</mn></mfrac><mo>=</mo><mn>4.25</mn></mrow></math></div></div><div class="step">الشجرة الأولى تتعلّم البواقي</div><div class="blk"><p>أفضل سؤال: هل <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>x</mi></mrow></math></bdi> أقل من 2.5؟ الجهة الأولى بواقيها <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo>−</mo><mn>2.5</mn></mrow></math></bdi> و <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo>−</mo><mn>1.5</mn></mrow></math></bdi>، متوسطها <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo>−</mo><mn>2</mn></mrow></math></bdi>. والثانية متوسطها <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo>+</mo><mn>2</mn></mrow></math></bdi>.</p><p>الشجرة تتوقع <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo>−</mo><mn>2</mn></mrow></math></bdi> للمثالين الأولين، و <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo>+</mo><mn>2</mn></mrow></math></bdi> للآخرين.</p></div><div class="step">نضيف نصف توقع الشجرة</div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>F</mi><mn>1</mn></msub><mo>=</mo><mn>3.5</mn><mo>+</mo><mn>0.5</mn><mo>×</mo><mo stretchy="false">(</mo><mo>−</mo><mn>2</mn><mo separator="true">,</mo><mtext>  </mtext><mo>−</mo><mn>2</mn><mo separator="true">,</mo><mtext>  </mtext><mn>2</mn><mo separator="true">,</mo><mtext>  </mtext><mn>2</mn><mo stretchy="false">)</mo><mo>=</mo><mo stretchy="false">(</mo><mn>2.5</mn><mo separator="true">,</mo><mtext>  </mtext><mn>2.5</mn><mo separator="true">,</mo><mtext>  </mtext><mn>4.5</mn><mo separator="true">,</mo><mtext>  </mtext><mn>4.5</mn><mo stretchy="false">)</mo></mrow></math></div></div><div class="blk"><p>البواقي الجديدة: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mo>−</mo><mn>1.5</mn><mo separator="true">,</mo><mtext>  </mtext><mo>−</mo><mn>0.5</mn><mo separator="true">,</mo><mtext>  </mtext><mn>0.5</mn><mo separator="true">,</mo><mtext>  </mtext><mn>1.5</mn><mo stretchy="false">)</mo></mrow></math></bdi>. والخسارة:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mtext>MSE</mtext><mn>1</mn></msub><mo>=</mo><mfrac><mrow><mn>2.25</mn><mo>+</mo><mn>0.25</mn><mo>+</mo><mn>0.25</mn><mo>+</mo><mn>2.25</mn></mrow><mn>4</mn></mfrac><mo>=</mo><mn>1.25</mn></mrow></math></div></div><div class="step">الشجرة الثانية</div><div class="blk"><p>نفس السؤال مرة أخرى. متوسط البواقي في الجهتين: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo>−</mo><mn>1</mn></mrow></math></bdi> و <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo>+</mo><mn>1</mn></mrow></math></bdi>.</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>F</mi><mn>2</mn></msub><mo>=</mo><mo stretchy="false">(</mo><mn>2.5</mn><mo>−</mo><mn>0.5</mn><mo separator="true">,</mo><mtext>  </mtext><mn>2.5</mn><mo>−</mo><mn>0.5</mn><mo separator="true">,</mo><mtext>  </mtext><mn>4.5</mn><mo>+</mo><mn>0.5</mn><mo separator="true">,</mo><mtext>  </mtext><mn>4.5</mn><mo>+</mo><mn>0.5</mn><mo stretchy="false">)</mo><mo>=</mo><mo stretchy="false">(</mo><mn>2</mn><mo separator="true">,</mo><mtext>  </mtext><mn>2</mn><mo separator="true">,</mo><mtext>  </mtext><mn>5</mn><mo separator="true">,</mo><mtext>  </mtext><mn>5</mn><mo stretchy="false">)</mo></mrow></math></div></div><div class="blk"><p>البواقي: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mo>−</mo><mn>1</mn><mo separator="true">,</mo><mtext>  </mtext><mn>0</mn><mo separator="true">,</mo><mtext>  </mtext><mn>0</mn><mo separator="true">,</mo><mtext>  </mtext><mn>1</mn><mo stretchy="false">)</mo></mrow></math></bdi>. والخسارة:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mtext>MSE</mtext><mn>2</mn></msub><mo>=</mo><mfrac><mrow><mn>1</mn><mo>+</mo><mn>0</mn><mo>+</mo><mn>0</mn><mo>+</mo><mn>1</mn></mrow><mn>4</mn></mfrac><mo>=</mo><mn>0.5</mn></mrow></math></div></div><div class="step">ماذا حدث؟</div><div class="blk"><p>من 4.25 إلى 1.25 إلى 0.5. كل شجرة صغيرة جداً، لكن كل واحدة تصحح جزءاً مما بقي.</p><p>والجولات التالية ستعمل على البواقي الصغيرة المتبقية.</p></div></div></section><h3>الفرق بين الطريقتين</h3><div class="tablewrap"><table><thead><tr><th></th><th>الغابة العشوائية</th><th>التعزيز بالتدرّج</th></tr></thead><tbody><tr><td>بناء الأشجار</td><td>مستقلة، ويمكن بالتوازي</td><td>بالتتابع، كل واحدة تعتمد على ما قبلها</td></tr><tr><td>حجم الشجرة</td><td>عميقة</td><td>صغيرة</td></tr><tr><td>ماذا تعالج</td><td>عدم الاستقرار: تقلل التذبذب</td><td>الانحياز: تصحح الأخطاء خطوة خطوة</td></tr><tr><td>الضبط</td><td>سهل جداً</td><td>يحتاج ضبطاً أكثر: معدل التعلّم وعدد الأشجار</td></tr><tr><td>الخطر</td><td>قليل</td><td>الأشجار الكثيرة جداً قد تحفظ الضجيج</td></tr></tbody></table></div><div class="callout tip"><div class="ct">البيانات الجدولية ومسابقات كاغل</div><div class="blk"><p>مع بيانات على شكل جدول، مثل العملاء والمبيعات والشقق، التعزيز بالتدرّج هو غالباً الأقوى.</p><p>أغلب الحلول الفائزة في مسابقات البيانات الجدولية تستخدم إحدى هذه المكتبات:</p></div><div class="blk"><div class="term" dir="ltr"><code>XGBoost · LightGBM · CatBoost</code></div></div><div class="blk"><p>وفي سايكت ليرن نسخة سريعة من نفس الفكرة، سنستخدمها في الكود:</p></div><div class="blk"><div class="term" dir="ltr"><code>HistGradientBoostingClassifier</code></div></div></div><h2>بالكود</h2><h3>التعزيز من الصفر</h3><div class="blk"><p>منحنى جيبي مع ضجيج. كل شجرة لها سؤال واحد فقط، لكن نجمع مئة منها:</p></div><div class="code "><div class="code-head"><span class="path">boosting_scratch.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.tree</span><span class="w"> </span><span class="kn">import</span> <span class="n">DecisionTreeRegressor</span>
+
+<span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">rng</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">120</span><span class="p">))</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">boost</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">rounds</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">F</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="n">y</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+    <span class="n">trees</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">rounds</span><span class="p">):</span>
+        <span class="n">residual</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">F</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">DecisionTreeRegressor</span><span class="p">(</span><span class="n">max_depth</span><span class="o">=</span><span class="n">depth</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">residual</span><span class="p">)</span>   <span class="c1"># الشجرة تتعلّم البواقي</span>
+        <span class="n">F</span> <span class="o">=</span> <span class="n">F</span> <span class="o">+</span> <span class="n">lr</span> <span class="o">*</span> <span class="n">t</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">trees</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">F</span><span class="p">,</span> <span class="n">trees</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">3.6</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;data&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">rounds</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">]:</span>
+    <span class="n">F</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">boost</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">rounds</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">rounds</span><span class="si">:</span><span class="s2">3d</span><span class="si">}</span><span class="s2"> rounds: MSE = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">y</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">F</span><span class="p">)</span><span class="w"> </span><span class="o">**</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">F</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">rounds</span><span class="si">}</span><span class="s2"> rounds&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span> <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>  1 rounds: MSE = 0.3041
+ 10 rounds: MSE = 0.0709
+100 rounds: MSE = 0.0270</pre></div><figure class="plot"><div class="svgwrap"><svg xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 382.911094 231.629937" xmlns="http://www.w3.org/2000/svg" version="1.1">
+<defs>
+</defs>
+<g id="figure_1">
+<g id="patch_1">
+<path d="M 0 231.629937 
+L 382.911094 231.629937 
+L 382.911094 0 
+L 0 0 
+L 0 231.629937 
+z
+" style="fill: none"/>
+</g>
+<g id="axes_1">
+<g id="patch_2">
+<path d="M 40.911094 206.784 
+L 375.711094 206.784 
+L 375.711094 7.2 
+L 40.911094 7.2 
+L 40.911094 206.784 
+z
+" style="fill: none"/>
+</g>
+<g id="PathCollection_1">
+<defs>
+<path id="mfd0189f2b0" d="M 0 1.732051 
+C 0.459345 1.732051 0.899939 1.549551 1.224745 1.224745 
+C 1.549551 0.899939 1.732051 0.459345 1.732051 0 
+C 1.732051 -0.459345 1.549551 -0.899939 1.224745 -1.224745 
+C 0.899939 -1.549551 0.459345 -1.732051 0 -1.732051 
+C -0.459345 -1.732051 -0.899939 -1.549551 -1.224745 -1.224745 
+C -1.549551 -0.899939 -1.732051 -0.459345 -1.732051 0 
+C -1.732051 0.459345 -1.549551 0.899939 -1.224745 1.224745 
+C -0.899939 1.549551 -0.459345 1.732051 0 1.732051 
+z
+" style="stroke: #808080; stroke-opacity: 0.6"/>
+</defs>
+<g clip-path="url(#p1179e80af6)">
+<use xlink:href="#mfd0189f2b0" x="56.129276" y="89.282833" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="59.79209" y="79.409548" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="60.185502" y="84.332797" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="60.349519" y="83.279634" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="63.958538" y="89.352315" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="63.972523" y="111.159304" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="65.570198" y="90.15695" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="67.689675" y="96.430811" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="67.831322" y="105.725274" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="71.212557" y="76.672539" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="73.216222" y="85.989765" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="75.516066" y="89.642409" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="75.701998" y="89.590079" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="81.004516" y="63.748213" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="83.066628" y="59.895026" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="87.578572" y="40.551207" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="90.466928" y="56.720482" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="93.328745" y="38.312487" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="96.638195" y="29.720151" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="100.821214" y="29.45941" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="101.285027" y="80.120616" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="109.051543" y="21.731755" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="116.047188" y="30.333681" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="116.353978" y="28.950402" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="124.814015" y="26.263694" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="125.880501" y="25.79834" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="126.410195" y="26.582251" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="128.551521" y="35.964648" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="136.741825" y="57.745234" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="137.860899" y="31.759202" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="146.708792" y="43.542985" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="147.01967" y="16.272" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="150.242432" y="37.335528" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="153.801099" y="33.547985" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="158.161679" y="49.539463" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="158.710794" y="44.955699" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="164.796396" y="41.980755" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="167.035185" y="65.187518" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="172.717839" y="44.29731" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="174.322755" y="51.759547" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="175.148363" y="68.263977" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="179.106532" y="89.990976" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="182.198922" y="51.10811" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="184.656969" y="65.714222" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="185.43478" y="70.006443" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="190.071074" y="71.382012" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="190.798162" y="42.473596" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="193.120065" y="72.546323" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="196.090572" y="74.442712" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="202.194175" y="105.547242" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="203.983816" y="62.48292" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="207.530186" y="78.042956" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="208.287098" y="76.93761" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="212.223864" y="97.320369" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="216.078819" y="90.182047" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="217.290138" y="99.834701" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="220.235081" y="100.500233" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="221.008427" y="112.715646" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="221.670661" y="132.854402" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="230.211096" y="108.390575" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="232.905168" y="155.097847" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="237.180045" y="136.118881" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="240.95547" y="140.417972" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="243.323567" y="155.521373" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="243.633254" y="131.839511" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="245.110995" y="145.434541" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="246.02111" y="149.948952" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="247.833268" y="138.156975" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="250.236888" y="155.344038" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="253.367171" y="131.618467" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="254.367901" y="147.733186" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="260.539557" y="165.711992" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="260.958995" y="187.445065" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="265.105164" y="181.721807" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="265.994178" y="147.637734" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="272.940463" y="169.019068" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="275.412442" y="173.836634" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="276.10675" y="146.226096" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="278.410363" y="189.892253" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="278.557712" y="179.835612" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="278.606339" y="178.215675" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="279.3258" y="163.160938" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="280.084015" y="181.651656" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="287.198363" y="183.28804" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="287.266355" y="197.712" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="295.785323" y="164.778661" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="296.187054" y="163.659462" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="299.010712" y="182.139788" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="300.711252" y="172.646998" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="304.197122" y="193.141312" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="304.98776" y="181.020118" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="306.983327" y="153.575539" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="310.126617" y="170.503876" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="312.781078" y="137.759273" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="317.704595" y="180.1368" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="319.471958" y="159.176651" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="319.613101" y="170.356764" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="323.544124" y="156.57383" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="327.52395" y="161.76757" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="327.660978" y="169.701659" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="327.764669" y="174.06657" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="334.645175" y="110.635144" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="337.942798" y="152.946087" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="339.052064" y="179.944836" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="339.134508" y="159.981148" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="339.648771" y="140.153862" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="340.234284" y="156.632507" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="340.553308" y="129.254307" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="341.16047" y="133.786422" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="341.475373" y="150.212743" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="343.630215" y="152.42028" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="345.720748" y="157.717806" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="347.448989" y="151.220631" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="348.250759" y="161.478752" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="351.530455" y="118.49854" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="352.96972" y="111.051137" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="355.481373" y="149.148942" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="355.591462" y="147.922673" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="359.846084" y="150.767322" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+<use xlink:href="#mfd0189f2b0" x="360.492912" y="138.198879" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+</g>
+</g>
+<g id="matplotlib.axis_1">
+<g id="xtick_1">
+<g id="line2d_1">
+<path d="M 55.291142 206.784 
+L 55.291142 7.2 
+" clip-path="url(#p1179e80af6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_2">
+<defs>
+<path id="m9d369db4c2" d="M 0 0 
+L 0 3.5 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#m9d369db4c2" x="55.291142" y="206.784" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_1">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="55.291142" y="222.142281" transform="rotate(-0 55.291142 222.142281)">0</text>
+</g>
+</g>
+<g id="xtick_2">
+<g id="line2d_3">
+<path d="M 106.300423 206.784 
+L 106.300423 7.2 
+" clip-path="url(#p1179e80af6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_4">
+<g>
+<use xlink:href="#m9d369db4c2" x="106.300423" y="206.784" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_2">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="106.300423" y="222.142281" transform="rotate(-0 106.300423 222.142281)">1</text>
+</g>
+</g>
+<g id="xtick_3">
+<g id="line2d_5">
+<path d="M 157.309704 206.784 
+L 157.309704 7.2 
+" clip-path="url(#p1179e80af6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_6">
+<g>
+<use xlink:href="#m9d369db4c2" x="157.309704" y="206.784" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_3">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="157.309704" y="222.142281" transform="rotate(-0 157.309704 222.142281)">2</text>
+</g>
+</g>
+<g id="xtick_4">
+<g id="line2d_7">
+<path d="M 208.318984 206.784 
+L 208.318984 7.2 
+" clip-path="url(#p1179e80af6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_8">
+<g>
+<use xlink:href="#m9d369db4c2" x="208.318984" y="206.784" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_4">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="208.318984" y="222.142281" transform="rotate(-0 208.318984 222.142281)">3</text>
+</g>
+</g>
+<g id="xtick_5">
+<g id="line2d_9">
+<path d="M 259.328265 206.784 
+L 259.328265 7.2 
+" clip-path="url(#p1179e80af6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_10">
+<g>
+<use xlink:href="#m9d369db4c2" x="259.328265" y="206.784" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_5">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="259.328265" y="222.142281" transform="rotate(-0 259.328265 222.142281)">4</text>
+</g>
+</g>
+<g id="xtick_6">
+<g id="line2d_11">
+<path d="M 310.337546 206.784 
+L 310.337546 7.2 
+" clip-path="url(#p1179e80af6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_12">
+<g>
+<use xlink:href="#m9d369db4c2" x="310.337546" y="206.784" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_6">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="310.337546" y="222.142281" transform="rotate(-0 310.337546 222.142281)">5</text>
+</g>
+</g>
+<g id="xtick_7">
+<g id="line2d_13">
+<path d="M 361.346827 206.784 
+L 361.346827 7.2 
+" clip-path="url(#p1179e80af6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_14">
+<g>
+<use xlink:href="#m9d369db4c2" x="361.346827" y="206.784" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_7">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="361.346827" y="222.142281" transform="rotate(-0 361.346827 222.142281)">6</text>
+</g>
+</g>
+</g>
+<g id="matplotlib.axis_2">
+<g id="ytick_1">
+<g id="line2d_15">
+<path d="M 40.911094 175.374953 
+L 375.711094 175.374953 
+" clip-path="url(#p1179e80af6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_16">
+<defs>
+<path id="m095f6aeacd" d="M 0 0 
+L -3.5 0 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#m095f6aeacd" x="40.911094" y="175.374953" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_8">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="33.911094" y="179.554094" transform="rotate(-0 33.911094 179.554094)">−1.0</text>
+</g>
+</g>
+<g id="ytick_2">
+<g id="line2d_17">
+<path d="M 40.911094 139.054583 
+L 375.711094 139.054583 
+" clip-path="url(#p1179e80af6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_18">
+<g>
+<use xlink:href="#m095f6aeacd" x="40.911094" y="139.054583" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_9">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="33.911094" y="143.233723" transform="rotate(-0 33.911094 143.233723)">−0.5</text>
+</g>
+</g>
+<g id="ytick_3">
+<g id="line2d_19">
+<path d="M 40.911094 102.734212 
+L 375.711094 102.734212 
+" clip-path="url(#p1179e80af6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_20">
+<g>
+<use xlink:href="#m095f6aeacd" x="40.911094" y="102.734212" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_10">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="33.911094" y="106.913353" transform="rotate(-0 33.911094 106.913353)">0.0</text>
+</g>
+</g>
+<g id="ytick_4">
+<g id="line2d_21">
+<path d="M 40.911094 66.413842 
+L 375.711094 66.413842 
+" clip-path="url(#p1179e80af6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_22">
+<g>
+<use xlink:href="#m095f6aeacd" x="40.911094" y="66.413842" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_11">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="33.911094" y="70.592982" transform="rotate(-0 33.911094 70.592982)">0.5</text>
+</g>
+</g>
+<g id="ytick_5">
+<g id="line2d_23">
+<path d="M 40.911094 30.093471 
+L 375.711094 30.093471 
+" clip-path="url(#p1179e80af6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_24">
+<g>
+<use xlink:href="#m095f6aeacd" x="40.911094" y="30.093471" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_12">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="33.911094" y="34.272612" transform="rotate(-0 33.911094 34.272612)">1.0</text>
+</g>
+</g>
+</g>
+<g id="line2d_25">
+<path d="M 56.129276 97.284885 
+L 59.79209 97.284885 
+L 60.185502 97.284885 
+L 60.349519 97.284885 
+L 63.958538 97.284885 
+L 63.972523 97.284885 
+L 65.570198 97.284885 
+L 67.689675 97.284885 
+L 67.831322 97.284885 
+L 71.212557 97.284885 
+L 73.216222 97.284885 
+L 75.516066 97.284885 
+L 75.701998 97.284885 
+L 81.004516 97.284885 
+L 83.066628 97.284885 
+L 87.578572 97.284885 
+L 90.466928 97.284885 
+L 93.328745 97.284885 
+L 96.638195 97.284885 
+L 100.821214 97.284885 
+L 101.285027 97.284885 
+L 109.051543 97.284885 
+L 116.047188 97.284885 
+L 116.353978 97.284885 
+L 124.814015 97.284885 
+L 125.880501 97.284885 
+L 126.410195 97.284885 
+L 128.551521 97.284885 
+L 136.741825 97.284885 
+L 137.860899 97.284885 
+L 146.708792 97.284885 
+L 147.01967 97.284885 
+L 150.242432 97.284885 
+L 153.801099 97.284885 
+L 158.161679 97.284885 
+L 158.710794 97.284885 
+L 164.796396 97.284885 
+L 167.035185 97.284885 
+L 172.717839 97.284885 
+L 174.322755 97.284885 
+L 175.148363 97.284885 
+L 179.106532 97.284885 
+L 182.198922 97.284885 
+L 184.656969 97.284885 
+L 185.43478 97.284885 
+L 190.071074 97.284885 
+L 190.798162 97.284885 
+L 193.120065 97.284885 
+L 196.090572 97.284885 
+L 202.194175 97.284885 
+L 203.983816 97.284885 
+L 207.530186 97.284885 
+L 208.287098 97.284885 
+L 212.223864 97.284885 
+L 216.078819 97.284885 
+L 217.290138 97.284885 
+L 220.235081 97.284885 
+L 221.008427 125.145424 
+L 221.670661 125.145424 
+L 230.211096 125.145424 
+L 232.905168 125.145424 
+L 237.180045 125.145424 
+L 240.95547 125.145424 
+L 243.323567 125.145424 
+L 243.633254 125.145424 
+L 245.110995 125.145424 
+L 246.02111 125.145424 
+L 247.833268 125.145424 
+L 250.236888 125.145424 
+L 253.367171 125.145424 
+L 254.367901 125.145424 
+L 260.539557 125.145424 
+L 260.958995 125.145424 
+L 265.105164 125.145424 
+L 265.994178 125.145424 
+L 272.940463 125.145424 
+L 275.412442 125.145424 
+L 276.10675 125.145424 
+L 278.410363 125.145424 
+L 278.557712 125.145424 
+L 278.606339 125.145424 
+L 279.3258 125.145424 
+L 280.084015 125.145424 
+L 287.198363 125.145424 
+L 287.266355 125.145424 
+L 295.785323 125.145424 
+L 296.187054 125.145424 
+L 299.010712 125.145424 
+L 300.711252 125.145424 
+L 304.197122 125.145424 
+L 304.98776 125.145424 
+L 306.983327 125.145424 
+L 310.126617 125.145424 
+L 312.781078 125.145424 
+L 317.704595 125.145424 
+L 319.471958 125.145424 
+L 319.613101 125.145424 
+L 323.544124 125.145424 
+L 327.52395 125.145424 
+L 327.660978 125.145424 
+L 327.764669 125.145424 
+L 334.645175 125.145424 
+L 337.942798 125.145424 
+L 339.052064 125.145424 
+L 339.134508 125.145424 
+L 339.648771 125.145424 
+L 340.234284 125.145424 
+L 340.553308 125.145424 
+L 341.16047 125.145424 
+L 341.475373 125.145424 
+L 343.630215 125.145424 
+L 345.720748 125.145424 
+L 347.448989 125.145424 
+L 348.250759 125.145424 
+L 351.530455 125.145424 
+L 352.96972 125.145424 
+L 355.481373 125.145424 
+L 355.591462 125.145424 
+L 359.846084 125.145424 
+L 360.492912 125.145424 
+" clip-path="url(#p1179e80af6)" style="fill: none; stroke: #1f77b4; stroke-width: 2; stroke-linecap: square"/>
+</g>
+<g id="line2d_26">
+<path d="M 56.129276 74.421573 
+L 59.79209 74.421573 
+L 60.185502 74.421573 
+L 60.349519 74.421573 
+L 63.958538 74.421573 
+L 63.972523 74.421573 
+L 65.570198 74.421573 
+L 67.689675 74.421573 
+L 67.831322 74.421573 
+L 71.212557 74.421573 
+L 73.216222 74.421573 
+L 75.516066 74.421573 
+L 75.701998 74.421573 
+L 81.004516 59.837545 
+L 83.066628 59.837545 
+L 87.578572 59.837545 
+L 90.466928 59.837545 
+L 93.328745 59.837545 
+L 96.638195 59.837545 
+L 100.821214 59.837545 
+L 101.285027 59.837545 
+L 109.051543 59.837545 
+L 116.047188 59.837545 
+L 116.353978 59.837545 
+L 124.814015 59.837545 
+L 125.880501 59.837545 
+L 126.410195 59.837545 
+L 128.551521 59.837545 
+L 136.741825 59.837545 
+L 137.860899 59.837545 
+L 146.708792 59.837545 
+L 147.01967 59.837545 
+L 150.242432 59.837545 
+L 153.801099 59.837545 
+L 158.161679 59.837545 
+L 158.710794 59.837545 
+L 164.796396 59.837545 
+L 167.035185 59.837545 
+L 172.717839 59.837545 
+L 174.322755 59.837545 
+L 175.148363 64.874432 
+L 179.106532 64.874432 
+L 182.198922 64.874432 
+L 184.656969 64.874432 
+L 185.43478 64.874432 
+L 190.071074 64.874432 
+L 190.798162 64.874432 
+L 193.120065 70.661597 
+L 196.090572 70.661597 
+L 202.194175 81.02406 
+L 203.983816 81.02406 
+L 207.530186 81.02406 
+L 208.287098 81.02406 
+L 212.223864 95.448877 
+L 216.078819 95.448877 
+L 217.290138 95.448877 
+L 220.235081 95.448877 
+L 221.008427 123.309416 
+L 221.670661 123.309416 
+L 230.211096 123.309416 
+L 232.905168 142.977794 
+L 237.180045 142.977794 
+L 240.95547 142.977794 
+L 243.323567 142.977794 
+L 243.633254 142.977794 
+L 245.110995 142.977794 
+L 246.02111 142.977794 
+L 247.833268 142.977794 
+L 250.236888 142.977794 
+L 253.367171 142.977794 
+L 254.367901 147.250786 
+L 260.539557 155.06149 
+L 260.958995 155.06149 
+L 265.105164 155.06149 
+L 265.994178 155.06149 
+L 272.940463 155.06149 
+L 275.412442 155.06149 
+L 276.10675 155.06149 
+L 278.410363 155.06149 
+L 278.557712 155.06149 
+L 278.606339 155.06149 
+L 279.3258 155.06149 
+L 280.084015 155.06149 
+L 287.198363 155.06149 
+L 287.266355 155.06149 
+L 295.785323 155.06149 
+L 296.187054 155.06149 
+L 299.010712 155.06149 
+L 300.711252 155.06149 
+L 304.197122 155.06149 
+L 304.98776 155.06149 
+L 306.983327 155.06149 
+L 310.126617 155.06149 
+L 312.781078 155.06149 
+L 317.704595 155.06149 
+L 319.471958 155.06149 
+L 319.613101 155.06149 
+L 323.544124 155.06149 
+L 327.52395 155.06149 
+L 327.660978 155.06149 
+L 327.764669 155.06149 
+L 334.645175 155.06149 
+L 337.942798 155.06149 
+L 339.052064 155.06149 
+L 339.134508 155.06149 
+L 339.648771 155.06149 
+L 340.234284 155.06149 
+L 340.553308 155.06149 
+L 341.16047 155.06149 
+L 341.475373 155.06149 
+L 343.630215 155.06149 
+L 345.720748 155.06149 
+L 347.448989 155.06149 
+L 348.250759 155.06149 
+L 351.530455 155.06149 
+L 352.96972 155.06149 
+L 355.481373 155.06149 
+L 355.591462 155.06149 
+L 359.846084 155.06149 
+L 360.492912 155.06149 
+" clip-path="url(#p1179e80af6)" style="fill: none; stroke: #ff7f0e; stroke-width: 2; stroke-linecap: square"/>
+</g>
+<g id="line2d_27">
+<path d="M 56.129276 87.225355 
+L 59.79209 87.225355 
+L 60.185502 87.225355 
+L 60.349519 87.225355 
+L 63.958538 90.431699 
+L 63.972523 91.654968 
+L 65.570198 91.654968 
+L 67.689675 91.654968 
+L 67.831322 91.654968 
+L 71.212557 84.908468 
+L 73.216222 84.908468 
+L 75.516066 84.908468 
+L 75.701998 84.908468 
+L 81.004516 63.269329 
+L 83.066628 58.823786 
+L 87.578572 46.862663 
+L 90.466928 46.862663 
+L 93.328745 43.66834 
+L 96.638195 43.66834 
+L 100.821214 43.66834 
+L 101.285027 43.66834 
+L 109.051543 36.47699 
+L 116.047188 36.47699 
+L 116.353978 36.47699 
+L 124.814015 36.47699 
+L 125.880501 36.47699 
+L 126.410195 36.47699 
+L 128.551521 36.47699 
+L 136.741825 37.000878 
+L 137.860899 37.000878 
+L 146.708792 37.000878 
+L 147.01967 37.000878 
+L 150.242432 37.000878 
+L 153.801099 37.000878 
+L 158.161679 44.821671 
+L 158.710794 44.821671 
+L 164.796396 44.821671 
+L 167.035185 52.920964 
+L 172.717839 52.920964 
+L 174.322755 52.920964 
+L 175.148363 65.03517 
+L 179.106532 65.03517 
+L 182.198922 65.03517 
+L 184.656969 65.03517 
+L 185.43478 65.03517 
+L 190.071074 65.03517 
+L 190.798162 65.03517 
+L 193.120065 70.822335 
+L 196.090572 70.822335 
+L 202.194175 81.184798 
+L 203.983816 81.184798 
+L 207.530186 81.184798 
+L 208.287098 81.184798 
+L 212.223864 95.609615 
+L 216.078819 95.609615 
+L 217.290138 95.609615 
+L 220.235081 95.609615 
+L 221.008427 123.470154 
+L 221.670661 123.470154 
+L 230.211096 123.470154 
+L 232.905168 144.185913 
+L 237.180045 144.185913 
+L 240.95547 144.185913 
+L 243.323567 144.185913 
+L 243.633254 144.185913 
+L 245.110995 144.185913 
+L 246.02111 144.185913 
+L 247.833268 144.185913 
+L 250.236888 144.185913 
+L 253.367171 144.185913 
+L 254.367901 148.458905 
+L 260.539557 166.281724 
+L 260.958995 167.47999 
+L 265.105164 167.47999 
+L 265.994178 167.47999 
+L 272.940463 167.47999 
+L 275.412442 167.47999 
+L 276.10675 167.47999 
+L 278.410363 173.966762 
+L 278.557712 173.966762 
+L 278.606339 173.966762 
+L 279.3258 173.966762 
+L 280.084015 173.966762 
+L 287.198363 173.966762 
+L 287.266355 173.966762 
+L 295.785323 173.966762 
+L 296.187054 173.966762 
+L 299.010712 173.966762 
+L 300.711252 173.966762 
+L 304.197122 173.966762 
+L 304.98776 173.966762 
+L 306.983327 164.507783 
+L 310.126617 164.507783 
+L 312.781078 164.507783 
+L 317.704595 164.507783 
+L 319.471958 164.507783 
+L 319.613101 164.507783 
+L 323.544124 164.507783 
+L 327.52395 164.507783 
+L 327.660978 164.507783 
+L 327.764669 164.507783 
+L 334.645175 152.009858 
+L 337.942798 152.009858 
+L 339.052064 152.009858 
+L 339.134508 152.009858 
+L 339.648771 149.01796 
+L 340.234284 149.01796 
+L 340.553308 149.01796 
+L 341.16047 149.01796 
+L 341.475373 149.01796 
+L 343.630215 149.01796 
+L 345.720748 149.01796 
+L 347.448989 149.01796 
+L 348.250759 149.01796 
+L 351.530455 129.797138 
+L 352.96972 129.797138 
+L 355.481373 142.837395 
+L 355.591462 142.837395 
+L 359.846084 142.837395 
+L 360.492912 142.837395 
+" clip-path="url(#p1179e80af6)" style="fill: none; stroke: #2ca02c; stroke-width: 2; stroke-linecap: square"/>
+</g>
+<g id="patch_3">
+<path d="M 40.911094 206.784 
+L 40.911094 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_4">
+<path d="M 375.711094 206.784 
+L 375.711094 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_5">
+<path d="M 40.911094 206.784 
+L 375.711094 206.784 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_6">
+<path d="M 40.911094 7.2 
+L 375.711094 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="legend_1">
+<g id="patch_7">
+<path d="M 270.657656 80.58375 
+L 368.011094 80.58375 
+Q 370.211094 80.58375 370.211094 78.38375 
+L 370.211094 14.9 
+Q 370.211094 12.7 368.011094 12.7 
+L 270.657656 12.7 
+Q 268.457656 12.7 268.457656 14.9 
+L 268.457656 78.38375 
+Q 268.457656 80.58375 270.657656 80.58375 
+L 270.657656 80.58375 
+z
+" style="fill: none; opacity: 0.35; stroke: currentColor; stroke-linejoin: miter"/>
+</g>
+<g id="PathCollection_2">
+<g>
+<use xlink:href="#mfd0189f2b0" x="283.857656" y="22.570781" style="fill: #808080; fill-opacity: 0.6; stroke: #808080; stroke-opacity: 0.6"/>
+</g>
+</g>
+<g id="text_13">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="303.657656" y="25.458281" transform="rotate(-0 303.657656 25.458281)">data</text>
+</g>
+<g id="line2d_28">
+<path d="M 272.857656 37.754219 
+L 283.857656 37.754219 
+L 294.857656 37.754219 
+" style="fill: none; stroke: #1f77b4; stroke-width: 2; stroke-linecap: square"/>
+</g>
+<g id="text_14">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="303.657656" y="41.604219" transform="rotate(-0 303.657656 41.604219)">1 rounds</text>
+</g>
+<g id="line2d_29">
+<path d="M 272.857656 53.900156 
+L 283.857656 53.900156 
+L 294.857656 53.900156 
+" style="fill: none; stroke: #ff7f0e; stroke-width: 2; stroke-linecap: square"/>
+</g>
+<g id="text_15">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="303.657656" y="57.750156" transform="rotate(-0 303.657656 57.750156)">10 rounds</text>
+</g>
+<g id="line2d_30">
+<path d="M 272.857656 70.046094 
+L 283.857656 70.046094 
+L 294.857656 70.046094 
+" style="fill: none; stroke: #2ca02c; stroke-width: 2; stroke-linecap: square"/>
+</g>
+<g id="text_16">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="303.657656" y="73.896094" transform="rotate(-0 303.657656 73.896094)">100 rounds</text>
+</g>
+</g>
+</g>
+</g>
+<defs>
+<clipPath id="p1179e80af6">
+<rect x="40.911094" y="7.2" width="334.8" height="199.584"/>
+</clipPath>
+</defs>
+</svg></div><figcaption>الرسم الذي يظهر عندما تشغّل الكود.</figcaption></figure><div class="blk"><p>جولة واحدة: درجة سلم واحدة. عشر جولات: شكل تقريبي. مئة جولة: المنحنى كاملاً.</p><p>كل شجرة سؤال واحد فقط، لكن مجموعها يرسم منحنى معقداً.</p></div><h3>مقارنة على بيانات حقيقية</h3><div class="code "><div class="code-head"><span class="path">compare.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_breast_cancer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.tree</span><span class="w"> </span><span class="kn">import</span> <span class="n">DecisionTreeClassifier</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.ensemble</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomForestClassifier</span><span class="p">,</span> <span class="n">HistGradientBoostingClassifier</span>
+
+<span class="n">Xb</span><span class="p">,</span> <span class="n">yb</span> <span class="o">=</span> <span class="n">load_breast_cancer</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">X_tr</span><span class="p">,</span> <span class="n">X_te</span><span class="p">,</span> <span class="n">y_tr</span><span class="p">,</span> <span class="n">y_te</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">Xb</span><span class="p">,</span> <span class="n">yb</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">stratify</span><span class="o">=</span><span class="n">yb</span><span class="p">)</span>
+
+<span class="n">models</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;single tree&quot;</span><span class="p">:</span>       <span class="n">DecisionTreeClassifier</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+    <span class="s2">&quot;random forest&quot;</span><span class="p">:</span>     <span class="n">RandomForestClassifier</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+    <span class="s2">&quot;gradient boosting&quot;</span><span class="p">:</span> <span class="n">HistGradientBoostingClassifier</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+<span class="p">}</span>
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">models</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">m</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_tr</span><span class="p">,</span> <span class="n">y_tr</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">:</span><span class="s2">18</span><span class="si">}</span><span class="s2"> test accuracy = </span><span class="si">{</span><span class="n">m</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_te</span><span class="p">,</span><span class="w"> </span><span class="n">y_te</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>single tree        test accuracy = 0.906
+random forest      test accuracy = 0.953
+gradient boosting  test accuracy = 0.942</pre></div><div class="blk"><p>الشجرة الواحدة أضعف بوضوح. والمجموعتان أقوى بكثير، بدون أي ضبط.</p><p>الفرق بين الغابة والتعزيز هنا صغير، وقد ينقلب مع بيانات أخرى. لذلك نجرب الاثنين دائماً.</p></div><h3>كم شجرة نحتاج؟</h3><div class="code "><div class="code-head"><span class="path">n_trees.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">300</span><span class="p">]:</span>
+    <span class="n">rf</span> <span class="o">=</span> <span class="n">RandomForestClassifier</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="n">n</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_tr</span><span class="p">,</span> <span class="n">y_tr</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">n</span><span class="si">:</span><span class="s2">3d</span><span class="si">}</span><span class="s2"> trees: test accuracy = </span><span class="si">{</span><span class="n">rf</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_te</span><span class="p">,</span><span class="w"> </span><span class="n">y_te</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>  1 trees: test accuracy = 0.889
+  5 trees: test accuracy = 0.942
+ 25 trees: test accuracy = 0.936
+100 trees: test accuracy = 0.953
+300 trees: test accuracy = 0.953</pre></div><div class="blk"><p>في الغابة، الأشجار الإضافية لا تضر: فقط تبطئ. بعد عدد معين، تستقر النتيجة.</p><p>أما في التعزيز، فالجولات الكثيرة جداً قد تحفظ الضجيج. لذلك نراقب بيانات التحقق، ونتوقف في الوقت المناسب.</p></div><div class="callout mistake"><div class="ct">خطأ شائع: التعزيز بمعدل تعلّم كبير</div><div class="blk"><p>معدل تعلّم كبير مع جولات كثيرة يحفظ الضجيج بسرعة.</p><p>القاعدة العملية: معدل صغير، مثل 0.05، مع جولات أكثر، ونتوقف عندما يتوقف تحسن بيانات التحقق.</p></div></div><div class="callout interview"><div class="ct">سؤال مقابلة</div><div class="blk"><p>سؤال قد تسمعه في المقابلة:</p></div><div class="en" dir="ltr"><p>What is the difference between bagging and boosting?</p></div><div class="blk"><p>جواب قصير وجيد:</p></div><div class="en" dir="ltr"><p>Bagging trains many models independently on bootstrap samples and averages them; it mainly reduces variance, like in random forests. Boosting trains models sequentially, each one fitting the errors of the current ensemble; it mainly reduces bias. Random forests are easy to tune; gradient boosting is often the most accurate on tabular data but needs more care with the learning rate and the number of trees.</p></div></div><section class="summary"><div class="ct">الخلاصة</div><ul class="l"><li>المجموعة تجمع نماذج كثيرة. تنفع عندما تخطئ النماذج بطرق مختلفة.</li><li>التجميع بالعينات: نماذج مستقلة على عينات بالإرجاع، ثم تصويت أو متوسط.</li><li>الغابة العشوائية: أشجار على عينات مختلفة، وميزات عشوائية عند كل سؤال.</li><li>التعزيز بالتدرّج: كل شجرة صغيرة تتعلّم بواقي ما قبلها، ونضيف جزءاً من توقعها.</li><li>للبيانات الجدولية: التعزيز غالباً الأقوى، والغابة الأسهل.</li></ul></section><section class="quiz" data-quiz="l21-q"><h2>اختبر فهمك</h2><div class="q" data-answer="1"><div class="qt"><span class="qn">1.</span>لماذا لا يفيد متوسط مئة نسخة من نفس النموذج بالضبط؟</div><div class="opts"><button type="button" class="opt">لأن المتوسط يحتاج نماذج مختلفة الأنواع</button><button type="button" class="opt">لأنها تخطئ بنفس الطريقة، فلا تلغي الأخطاء بعضها</button><button type="button" class="opt">لأن مئة قليلة جداً</button></div><div class="explain" hidden><span class="verdict"></span><p>المتوسط يفيد مع الأخطاء المستقلة.</p></div></div><div class="q" data-answer="0"><div class="qt"><span class="qn">2.</span>في العينة بالإرجاع، ماذا يحدث لبعض الأمثلة؟</div><div class="opts"><button type="button" class="opt">قد يتكرر بعضها، ولا يظهر بعضها أبداً</button><button type="button" class="opt">تُحذف كل الأمثلة المكررة</button><button type="button" class="opt">تظهر كل الأمثلة مرة واحدة بالضبط</button></div><div class="explain" hidden><span class="verdict"></span><p>السحب مع الإرجاع يسمح بالتكرار.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">3.</span>ماذا يضيف الغابة العشوائية على التجميع العادي بالعينات؟</div><div class="opts"><button type="button" class="opt">أشجاراً أعمق</button><button type="button" class="opt">اختيار مجموعة عشوائية من الميزات عند كل سؤال، لكي تتنوع الأشجار</button><button type="button" class="opt">تدريب الأشجار بالتتابع</button></div><div class="explain" hidden><span class="verdict"></span><p>التنوع يقلل ارتباط الأخطاء.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">4.</span>في التعزيز بالتدرّج للانحدار، على ماذا تتدرّب الشجرة الجديدة؟</div><div class="opts"><button type="button" class="opt">على البيانات الأصلية نفسها</button><button type="button" class="opt">على البواقي: الجواب ناقص التوقع الحالي</button><button type="button" class="opt">على عينة عشوائية فقط</button></div><div class="explain" hidden><span class="verdict"></span><p>كل شجرة تصحح ما بقي من الخطأ.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">5.</span>أي الطريقتين تبني الأشجار بالتتابع؟</div><div class="opts"><button type="button" class="opt">الغابة العشوائية</button><button type="button" class="opt">التعزيز</button><button type="button" class="opt">كلتاهما</button></div><div class="explain" hidden><span class="verdict"></span><p>الغابة تبني أشجارها مستقلة، ويمكن بالتوازي.</p></div></div><div class="row"><span class="score"></span><button type="button" class="btn ghost quiz-reset">أعد المحاولة</button></div></section><section class="exercise"><div class="xt">تمرين: الجولة الثالثة</div><div class="blk"><p>في المثال المحلول، البواقي بعد جولتين: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mo>−</mo><mn>1</mn><mo separator="true">,</mo><mtext>  </mtext><mn>0</mn><mo separator="true">,</mo><mtext>  </mtext><mn>0</mn><mo separator="true">,</mo><mtext>  </mtext><mn>1</mn><mo stretchy="false">)</mo></mrow></math></bdi>، والتوقع الحالي <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>2</mn><mo separator="true">,</mo><mn>2</mn><mo separator="true">,</mo><mn>5</mn><mo separator="true">,</mo><mn>5</mn><mo stretchy="false">)</mo></mrow></math></bdi>.</p></div><ol class="l"><li>جرّب الأسئلة الثلاثة الممكنة: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>x</mi><mo>&lt;</mo><mn>1.5</mn></mrow></math></bdi>، و <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>x</mi><mo>&lt;</mo><mn>2.5</mn></mrow></math></bdi>، و <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>x</mi><mo>&lt;</mo><mn>3.5</mn></mrow></math></bdi>. لكل سؤال، احسب مجموع مربعات البواقي حول متوسط كل جهة.</li><li>أي سؤال أو أسئلة هي الأفضل؟</li><li>اختر السؤال <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>x</mi><mo>&lt;</mo><mn>1.5</mn></mrow></math></bdi>، وأضف نصف توقع الشجرة. ما الخسارة الجديدة؟</li><li>تحقق بالكود بدالة التعزيز من الدرس، على نفس الأمثلة الأربعة، بثلاث جولات ومعدل 0.5.</li></ol><details><summary>تلميح</summary><div class="dbody"><div class="blk"><p>للسؤال الأول: الجهة الأولى فيها باقٍ واحد. الجهة الثانية فيها ثلاثة بواقي، متوسطها ثلث.</p></div></div></details><details class="sol"><summary>الحل (افتحه بعد أن تحاول)</summary><div class="dbody"><div class="blk"><p>السؤال <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>x</mi><mo>&lt;</mo><mn>1.5</mn></mrow></math></bdi>: الجهة الأولى <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></math></bdi> مجموعها صفر. الثانية <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mn>0</mn><mo separator="true">,</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></math></bdi> متوسطها <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1</mn><mi mathvariant="normal">/</mi><mn>3</mn></mrow></math></bdi>:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msup><mrow><mo fence="true">(</mo><mstyle scriptlevel="0" displaystyle="false"><mfrac><mn>1</mn><mn>3</mn></mfrac></mstyle><mo fence="true">)</mo></mrow><mn>2</mn></msup><mo>+</mo><msup><mrow><mo fence="true">(</mo><mstyle scriptlevel="0" displaystyle="false"><mfrac><mn>1</mn><mn>3</mn></mfrac></mstyle><mo fence="true">)</mo></mrow><mn>2</mn></msup><mo>+</mo><msup><mrow><mo fence="true">(</mo><mstyle scriptlevel="0" displaystyle="false"><mfrac><mn>2</mn><mn>3</mn></mfrac></mstyle><mo fence="true">)</mo></mrow><mn>2</mn></msup><mo>=</mo><mstyle scriptlevel="0" displaystyle="false"><mfrac><mn>6</mn><mn>9</mn></mfrac></mstyle><mo>≈</mo><mn>0.667</mn></mrow></math></div></div><div class="blk"><p>السؤال <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>x</mi><mo>&lt;</mo><mn>2.5</mn></mrow></math></bdi>: الجهتان <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mo>−</mo><mn>1</mn><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">)</mo></mrow></math></bdi> و <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></math></bdi>، متوسطهما سالب نصف ونصف: المجموع <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>4</mn><mo>×</mo><mn>0.25</mn><mo>=</mo><mn>1</mn></mrow></math></bdi>.</p><p>السؤال <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>x</mi><mo>&lt;</mo><mn>3.5</mn></mrow></math></bdi>: مثل الأول بالتناظر: 0.667.</p><p>الأفضل: السؤال الأول أو الثالث، بالتساوي.</p></div><div class="blk"><p>مع السؤال الأول: الشجرة تتوقع <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mo>−</mo><mn>1</mn><mo separator="true">,</mo><mstyle scriptlevel="0" displaystyle="false"><mfrac><mn>1</mn><mn>3</mn></mfrac></mstyle><mo separator="true">,</mo><mstyle scriptlevel="0" displaystyle="false"><mfrac><mn>1</mn><mn>3</mn></mfrac></mstyle><mo separator="true">,</mo><mstyle scriptlevel="0" displaystyle="false"><mfrac><mn>1</mn><mn>3</mn></mfrac></mstyle><mo stretchy="false">)</mo></mrow></math></bdi>. نضيف نصفها:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>F</mi><mn>3</mn></msub><mo>=</mo><mo stretchy="false">(</mo><mn>1.5</mn><mo separator="true">,</mo><mtext>  </mtext><mn>2.167</mn><mo separator="true">,</mo><mtext>  </mtext><mn>5.167</mn><mo separator="true">,</mo><mtext>  </mtext><mn>5.167</mn><mo stretchy="false">)</mo><mspace width="2em"/><msub><mtext>MSE</mtext><mn>3</mn></msub><mo>=</mo><mfrac><mrow><mn>0.25</mn><mo>+</mo><mn>0.0278</mn><mo>+</mo><mn>0.0278</mn><mo>+</mo><mn>0.694</mn></mrow><mn>4</mn></mfrac><mo>≈</mo><mn>0.25</mn></mrow></math></div></div><div class="code "><div class="code-head"><span class="path"></span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="n">X4</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">]])</span>
+<span class="n">y4</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mf">6.</span><span class="p">])</span>
+<span class="n">F</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">boost</span><span class="p">(</span><span class="n">X4</span><span class="p">,</span> <span class="n">y4</span><span class="p">,</span> <span class="n">rounds</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">y4</span> <span class="o">-</span> <span class="n">F</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">),</span> <span class="mi">4</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>[1.5   2.167 5.167 5.167] 0.25</pre></div><div class="blk"><p>المكتبة قد تختار السؤال الثالث بدل الأول عند التعادل، فتختلف الأرقام، لكن الخسارة نفسها.</p></div></div></details><div class="askbox" data-kind="review" hidden><div class="al">اطلب من كلود أن يراجع حلّك</div><div class="ah">اكتب إجابتك أو الصق الكود. سيقارنه بالحل ويشرح لك بالعربي. هذا يستهلك من رصيد استخدامك.</div><textarea id="rv-l21-1" dir="auto" placeholder="اكتب إجابتك هنا"></textarea><div class="row"><button type="button" class="btn ask-go">راجع حلّي</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></div><pre hidden class="x-task">في المثال المحلول، البواقي بعد جولتين: $(-1,\; 0,\; 0,\; 1)$، والتوقع الحالي $(2, 2, 5, 5)$.
+
+1. جرّب الأسئلة الثلاثة الممكنة: $x &lt; 1.5$، و $x &lt; 2.5$، و $x &lt; 3.5$. لكل سؤال، احسب مجموع مربعات البواقي حول متوسط كل جهة.
+2. أي سؤال أو أسئلة هي الأفضل؟
+3. اختر السؤال $x &lt; 1.5$، وأضف نصف توقع الشجرة. ما الخسارة الجديدة؟
+4. تحقق بالكود بدالة التعزيز من الدرس، على نفس الأمثلة الأربعة، بثلاث جولات ومعدل 0.5.</pre><pre hidden class="x-solution">السؤال $x &lt; 1.5$: الجهة الأولى $(-1)$ مجموعها صفر. الثانية $(0, 0, 1)$ متوسطها $1/3$:
+
+$$\left(\tfrac{1}{3}\right)^2 + \left(\tfrac{1}{3}\right)^2 + \left(\tfrac{2}{3}\right)^2 = \tfrac{6}{9} \approx 0.667$$
+
+السؤال $x &lt; 2.5$: الجهتان $(-1, 0)$ و $(0, 1)$، متوسطهما سالب نصف ونصف: المجموع $4 \times 0.25 = 1$.
+السؤال $x &lt; 3.5$: مثل الأول بالتناظر: 0.667.
+الأفضل: السؤال الأول أو الثالث، بالتساوي.
+
+مع السؤال الأول: الشجرة تتوقع $(-1, \tfrac13, \tfrac13, \tfrac13)$. نضيف نصفها:
+
+$$F_3 = (1.5,\; 2.167,\; 5.167,\; 5.167) \qquad \text{MSE}_3 = \frac{0.25 + 0.0278 + 0.0278 + 0.694}{4} \approx 0.25$$
+
+```python
+X4 = np.array([[1], [2], [3], [4]])
+y4 = np.array([1, 2, 5, 6.])
+F, _ = boost(X4, y4, rounds=3, lr=0.5)
+print(F.round(3), round(np.mean((y4 - F) ** 2), 4))
+```
+
+المكتبة قد تختار السؤال الثالث بدل الأول عند التعادل، فتختلف الأرقام، لكن الخسارة نفسها.</pre></section></article><section class="askbox" data-kind="ask" hidden><div class="al">عندك سؤال عن هذا الدرس؟ اسأل كلود</div><div class="ah">اكتب سؤالك بالعربي. كلود يقرأ نص الدرس ويجيبك. هذا يستهلك من رصيد استخدامك.</div><textarea id="ask-l21" dir="auto" placeholder="مثلاً: لماذا نضرب هنا في المشتقة؟"></textarea><div class="row"><button type="button" class="btn ask-go">اسأل</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></section><div class="donebox"><span class="dmsg"></span><button type="button" class="btn">أنهيت هذا الدرس</button></div><nav class="pager" aria-label="التنقل بين الدروس"><a class="prev" href="#l20"><small>الدرس السابق</small>أشجار القرار</a><a class="next" href="#l22"><small>الدرس التالي</small>آلة المتجهات الداعمة</a></nav></div>

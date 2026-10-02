@@ -1,0 +1,650 @@
+<div class="page"><article><div class="eyebrow">الجزء الثالث · تقييم النماذج</div><h1>اختيار العتبة، ومنحنى الأداء</h1><div class="meta"><span>الدرس 30 من 59</span><span>المدة: حوالي 50 دقيقة</span><span class="nbdl-slot"></span></div><div class="chips" dir="ltr"><bdi class="chip">threshold</bdi><bdi class="chip">ROC curve</bdi><bdi class="chip">true positive rate</bdi><bdi class="chip">false positive rate</bdi><bdi class="chip">AUC</bdi><bdi class="chip">precision-recall curve</bdi><bdi class="chip">average precision</bdi><bdi class="chip">cost-sensitive threshold</bdi></div><div class="goals"><b>بعد هذا الدرس ستعرف:</b><ul><li>تفهم أن المصنّف يعطي درجة، والعتبة هي التي تحولها إلى قرار</li><li>ترى كيف تتبادل الدقة الإيجابية والاستدعاء عندما تحرّك العتبة</li><li>تبني منحنى الأداء بيدك من ثماني نقاط، وتحسب المساحة تحته بعدّ الأزواج</li><li>تستخدم منحنى الدقة والاستدعاء مع البيانات غير المتوازنة</li><li>تختار العتبة حسب كلفة الأخطاء، على بيانات التحقق</li></ul></div><h2>الدرجة أولاً، ثم القرار</h2><div class="blk"><p>المصنّف في الحقيقة لا يقول "مريض" أو "سليم". يعطي <b>درجة</b>، غالباً احتمالاً.</p><p>ثم نحن نقرر: إذا كانت الدرجة فوق عتبة معينة، نقول موجب.</p></div><div class="blk"><p>العتبة الافتراضية في المكتبات نصف. لكنها مجرد اختيار، وليست قانوناً.</p></div><div class="blk"><div class="term" dir="ltr"><code>threshold</code></div></div><ul class="l"><li><b>عتبة منخفضة:</b> نقول موجب كثيراً. نكتشف أغلب الحالات، لكن مع إنذارات كاذبة كثيرة.</li><li><b>عتبة مرتفعة:</b> نقول موجب فقط عندما نكون واثقين. إنذارات قليلة، لكن نفوّت حالات.</li></ul><div class="key">تحريك العتبة يبادل الدقة الإيجابية بالاستدعاء. لا يمكن تحسين الاثنين بالعتبة وحدها.</div><div class="widget" data-widget="threshold" data-args="{}"><div class="w-fallback">هنا أداة تفاعلية. إذا لم تظهر، حدّث الصفحة.</div></div><h2>منحنى الأداء</h2><div class="blk"><p>كيف نقيّم المصنّف نفسه، بغض النظر عن العتبة؟</p><p>نجرب <b>كل</b> العتبات الممكنة، ونرسم لكل عتبة نقطة:</p></div><ul class="l"><li>المحور الأفقي: معدل الإيجابي الكاذب. من كل السالب، كم أنذرنا بالخطأ؟</li><li>المحور العمودي: معدل الإيجابي الصحيح. نفس الاستدعاء.</li></ul><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>TPR</mtext><mo>=</mo><mfrac><mrow><mi>T</mi><mi>P</mi></mrow><mrow><mi>T</mi><mi>P</mi><mo>+</mo><mi>F</mi><mi>N</mi></mrow></mfrac><mspace width="2em"/><mtext>FPR</mtext><mo>=</mo><mfrac><mrow><mi>F</mi><mi>P</mi></mrow><mrow><mi>F</mi><mi>P</mi><mo>+</mo><mi>T</mi><mi>N</mi></mrow></mfrac></mrow></math></div></div><div class="blk"><p>المنحنى يبدأ من الزاوية <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">)</mo></mrow></math></bdi>: عتبة عالية جداً، لا نقول موجب أبداً.</p><p>وينتهي عند <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>1</mn><mo separator="true">,</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></math></bdi>: عتبة منخفضة جداً، نقول موجب للجميع.</p></div><ul class="l"><li>مصنّف مثالي: يصعد مباشرة إلى الزاوية العليا اليسرى.</li><li>مصنّف عشوائي: الخط القطري.</li></ul><div class="blk"><div class="term" dir="ltr"><code>ROC curve · TPR · FPR</code></div></div><h3>المساحة تحت المنحنى</h3><div class="blk"><p>رقم واحد يلخص المنحنى كله: المساحة تحته. من 0.5 للعشوائي، إلى 1 للمثالي.</p></div><div class="blk"><div class="term" dir="ltr"><code>AUC (area under the ROC curve)</code></div></div><div class="blk"><p>ولها معنى جميل جداً:</p></div><div class="key">المساحة تحت المنحنى هي احتمال أن يعطي النموذج مثالاً موجباً عشوائياً درجة أعلى من مثال سالب عشوائي.</div><div class="blk"><p>أي أنها تقيس <b>الترتيب</b>: هل الموجب فوق السالب؟ ولا يهمها قيم الدرجات نفسها.</p></div><section class="hand"><div class="hand-h"><span class="hand-tag">مثال محلول باليد</span><div class="hand-t">منحنى من ثماني نقاط</div></div><div class="hand-body"><div class="blk"><p>درجات النموذج لثمانية أمثلة، مرتبة من الأعلى. أربعة موجبة، وأربعة سالبة:</p></div><div class="tablewrap"><table><thead><tr><th>المثال</th><th>أ</th><th>ب</th><th>ج</th><th>د</th><th>هـ</th><th>و</th><th>ز</th><th>ح</th></tr></thead><tbody><tr><td>الدرجة</td><td>0.95</td><td>0.85</td><td>0.80</td><td>0.70</td><td>0.55</td><td>0.45</td><td>0.30</td><td>0.10</td></tr><tr><td>الحقيقة</td><td>1</td><td>1</td><td>0</td><td>1</td><td>0</td><td>1</td><td>0</td><td>0</td></tr></tbody></table></div><div class="blk"><p>القاعدة: نتوقع موجباً إذا كانت الدرجة أكبر من العتبة أو تساويها.</p></div><div class="step">أربع عتبات</div><div class="tablewrap"><table><thead><tr><th>العتبة</th><th>إيجابي صحيح</th><th>إيجابي كاذب</th><th>معدل الصحيح</th><th>معدل الكاذب</th></tr></thead><tbody><tr><td>0.90</td><td>1</td><td>0</td><td>0.25</td><td>0</td></tr><tr><td>0.75</td><td>2</td><td>1</td><td>0.50</td><td>0.25</td></tr><tr><td>0.50</td><td>3</td><td>2</td><td>0.75</td><td>0.50</td></tr><tr><td>0.20</td><td>4</td><td>3</td><td>1.00</td><td>0.75</td></tr></tbody></table></div><div class="blk"><p>كل نقطة من هذه نقطة على المنحنى.</p></div><div class="step">الدقة الإيجابية والاستدعاء عند عتبتين</div><div class="blk"><p>عند 0.75: الدقة الإيجابية <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>2</mn><mi mathvariant="normal">/</mi><mn>3</mn><mo>≈</mo><mn>0.67</mn></mrow></math></bdi>، والاستدعاء 0.5.</p><p>عند 0.20: الدقة الإيجابية <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>4</mn><mi mathvariant="normal">/</mi><mn>7</mn><mo>≈</mo><mn>0.57</mn></mrow></math></bdi>، والاستدعاء 1.</p><p>خفضنا العتبة: الاستدعاء صعد، والدقة الإيجابية نزلت.</p></div><div class="step">المساحة بعدّ الأزواج</div><div class="blk"><p>نأخذ كل زوج: مثال موجب مع مثال سالب. أربعة في أربعة: 16 زوجاً.</p><p>نعدّ الأزواج التي درجة الموجب فيها أعلى:</p></div><ul class="l"><li>أ بدرجة 0.95: أعلى من كل السالب. 4 أزواج.</li><li>ب بدرجة 0.85: أعلى من كل السالب. 4 أزواج.</li><li>د بدرجة 0.70: أعلى من هـ و ز و ح، وأقل من ج. 3 أزواج.</li><li>و بدرجة 0.45: أعلى من ز و ح فقط. زوجان.</li></ul><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>AUC</mtext><mo>=</mo><mfrac><mrow><mn>4</mn><mo>+</mo><mn>4</mn><mo>+</mo><mn>3</mn><mo>+</mo><mn>2</mn></mrow><mn>16</mn></mfrac><mo>=</mo><mfrac><mn>13</mn><mn>16</mn></mfrac><mo>≈</mo><mn>0.81</mn></mrow></math></div></div><div class="blk"><p>إذا اخترنا موجباً وسالباً عشوائياً، فالنموذج يرتبهما صحيحاً في 81% من المرات.</p></div></div></section><h2>منحنى الدقة والاستدعاء</h2><div class="blk"><p>مع فئة نادرة جداً، مثل الاحتيال، منحنى الأداء قد يبدو متفائلاً.</p><p>السبب: السالب كثير جداً، فمعدل الإيجابي الكاذب يبقى صغيراً حتى مع مئات الإنذارات الكاذبة.</p></div><div class="blk"><p>البديل: نرسم الدقة الإيجابية مقابل الاستدعاء لكل العتبات.</p><p>الدقة الإيجابية تتأثر مباشرة بعدد الإنذارات الكاذبة، مهما كان السالب كثيراً.</p><p>والمساحة تحته، بطريقة حساب قريبة، اسمها:</p></div><div class="blk"><div class="term" dir="ltr"><code>average precision (AP)</code></div></div><div class="blk"><p>المصنّف العشوائي هنا لا يعطي 0.5، بل نسبة الموجب في البيانات. مع احتيال بنسبة 1%، العشوائي يعطي 0.01.</p></div><h2>بالكود</h2><div class="code "><div class="code-head"><span class="path">setup.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_breast_cancer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_pipeline</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">StandardScaler</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.linear_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">LogisticRegression</span>
+
+<span class="n">X</span><span class="p">,</span> <span class="n">y_raw</span> <span class="o">=</span> <span class="n">load_breast_cancer</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">y_raw</span>                       <span class="c1"># 1 = خبيث</span>
+<span class="n">X_tmp</span><span class="p">,</span> <span class="n">X_te</span><span class="p">,</span> <span class="n">y_tmp</span><span class="p">,</span> <span class="n">y_te</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">stratify</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+<span class="n">X_tr</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">y_tr</span><span class="p">,</span> <span class="n">y_val</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X_tmp</span><span class="p">,</span> <span class="n">y_tmp</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.33</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">stratify</span><span class="o">=</span><span class="n">y_tmp</span><span class="p">)</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">max_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">))</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_tr</span><span class="p">,</span> <span class="n">y_tr</span><span class="p">)</span>
+<span class="n">p_val</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_val</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>          <span class="c1"># احتمال الخبيث</span>
+<span class="n">p_te</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_te</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span></pre></div><div class="blk"><p>قسمنا ثلاثة أجزاء، لأننا سنختار العتبة. والاختيار مكانه التحقق، وليس الاختبار.</p></div><h3>العتبة تغيّر كل شيء</h3><div class="code "><div class="code-head"><span class="path">thresholds.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">precision_score</span><span class="p">,</span> <span class="n">recall_score</span>
+
+<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">]:</span>
+    <span class="n">pred</span> <span class="o">=</span> <span class="p">(</span><span class="n">p_val</span> <span class="o">&gt;=</span> <span class="n">t</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;threshold </span><span class="si">{</span><span class="n">t</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">: precision = </span><span class="si">{</span><span class="n">precision_score</span><span class="p">(</span><span class="n">y_val</span><span class="p">,</span><span class="w"> </span><span class="n">pred</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">  recall = </span><span class="si">{</span><span class="n">recall_score</span><span class="p">(</span><span class="n">y_val</span><span class="p">,</span><span class="w"> </span><span class="n">pred</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>threshold 0.1: precision = 0.864  recall = 0.962
+threshold 0.3: precision = 0.981  recall = 0.962
+threshold 0.5: precision = 1.000  recall = 0.962
+threshold 0.7: precision = 1.000  recall = 0.925
+threshold 0.9: precision = 1.000  recall = 0.887</pre></div><h3>المنحنيان</h3><div class="code "><div class="code-head"><span class="path">curves.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">roc_curve</span><span class="p">,</span> <span class="n">roc_auc_score</span><span class="p">,</span> <span class="n">precision_recall_curve</span><span class="p">,</span> <span class="n">average_precision_score</span>
+
+<span class="n">fpr</span><span class="p">,</span> <span class="n">tpr</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">roc_curve</span><span class="p">(</span><span class="n">y_val</span><span class="p">,</span> <span class="n">p_val</span><span class="p">)</span>
+<span class="n">prec</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">precision_recall_curve</span><span class="p">(</span><span class="n">y_val</span><span class="p">,</span> <span class="n">p_val</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="p">(</span><span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">)</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mf">3.8</span><span class="p">))</span>
+<span class="n">a1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fpr</span><span class="p">,</span> <span class="n">tpr</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;AUC = </span><span class="si">{</span><span class="n">roc_auc_score</span><span class="p">(</span><span class="n">y_val</span><span class="p">,</span><span class="w"> </span><span class="n">p_val</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">a1</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">)</span>
+<span class="n">a1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;false positive rate&quot;</span><span class="p">);</span> <span class="n">a1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;true positive rate (recall)&quot;</span><span class="p">);</span> <span class="n">a1</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span> <span class="n">a1</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">a2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">rec</span><span class="p">,</span> <span class="n">prec</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C1&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;AP = </span><span class="si">{</span><span class="n">average_precision_score</span><span class="p">(</span><span class="n">y_val</span><span class="p">,</span><span class="w"> </span><span class="n">p_val</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">a2</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">y_val</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">)</span>
+<span class="n">a2</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;recall&quot;</span><span class="p">);</span> <span class="n">a2</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;precision&quot;</span><span class="p">);</span> <span class="n">a2</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span> <span class="n">a2</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></pre></div><figure class="plot"><div class="svgwrap"><svg xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 638.519375 263.931875" xmlns="http://www.w3.org/2000/svg" version="1.1">
+<defs>
+</defs>
+<g id="figure_1">
+<g id="patch_1">
+<path d="M 0 263.931875 
+L 638.519375 263.931875 
+L 638.519375 0 
+L 0 0 
+L 0 263.931875 
+z
+" style="fill: none"/>
+</g>
+<g id="axes_1">
+<g id="patch_2">
+<path d="M 46.339375 224.44 
+L 313.259375 224.44 
+L 313.259375 7.2 
+L 46.339375 7.2 
+L 46.339375 224.44 
+z
+" style="fill: none"/>
+</g>
+<g id="matplotlib.axis_1">
+<g id="xtick_1">
+<g id="line2d_1">
+<path d="M 58.472102 224.44 
+L 58.472102 7.2 
+" clip-path="url(#p9a6353bee6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_2">
+<defs>
+<path id="m01098cd7b9" d="M 0 0 
+L 0 3.5 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#m01098cd7b9" x="58.472102" y="224.44" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_1">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="58.472102" y="239.798281" transform="rotate(-0 58.472102 239.798281)">0.0</text>
+</g>
+</g>
+<g id="xtick_2">
+<g id="line2d_3">
+<path d="M 107.003011 224.44 
+L 107.003011 7.2 
+" clip-path="url(#p9a6353bee6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_4">
+<g>
+<use xlink:href="#m01098cd7b9" x="107.003011" y="224.44" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_2">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="107.003011" y="239.798281" transform="rotate(-0 107.003011 239.798281)">0.2</text>
+</g>
+</g>
+<g id="xtick_3">
+<g id="line2d_5">
+<path d="M 155.53392 224.44 
+L 155.53392 7.2 
+" clip-path="url(#p9a6353bee6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_6">
+<g>
+<use xlink:href="#m01098cd7b9" x="155.53392" y="224.44" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_3">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="155.53392" y="239.798281" transform="rotate(-0 155.53392 239.798281)">0.4</text>
+</g>
+</g>
+<g id="xtick_4">
+<g id="line2d_7">
+<path d="M 204.06483 224.44 
+L 204.06483 7.2 
+" clip-path="url(#p9a6353bee6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_8">
+<g>
+<use xlink:href="#m01098cd7b9" x="204.06483" y="224.44" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_4">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="204.06483" y="239.798281" transform="rotate(-0 204.06483 239.798281)">0.6</text>
+</g>
+</g>
+<g id="xtick_5">
+<g id="line2d_9">
+<path d="M 252.595739 224.44 
+L 252.595739 7.2 
+" clip-path="url(#p9a6353bee6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_10">
+<g>
+<use xlink:href="#m01098cd7b9" x="252.595739" y="224.44" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_5">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="252.595739" y="239.798281" transform="rotate(-0 252.595739 239.798281)">0.8</text>
+</g>
+</g>
+<g id="xtick_6">
+<g id="line2d_11">
+<path d="M 301.126648 224.44 
+L 301.126648 7.2 
+" clip-path="url(#p9a6353bee6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_12">
+<g>
+<use xlink:href="#m01098cd7b9" x="301.126648" y="224.44" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_6">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="301.126648" y="239.798281" transform="rotate(-0 301.126648 239.798281)">1.0</text>
+</g>
+</g>
+<g id="text_7">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="179.799375" y="254.444219" transform="rotate(-0 179.799375 254.444219)">false positive rate</text>
+</g>
+</g>
+<g id="matplotlib.axis_2">
+<g id="ytick_1">
+<g id="line2d_13">
+<path d="M 46.339375 214.565455 
+L 313.259375 214.565455 
+" clip-path="url(#p9a6353bee6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_14">
+<defs>
+<path id="m7facbce557" d="M 0 0 
+L -3.5 0 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#m7facbce557" x="46.339375" y="214.565455" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_8">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="39.339375" y="218.744595" transform="rotate(-0 39.339375 218.744595)">0.0</text>
+</g>
+</g>
+<g id="ytick_2">
+<g id="line2d_15">
+<path d="M 46.339375 175.067273 
+L 313.259375 175.067273 
+" clip-path="url(#p9a6353bee6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_16">
+<g>
+<use xlink:href="#m7facbce557" x="46.339375" y="175.067273" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_9">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="39.339375" y="179.246413" transform="rotate(-0 39.339375 179.246413)">0.2</text>
+</g>
+</g>
+<g id="ytick_3">
+<g id="line2d_17">
+<path d="M 46.339375 135.569091 
+L 313.259375 135.569091 
+" clip-path="url(#p9a6353bee6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_18">
+<g>
+<use xlink:href="#m7facbce557" x="46.339375" y="135.569091" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_10">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="39.339375" y="139.748232" transform="rotate(-0 39.339375 139.748232)">0.4</text>
+</g>
+</g>
+<g id="ytick_4">
+<g id="line2d_19">
+<path d="M 46.339375 96.070909 
+L 313.259375 96.070909 
+" clip-path="url(#p9a6353bee6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_20">
+<g>
+<use xlink:href="#m7facbce557" x="46.339375" y="96.070909" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_11">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="39.339375" y="100.25005" transform="rotate(-0 39.339375 100.25005)">0.6</text>
+</g>
+</g>
+<g id="ytick_5">
+<g id="line2d_21">
+<path d="M 46.339375 56.572727 
+L 313.259375 56.572727 
+" clip-path="url(#p9a6353bee6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_22">
+<g>
+<use xlink:href="#m7facbce557" x="46.339375" y="56.572727" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_12">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="39.339375" y="60.751868" transform="rotate(-0 39.339375 60.751868)">0.8</text>
+</g>
+</g>
+<g id="ytick_6">
+<g id="line2d_23">
+<path d="M 46.339375 17.074545 
+L 313.259375 17.074545 
+" clip-path="url(#p9a6353bee6)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_24">
+<g>
+<use xlink:href="#m7facbce557" x="46.339375" y="17.074545" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_13">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="39.339375" y="21.253686" transform="rotate(-0 39.339375 21.253686)">1.0</text>
+</g>
+</g>
+<g id="text_14">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="15.558281" y="115.82" transform="rotate(-90 15.558281 115.82)">true positive rate (recall)</text>
+</g>
+</g>
+<g id="line2d_25">
+<path d="M 58.472102 214.565455 
+L 58.472102 210.839211 
+L 58.472102 24.527033 
+L 80.531606 24.527033 
+L 80.531606 20.800789 
+L 146.710119 20.800789 
+L 146.710119 17.074545 
+L 301.126648 17.074545 
+" clip-path="url(#p9a6353bee6)" style="fill: none; stroke: #1f77b4; stroke-width: 2.5; stroke-linecap: square"/>
+</g>
+<g id="line2d_26">
+<path d="M 58.472102 214.565455 
+L 301.126648 17.074545 
+" clip-path="url(#p9a6353bee6)" style="fill: none; stroke-dasharray: 5.55,2.4; stroke-dashoffset: 0; stroke: #808080; stroke-width: 1.5"/>
+</g>
+<g id="patch_3">
+<path d="M 46.339375 224.44 
+L 46.339375 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_4">
+<path d="M 313.259375 224.44 
+L 313.259375 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_5">
+<path d="M 46.339375 224.44 
+L 313.259375 224.44 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_6">
+<path d="M 46.339375 7.2 
+L 313.259375 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="legend_1">
+<g id="patch_7">
+<path d="M 199.4025 218.94 
+L 305.559375 218.94 
+Q 307.759375 218.94 307.759375 216.74 
+L 307.759375 201.694062 
+Q 307.759375 199.494062 305.559375 199.494062 
+L 199.4025 199.494062 
+Q 197.2025 199.494062 197.2025 201.694062 
+L 197.2025 216.74 
+Q 197.2025 218.94 199.4025 218.94 
+L 199.4025 218.94 
+z
+" style="fill: none; opacity: 0.35; stroke: currentColor; stroke-linejoin: miter"/>
+</g>
+<g id="line2d_27">
+<path d="M 201.6025 208.402344 
+L 212.6025 208.402344 
+L 223.6025 208.402344 
+" style="fill: none; stroke: #1f77b4; stroke-width: 2.5; stroke-linecap: square"/>
+</g>
+<g id="text_15">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="232.4025" y="212.252344" transform="rotate(-0 232.4025 212.252344)">AUC = 0.991</text>
+</g>
+</g>
+</g>
+<g id="axes_2">
+<g id="patch_8">
+<path d="M 364.399375 224.44 
+L 631.319375 224.44 
+L 631.319375 7.2 
+L 364.399375 7.2 
+L 364.399375 224.44 
+z
+" style="fill: none"/>
+</g>
+<g id="matplotlib.axis_3">
+<g id="xtick_7">
+<g id="line2d_28">
+<path d="M 376.532102 224.44 
+L 376.532102 7.2 
+" clip-path="url(#p111f45475b)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_29">
+<g>
+<use xlink:href="#m01098cd7b9" x="376.532102" y="224.44" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_16">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="376.532102" y="239.798281" transform="rotate(-0 376.532102 239.798281)">0.0</text>
+</g>
+</g>
+<g id="xtick_8">
+<g id="line2d_30">
+<path d="M 425.063011 224.44 
+L 425.063011 7.2 
+" clip-path="url(#p111f45475b)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_31">
+<g>
+<use xlink:href="#m01098cd7b9" x="425.063011" y="224.44" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_17">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="425.063011" y="239.798281" transform="rotate(-0 425.063011 239.798281)">0.2</text>
+</g>
+</g>
+<g id="xtick_9">
+<g id="line2d_32">
+<path d="M 473.59392 224.44 
+L 473.59392 7.2 
+" clip-path="url(#p111f45475b)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_33">
+<g>
+<use xlink:href="#m01098cd7b9" x="473.59392" y="224.44" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_18">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="473.59392" y="239.798281" transform="rotate(-0 473.59392 239.798281)">0.4</text>
+</g>
+</g>
+<g id="xtick_10">
+<g id="line2d_34">
+<path d="M 522.12483 224.44 
+L 522.12483 7.2 
+" clip-path="url(#p111f45475b)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_35">
+<g>
+<use xlink:href="#m01098cd7b9" x="522.12483" y="224.44" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_19">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="522.12483" y="239.798281" transform="rotate(-0 522.12483 239.798281)">0.6</text>
+</g>
+</g>
+<g id="xtick_11">
+<g id="line2d_36">
+<path d="M 570.655739 224.44 
+L 570.655739 7.2 
+" clip-path="url(#p111f45475b)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_37">
+<g>
+<use xlink:href="#m01098cd7b9" x="570.655739" y="224.44" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_20">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="570.655739" y="239.798281" transform="rotate(-0 570.655739 239.798281)">0.8</text>
+</g>
+</g>
+<g id="xtick_12">
+<g id="line2d_38">
+<path d="M 619.186648 224.44 
+L 619.186648 7.2 
+" clip-path="url(#p111f45475b)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_39">
+<g>
+<use xlink:href="#m01098cd7b9" x="619.186648" y="224.44" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_21">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="619.186648" y="239.798281" transform="rotate(-0 619.186648 239.798281)">1.0</text>
+</g>
+</g>
+<g id="text_22">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="497.859375" y="254.444219" transform="rotate(-0 497.859375 254.444219)">recall</text>
+</g>
+</g>
+<g id="matplotlib.axis_4">
+<g id="ytick_7">
+<g id="line2d_40">
+<path d="M 364.399375 206.935124 
+L 631.319375 206.935124 
+" clip-path="url(#p111f45475b)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_41">
+<g>
+<use xlink:href="#m7facbce557" x="364.399375" y="206.935124" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_23">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="357.399375" y="211.114265" transform="rotate(-0 357.399375 211.114265)">0.4</text>
+</g>
+</g>
+<g id="ytick_8">
+<g id="line2d_42">
+<path d="M 364.399375 175.291694 
+L 631.319375 175.291694 
+" clip-path="url(#p111f45475b)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_43">
+<g>
+<use xlink:href="#m7facbce557" x="364.399375" y="175.291694" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_24">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="357.399375" y="179.470835" transform="rotate(-0 357.399375 179.470835)">0.5</text>
+</g>
+</g>
+<g id="ytick_9">
+<g id="line2d_44">
+<path d="M 364.399375 143.648264 
+L 631.319375 143.648264 
+" clip-path="url(#p111f45475b)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_45">
+<g>
+<use xlink:href="#m7facbce557" x="364.399375" y="143.648264" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_25">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="357.399375" y="147.827405" transform="rotate(-0 357.399375 147.827405)">0.6</text>
+</g>
+</g>
+<g id="ytick_10">
+<g id="line2d_46">
+<path d="M 364.399375 112.004835 
+L 631.319375 112.004835 
+" clip-path="url(#p111f45475b)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_47">
+<g>
+<use xlink:href="#m7facbce557" x="364.399375" y="112.004835" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_26">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="357.399375" y="116.183975" transform="rotate(-0 357.399375 116.183975)">0.7</text>
+</g>
+</g>
+<g id="ytick_11">
+<g id="line2d_48">
+<path d="M 364.399375 80.361405 
+L 631.319375 80.361405 
+" clip-path="url(#p111f45475b)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_49">
+<g>
+<use xlink:href="#m7facbce557" x="364.399375" y="80.361405" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_27">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="357.399375" y="84.540546" transform="rotate(-0 357.399375 84.540546)">0.8</text>
+</g>
+</g>
+<g id="ytick_12">
+<g id="line2d_50">
+<path d="M 364.399375 48.717975 
+L 631.319375 48.717975 
+" clip-path="url(#p111f45475b)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_51">
+<g>
+<use xlink:href="#m7facbce557" x="364.399375" y="48.717975" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_28">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="357.399375" y="52.897116" transform="rotate(-0 357.399375 52.897116)">0.9</text>
+</g>
+</g>
+<g id="ytick_13">
+<g id="line2d_52">
+<path d="M 364.399375 17.074545 
+L 631.319375 17.074545 
+" clip-path="url(#p111f45475b)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_53">
+<g>
+<use xlink:href="#m7facbce557" x="364.399375" y="17.074545" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_29">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="357.399375" y="21.253686" transform="rotate(-0 357.399375 21.253686)">1.0</text>
+</g>
+</g>
+<g id="text_30">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="333.618281" y="115.82" transform="rotate(-90 333.618281 115.82)">precision</text>
+</g>
+</g>
+<g id="line2d_54">
+<path d="M 619.186648 214.565455 
+L 619.186648 136.202752 
+L 614.60826 137.620945 
+L 614.60826 59.265785 
+L 610.029872 59.980891 
+L 610.029872 17.074545 
+L 376.532102 17.074545 
+L 376.532102 17.074545 
+" clip-path="url(#p111f45475b)" style="fill: none; stroke: #ff7f0e; stroke-width: 2.5; stroke-linecap: square"/>
+</g>
+<g id="line2d_55">
+<path d="M 364.399375 214.565455 
+L 631.319375 214.565455 
+" clip-path="url(#p111f45475b)" style="fill: none; stroke-dasharray: 5.55,2.4; stroke-dashoffset: 0; stroke: #808080; stroke-width: 1.5"/>
+</g>
+<g id="patch_9">
+<path d="M 364.399375 224.44 
+L 364.399375 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_10">
+<path d="M 631.319375 224.44 
+L 631.319375 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_11">
+<path d="M 364.399375 224.44 
+L 631.319375 224.44 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_12">
+<path d="M 364.399375 7.2 
+L 631.319375 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="legend_2">
+<g id="patch_13">
+<path d="M 372.099375 125.542969 
+L 469.157188 125.542969 
+Q 471.357188 125.542969 471.357188 123.342969 
+L 471.357188 108.297031 
+Q 471.357188 106.097031 469.157188 106.097031 
+L 372.099375 106.097031 
+Q 369.899375 106.097031 369.899375 108.297031 
+L 369.899375 123.342969 
+Q 369.899375 125.542969 372.099375 125.542969 
+L 372.099375 125.542969 
+z
+" style="fill: none; opacity: 0.35; stroke: currentColor; stroke-linejoin: miter"/>
+</g>
+<g id="line2d_56">
+<path d="M 374.299375 115.005312 
+L 385.299375 115.005312 
+L 396.299375 115.005312 
+" style="fill: none; stroke: #ff7f0e; stroke-width: 2.5; stroke-linecap: square"/>
+</g>
+<g id="text_31">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="405.099375" y="118.855312" transform="rotate(-0 405.099375 118.855312)">AP = 0.990</text>
+</g>
+</g>
+</g>
+</g>
+<defs>
+<clipPath id="p9a6353bee6">
+<rect x="46.339375" y="7.2" width="266.92" height="217.24"/>
+</clipPath>
+<clipPath id="p111f45475b">
+<rect x="364.399375" y="7.2" width="266.92" height="217.24"/>
+</clipPath>
+</defs>
+</svg></div><figcaption>يسار: منحنى الأداء، قريب جداً من الزاوية المثالية، والخط المتقطع هو العشوائي. يمين: الدقة الإيجابية مقابل الاستدعاء، والخط المتقطع هو نسبة الخبيث في البيانات: أداء العشوائي.</figcaption></figure><h3>نختار العتبة حسب الكلفة</h3><div class="blk"><p>تخيل أن تفويت ورم خبيث يكلّف <b>عشرين</b> ضعف فحص إضافي لورم حميد.</p><p>نبحث عن العتبة التي تصغّر الكلفة الكلية، على بيانات التحقق:</p></div><div class="code "><div class="code-head"><span class="path">cost.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="n">cost_fn</span><span class="p">,</span> <span class="n">cost_fp</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">1</span>
+<span class="n">best_t</span><span class="p">,</span> <span class="n">best_cost</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">,</span> <span class="mi">99</span><span class="p">):</span>
+    <span class="n">pred</span> <span class="o">=</span> <span class="n">p_val</span> <span class="o">&gt;=</span> <span class="n">t</span>
+    <span class="n">fn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">~</span><span class="n">pred</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">y_val</span> <span class="o">==</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">fp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">pred</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">y_val</span> <span class="o">==</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">cost</span> <span class="o">=</span> <span class="n">cost_fn</span> <span class="o">*</span> <span class="n">fn</span> <span class="o">+</span> <span class="n">cost_fp</span> <span class="o">*</span> <span class="n">fp</span>
+    <span class="k">if</span> <span class="n">best_cost</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">cost</span> <span class="o">&lt;</span> <span class="n">best_cost</span><span class="p">:</span>
+        <span class="n">best_t</span><span class="p">,</span> <span class="n">best_cost</span> <span class="o">=</span> <span class="n">t</span><span class="p">,</span> <span class="n">cost</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;best threshold on validation: </span><span class="si">{</span><span class="n">best_t</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2"> (cost </span><span class="si">{</span><span class="n">best_cost</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">best_t</span><span class="p">]:</span>
+    <span class="n">pred</span> <span class="o">=</span> <span class="p">(</span><span class="n">p_te</span> <span class="o">&gt;=</span> <span class="n">t</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">fn</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">pred</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">y_te</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)));</span> <span class="n">fp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">pred</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">y_te</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;test, threshold </span><span class="si">{</span><span class="n">t</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">: missed cancers = </span><span class="si">{</span><span class="n">fn</span><span class="si">}</span><span class="s2">, extra checks = </span><span class="si">{</span><span class="n">fp</span><span class="si">}</span><span class="s2">, cost = </span><span class="si">{</span><span class="n">cost_fn</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">fn</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">cost_fp</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">fp</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>best threshold on validation: 0.08 (cost 29)
+test, threshold 0.50: missed cancers = 4, extra checks = 1, cost = 81
+test, threshold 0.08: missed cancers = 0, extra checks = 16, cost = 16</pre></div><div class="blk"><p>العتبة المختارة أقل بكثير من نصف: نقبل فحوصاً إضافية كثيرة، لكي لا نفوّت حالات خبيثة.</p><p>واختبرناها على الاختبار مرة واحدة، بعد أن اخترناها على التحقق.</p></div><div class="callout mistake"><div class="ct">خطأ شائع: اختيار العتبة على بيانات الاختبار</div><div class="blk"><p>العتبة معامل مثل أي معامل: إذا اخترتها بالنظر إلى الاختبار، صار الاختبار متفائلاً.</p><p>اخترها على التحقق، أو بالتحقق المتقاطع.</p></div></div><div class="callout warn"><div class="ct">المساحة تحت المنحنى لا تكفي وحدها</div><div class="blk"><p>نموذجان بنفس المساحة قد يختلفان كثيراً في المنطقة التي تهمك. مثلاً: عند معدل إيجابي كاذب صغير جداً.</p><p>وهي لا تقول شيئاً عن أي عتبة ستستخدم. في النهاية، القرار عند عتبة واحدة هو الذي يعمل في الواقع.</p></div></div><div class="callout interview"><div class="ct">سؤال مقابلة</div><div class="blk"><p>سؤال قد تسمعه في المقابلة:</p></div><div class="en" dir="ltr"><p>What does ROC AUC measure, and when is the precision-recall curve better?</p></div><div class="blk"><p>جواب قصير وجيد:</p></div><div class="en" dir="ltr"><p>ROC AUC is the probability that the model gives a random positive a higher score than a random negative, so it measures ranking quality independent of the threshold. For highly imbalanced data, the ROC curve can look good even with many false alarms, because the false positive rate stays small. The precision-recall curve and average precision show that problem, so they are better when positives are rare.</p></div></div><section class="summary"><div class="ct">الخلاصة</div><ul class="l"><li>المصنّف يعطي درجة، والعتبة تحولها إلى قرار. العتبة اختيار، وليست قانوناً.</li><li>خفض العتبة يرفع الاستدعاء ويخفض الدقة الإيجابية، والعكس.</li><li>منحنى الأداء: معدل الصحيح مقابل معدل الكاذب لكل العتبات.</li><li>المساحة تحته: احتمال أن يُرتَّب الموجب فوق السالب. من 0.5 للعشوائي إلى 1.</li><li>مع الفئات النادرة، استخدم منحنى الدقة والاستدعاء.</li><li>اختر العتبة حسب الكلفة الحقيقية، على بيانات التحقق.</li></ul></section><section class="quiz" data-quiz="l30-q"><h2>اختبر فهمك</h2><div class="q" data-answer="0"><div class="qt"><span class="qn">1.</span>خفضت العتبة من 0.5 إلى 0.2. ماذا يحدث غالباً؟</div><div class="opts"><button type="button" class="opt">الاستدعاء يرتفع، والدقة الإيجابية تنخفض</button><button type="button" class="opt">الاثنان يرتفعان</button><button type="button" class="opt">الاستدعاء ينخفض</button></div><div class="explain" hidden><span class="verdict"></span><p>نقول موجب أكثر: نجد حالات أكثر، مع إنذارات كاذبة أكثر.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">2.</span>مساحة تحت منحنى الأداء تساوي 0.5. ماذا تعني؟</div><div class="opts"><button type="button" class="opt">نموذج ممتاز</button><button type="button" class="opt">ترتيب النموذج ليس أفضل من العشوائي</button><button type="button" class="opt">نصف التوقعات صحيحة</button></div><div class="explain" hidden><span class="verdict"></span><p>الخط القطري مساحته نصف.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">3.</span>ثلاثة أمثلة موجبة واثنان سالبان. في 5 من 6 أزواج، درجة الموجب أعلى. ما المساحة؟</div><div class="opts"><button type="button" class="opt">0.5</button><button type="button" class="opt">0.83</button><button type="button" class="opt">5</button></div><div class="explain" hidden><span class="verdict"></span><p>خمسة من ستة أزواج.</p></div></div><div class="q" data-answer="0"><div class="qt"><span class="qn">4.</span>لماذا قد يبدو منحنى الأداء متفائلاً مع فئة نادرة جداً؟</div><div class="opts"><button type="button" class="opt">لأن السالب كثير جداً، فمعدل الإيجابي الكاذب يبقى صغيراً حتى مع إنذارات كاذبة كثيرة</button><button type="button" class="opt">لأن المنحنى لا يعمل مع البيانات غير المتوازنة</button><button type="button" class="opt">لأن الموجب يُحسب مرتين</button></div><div class="explain" hidden><span class="verdict"></span><p>منحنى الدقة والاستدعاء يكشف هذا.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">5.</span>أين تختار العتبة؟</div><div class="opts"><button type="button" class="opt">على بيانات الاختبار</button><button type="button" class="opt">على بيانات التحقق، أو بالتحقق المتقاطع</button><button type="button" class="opt">دائماً نصف</button></div><div class="explain" hidden><span class="verdict"></span><p>العتبة معامل يُختار، والاختيار لا يكون على الاختبار.</p></div></div><div class="row"><span class="score"></span><button type="button" class="btn ghost quiz-reset">أعد المحاولة</button></div></section><section class="exercise"><div class="xt">تمرين: ست درجات</div><div class="tablewrap"><table><thead><tr><th>المثال</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th></tr></thead><tbody><tr><td>الدرجة</td><td>0.9</td><td>0.8</td><td>0.6</td><td>0.4</td><td>0.35</td><td>0.2</td></tr><tr><td>الحقيقة</td><td>1</td><td>0</td><td>1</td><td>1</td><td>0</td><td>0</td></tr></tbody></table></div><ol class="l"><li>احسب معدل الإيجابي الصحيح والكاذب عند العتبات: 0.85، و 0.5، و 0.3.</li><li>احسب المساحة تحت المنحنى بعدّ الأزواج.</li><li>عند أي عتبة من الثلاث يكون الاستدعاء كاملاً؟ وما الدقة الإيجابية عندها؟</li><li>تحقق من المساحة بالكود.</li></ol><details><summary>تلميح</summary><div class="dbody"><div class="blk"><p>ثلاثة موجبة، وثلاثة سالبة: تسعة أزواج.</p></div></div></details><details class="sol"><summary>الحل (افتحه بعد أن تحاول)</summary><div class="dbody"><div class="tablewrap"><table><thead><tr><th>العتبة</th><th>الصحيح</th><th>الكاذب</th><th>معدل الصحيح</th><th>معدل الكاذب</th></tr></thead><tbody><tr><td>0.85</td><td>1</td><td>0</td><td>0.33</td><td>0</td></tr><tr><td>0.5</td><td>2</td><td>1</td><td>0.67</td><td>0.33</td></tr><tr><td>0.3</td><td>3</td><td>2</td><td>1.00</td><td>0.67</td></tr></tbody></table></div><div class="blk"><p>الأزواج: المثال 1 أعلى من كل السالب: 3. المثال 3 أعلى من 5 و 6: 2. المثال 4 أعلى من 5 و 6: 2.</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>AUC</mtext><mo>=</mo><mfrac><mrow><mn>3</mn><mo>+</mo><mn>2</mn><mo>+</mo><mn>2</mn></mrow><mn>9</mn></mfrac><mo>=</mo><mfrac><mn>7</mn><mn>9</mn></mfrac><mo>≈</mo><mn>0.78</mn></mrow></math></div></div><div class="blk"><p>الاستدعاء كامل عند 0.3، والدقة الإيجابية عندها <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>3</mn><mi mathvariant="normal">/</mi><mn>5</mn><mo>=</mo><mn>0.6</mn></mrow></math></bdi>.</p></div><div class="code "><div class="code-head"><span class="path"></span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="n">s6</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.35</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">]</span>
+<span class="n">y6</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">roc_auc_score</span><span class="p">(</span><span class="n">y6</span><span class="p">,</span> <span class="n">s6</span><span class="p">),</span> <span class="mi">4</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>0.7778</pre></div></div></details><div class="askbox" data-kind="review" hidden><div class="al">اطلب من كلود أن يراجع حلّك</div><div class="ah">اكتب إجابتك أو الصق الكود. سيقارنه بالحل ويشرح لك بالعربي. هذا يستهلك من رصيد استخدامك.</div><textarea id="rv-l30-1" dir="auto" placeholder="اكتب إجابتك هنا"></textarea><div class="row"><button type="button" class="btn ask-go">راجع حلّي</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></div><pre hidden class="x-task">| المثال | 1 | 2 | 3 | 4 | 5 | 6 |
+|---|---|---|---|---|---|---|
+| الدرجة | 0.9 | 0.8 | 0.6 | 0.4 | 0.35 | 0.2 |
+| الحقيقة | 1 | 0 | 1 | 1 | 0 | 0 |
+
+1. احسب معدل الإيجابي الصحيح والكاذب عند العتبات: 0.85، و 0.5، و 0.3.
+2. احسب المساحة تحت المنحنى بعدّ الأزواج.
+3. عند أي عتبة من الثلاث يكون الاستدعاء كاملاً؟ وما الدقة الإيجابية عندها؟
+4. تحقق من المساحة بالكود.</pre><pre hidden class="x-solution">| العتبة | الصحيح | الكاذب | معدل الصحيح | معدل الكاذب |
+|---|---|---|---|---|
+| 0.85 | 1 | 0 | 0.33 | 0 |
+| 0.5 | 2 | 1 | 0.67 | 0.33 |
+| 0.3 | 3 | 2 | 1.00 | 0.67 |
+
+الأزواج: المثال 1 أعلى من كل السالب: 3. المثال 3 أعلى من 5 و 6: 2. المثال 4 أعلى من 5 و 6: 2.
+
+$$\text{AUC} = \frac{3 + 2 + 2}{9} = \frac{7}{9} \approx 0.78$$
+
+الاستدعاء كامل عند 0.3، والدقة الإيجابية عندها $3/5 = 0.6$.
+
+```python
+s6 = [0.9, 0.8, 0.6, 0.4, 0.35, 0.2]
+y6 = [1, 0, 1, 1, 0, 0]
+print(round(roc_auc_score(y6, s6), 4))
+```</pre></section></article><section class="askbox" data-kind="ask" hidden><div class="al">عندك سؤال عن هذا الدرس؟ اسأل كلود</div><div class="ah">اكتب سؤالك بالعربي. كلود يقرأ نص الدرس ويجيبك. هذا يستهلك من رصيد استخدامك.</div><textarea id="ask-l30" dir="auto" placeholder="مثلاً: لماذا نضرب هنا في المشتقة؟"></textarea><div class="row"><button type="button" class="btn ask-go">اسأل</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></section><div class="donebox"><span class="dmsg"></span><button type="button" class="btn">أنهيت هذا الدرس</button></div><nav class="pager" aria-label="التنقل بين الدروس"><a class="prev" href="#l29"><small>الدرس السابق</small>مقاييس التصنيف: الدقة والاستدعاء</a><a class="next" href="#l31"><small>الدرس التالي</small>مقاييس الانحدار، والنموذج المرجعي</a></nav></div>

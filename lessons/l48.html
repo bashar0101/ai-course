@@ -1,0 +1,530 @@
+<div class="page"><article><div class="eyebrow">الجزء الخامس · الترانسفورمرز</div><h1>كتلة الترانسفورمر، ومعمارية جي بي تي</h1><div class="meta"><span>الدرس 48 من 59</span><span>المدة: حوالي 60 دقيقة</span><span class="nbdl-slot"></span></div><div class="chips" dir="ltr"><bdi class="chip">transformer block</bdi><bdi class="chip">residual stream</bdi><bdi class="chip">pre-norm</bdi><bdi class="chip">feed-forward network</bdi><bdi class="chip">GELU</bdi><bdi class="chip">weight tying</bdi><bdi class="chip">decoder-only</bdi><bdi class="chip">encoder-only</bdi><bdi class="chip">encoder-decoder</bdi><bdi class="chip">KV cache</bdi></div><div class="goals"><b>بعد هذا الدرس ستعرف:</b><ul><li>تجمع كل القطع في كتلة ترانسفورمر واحدة، وتفهم دور كل جزء</li><li>تفهم مجرى البقايا: الطريق الذي تضيف إليه كل كتلة</li><li>تبني نموذج جي بي تي كاملاً في أقل من مئة سطر</li><li>تعدّ معاملات جي بي تي 2 بيدك، وتصل إلى 124 مليوناً بالضبط</li><li>تفرّق بين عائلات الترانسفورمرز الثلاث</li></ul></div><h2>الصورة الكاملة</h2><div class="blk"><p>عندنا الآن كل القطع: التقطيع، والتضمين، وترميز الموضع، والانتباه متعدد الرؤوس. وقبلها: الطبقات، وريلو، والتطبيع، والوصلات المتبقية.</p><p>في هذا الدرس نركّبها معاً في نموذج جي بي تي كامل.</p></div><figure><div class="svgwrap"><svg viewBox="0 0 640 470" width="640" role="img" aria-label="الرموز تدخل التضمين ثم كتل مكررة فيها تطبيع وانتباه وجمع ثم تطبيع وشبكة أمامية وجمع، ثم تطبيع أخير وطبقة المخرجات" fill="none">
+  <defs><marker id="l48-a" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L8,4 L0,8 z" fill="currentColor"/></marker></defs>
+  <rect x="130" y="92" width="310" height="266" rx="14" stroke="currentColor" stroke-dasharray="6 5" stroke-opacity=".5"/>
+  <text x="430" y="346" text-anchor="end" font-size="12.5" fill="currentColor">الكتلة تتكرر عدة مرات</text>
+  <line x1="300" y1="440" x2="300" y2="30" stroke="currentColor" stroke-width="4" stroke-opacity=".75" marker-end="url(#l48-a)"/>
+  <g stroke-width="1.8">
+    <rect x="232" y="408" width="136" height="30" rx="7" class="s-muted f-panel"/>
+    <rect x="160" y="280" width="92" height="34" rx="7" class="s-muted f-panel"/>
+    <rect x="160" y="230" width="92" height="34" rx="7" class="s-accent f-panel"/>
+    <rect x="160" y="170" width="92" height="34" rx="7" class="s-muted f-panel"/>
+    <rect x="160" y="120" width="92" height="34" rx="7" class="s-orange f-panel"/>
+    <rect x="232" y="44" width="136" height="30" rx="7" class="s-muted f-panel"/>
+  </g>
+  <g stroke="currentColor" stroke-width="1.4">
+    <path d="M300,330 L206,330 L206,318"/><line x1="206" y1="280" x2="206" y2="268"/>
+    <path d="M206,228 L206,214 L286,214" marker-end="url(#l48-a)"/>
+    <path d="M300,206 L206,206 L206,208"/><line x1="206" y1="170" x2="206" y2="158"/>
+    <path d="M206,118 L206,104 L286,104" marker-end="url(#l48-a)"/>
+  </g>
+  <circle cx="300" cy="214" r="10" class="f-panel" stroke="currentColor" stroke-width="1.6"/><text x="300" y="219" text-anchor="middle" font-size="15" fill="currentColor">+</text>
+  <circle cx="300" cy="104" r="10" class="f-panel" stroke="currentColor" stroke-width="1.6"/><text x="300" y="109" text-anchor="middle" font-size="15" fill="currentColor">+</text>
+  <g font-size="12" class="mono" fill="currentColor" text-anchor="middle">
+    <text x="300" y="428">tokens + positions</text>
+    <text x="206" y="302">LayerNorm</text><text x="206" y="252">Attention</text>
+    <text x="206" y="192">LayerNorm</text><text x="206" y="142">MLP</text>
+    <text x="300" y="64">LayerNorm → head</text>
+  </g>
+  <g font-size="12.5" fill="currentColor">
+    <text x="455" y="244">الانتباه:</text><text x="455" y="262">الرموز تتبادل المعلومات</text>
+    <text x="455" y="134">الشبكة الأمامية:</text><text x="455" y="152">كل رمز يفكّر وحده</text>
+    <text x="455" y="214">جمع مع المجرى</text>
+    <text x="455" y="104">جمع مع المجرى</text>
+    <text x="300" y="18" text-anchor="middle">درجات لكل رمز في المفردات</text>
+    <text x="380" y="428">التضمين، والموضع</text>
+  </g>
+</svg></div><figcaption>نموذج جي بي تي. الخط العمودي الغامق هو مجرى البقايا: كل كتلة تقرأ منه، وتضيف إليه. والكتلة تتكرر عدداً من المرات.</figcaption></figure><div class="blk"><p>المسار كاملاً:</p></div><ol class="l"><li><b>التضمين:</b> كل رمز يصبح متجهاً، ونضيف متجه موضعه.</li><li><b>الكتل:</b> نفس الكتلة تتكرر عدة مرات، بأوزان مختلفة في كل مرة. جي بي تي 2 الصغير فيه 12 كتلة.</li><li><b>الرأس الأخير:</b> تطبيع، ثم طبقة تحوّل متجه كل موضع إلى درجة لكل رمز في المفردات.</li><li><b>السوفتماكس:</b> الدرجات تصبح احتمالات للرمز التالي، كما في الدرس 45.</li></ol><h2>داخل الكتلة</h2><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>x</mi><mo>←</mo><mi>x</mi><mo>+</mo><mtext>Attention</mtext><mo stretchy="false">(</mo><mtext>LN</mtext><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo stretchy="false">)</mo></mrow></math></div></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>x</mi><mo>←</mo><mi>x</mi><mo>+</mo><mtext>MLP</mtext><mo stretchy="false">(</mo><mtext>LN</mtext><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo stretchy="false">)</mo></mrow></math></div></div><div class="blk"><p>سطران فقط. وكل جزء تعرفه:</p></div><div class="tablewrap"><table><thead><tr><th>الجزء</th><th>دوره</th><th>الدرس</th></tr></thead><tbody><tr><td>الانتباه متعدد الرؤوس، بقناع سببي</td><td>الرموز تتبادل المعلومات</td><td>46 و 47</td></tr><tr><td>الشبكة الأمامية</td><td>كل رمز يعالج ما جمعه، وحده</td><td>35</td></tr><tr><td>التطبيع قبل كل جزء</td><td>يُبقي الأرقام بمقياس ثابت</td><td>39</td></tr><tr><td>الجمع مع المدخل</td><td>طريق مباشر للمعلومات والتدرّج</td><td>41</td></tr></tbody></table></div><div class="blk"><div class="term" dir="ltr"><code>LayerNorm → Attention → + · LayerNorm → MLP → +</code></div></div><div class="key">فكرة مفيدة: الانتباه <b>تواصل</b> بين الرموز، والشبكة الأمامية <b>حساب</b> على كل رمز وحده. والكتلة تكرر: تواصل، ثم تفكير.</div><h3>الشبكة الأمامية</h3><div class="blk"><p>طبقتان كاملتا الاتصال، الوسطى أعرض أربع مرات، وبينهما دالة تفعيل:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>MLP</mtext><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><msub><mi>W</mi><mn>2</mn></msub><mtext> </mtext><mtext>GELU</mtext><mo stretchy="false">(</mo><msub><mi>W</mi><mn>1</mn></msub><mi>x</mi><mo>+</mo><msub><mi>b</mi><mn>1</mn></msub><mo stretchy="false">)</mo><mo>+</mo><msub><mi>b</mi><mn>2</mn></msub></mrow></math></div></div><div class="blk"><p>من 768 إلى 3072، ثم عودة إلى 768. أغلب معاملات الكتلة هنا، وليس في الانتباه. وتشير الأبحاث إلى أن كثيراً من "المعرفة" المحفوظة في النموذج تعيش في هذه الطبقات.</p></div><div class="blk"><p>دالة التفعيل هنا نسخة ناعمة من ريلو، ذكرناها في الدرس 34:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>GELU</mtext><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><mi>x</mi><mo>⋅</mo><mi mathvariant="normal">Φ</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></math></div></div><div class="blk"><p>حيث <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi mathvariant="normal">Φ</mi></mrow></math></bdi> احتمال أن يكون متغير طبيعي معياري أصغر من <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>x</mi></mrow></math></bdi>، من الدرس 12.</p></div><div class="blk"><div class="term" dir="ltr"><code>GELU</code></div></div><h3>مجرى البقايا</h3><div class="blk"><p>انظر للرسم مرة أخرى: الخط العمودي لا ينقطع أبداً. كل كتلة <b>تقرأ</b> منه، و<b>تضيف</b> إليه تعديلاً صغيراً.</p><p>الانتباه في الكتلة الأولى يضيف معلومات من الرموز المجاورة. والشبكة الأمامية تضيف ما استنتجته. والكتلة التالية تقرأ المجموع، وتضيف فوقه.</p></div><div class="blk"><div class="term" dir="ltr"><code>residual stream</code></div></div><div class="blk"><p>لهذا يمر التدرّج بسهولة عبر عشرات الكتل: الجمع يمرر التدرّج كما هو، كما في الدرس 41.</p></div><h3>التطبيع قبل، لا بعد</h3><div class="blk"><p>الترانسفورمر الأصلي وضع التطبيع <b>بعد</b> الجمع. جي بي تي 2 وما بعده وضعوه <b>قبل</b> كل جزء، وأضافوا تطبيعاً أخيراً قبل الرأس.</p><p>هذا يجعل تدريب النماذج العميقة أكثر استقراراً.</p></div><div class="blk"><div class="term" dir="ltr"><code>pre-norm</code></div></div><h2>ربط الأوزان</h2><div class="blk"><p>الرأس الأخير يحوّل متجهاً بطول 768 إلى 50,257 درجة: مصفوفة <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>768</mn><mo>×</mo><mn>50,257</mn></mrow></math></bdi>. نفس حجم جدول التضمين!</p><p>فكرة ذكية: نستخدم <b>نفس</b> المصفوفة للاثنين. التضمين يحوّل الرمز إلى متجه، والرأس يقارن المتجه بكل متجهات الرموز بالضرب النقطي.</p><p>نوفر حوالي 38 مليون معامل، والنتائج غالباً أفضل.</p></div><div class="blk"><div class="term" dir="ltr"><code>weight tying</code></div></div><section class="hand"><div class="hand-h"><span class="hand-tag">مثال محلول باليد</span><div class="hand-t">معاملات جي بي تي 2 الصغير، بيدك</div></div><div class="hand-body"><div class="step">الإعدادات</div><div class="blk"><p>طول التضمين <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>d</mi><mo>=</mo><mn>768</mn></mrow></math></bdi>، و 12 كتلة، ومفردات 50,257 رمزاً، وسياق 1024 رمزاً.</p></div><div class="step">التضمين</div><div class="tablewrap"><table><thead><tr><th>الجزء</th><th>الحساب</th><th>المعاملات</th></tr></thead><tbody><tr><td>تضمين الرموز</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>50,257</mn><mo>×</mo><mn>768</mn></mrow></math></bdi></td><td>38,597,376</td></tr><tr><td>تضمين المواضع</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1,024</mn><mo>×</mo><mn>768</mn></mrow></math></bdi></td><td>786,432</td></tr></tbody></table></div><div class="step">كتلة واحدة</div><div class="tablewrap"><table><thead><tr><th>الجزء</th><th>الحساب</th><th>المعاملات</th></tr></thead><tbody><tr><td>الانتباه</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>4</mn><msup><mi>d</mi><mn>2</mn></msup><mo>+</mo><mn>4</mn><mi>d</mi></mrow></math></bdi>، من الدرس 47</td><td>2,362,368</td></tr><tr><td>الشبكة الأمامية</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>d</mi><mo>×</mo><mn>4</mn><mi>d</mi><mo>+</mo><mn>4</mn><mi>d</mi></mrow></math></bdi>، ثم <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>4</mn><mi>d</mi><mo>×</mo><mi>d</mi><mo>+</mo><mi>d</mi></mrow></math></bdi></td><td>4,722,432</td></tr><tr><td>تطبيعان</td><td>كل واحد <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>2</mn><mi>d</mi></mrow></math></bdi>: مقياس وإزاحة</td><td>3,072</td></tr><tr><td><b>المجموع</b></td><td></td><td><b>7,087,872</b></td></tr></tbody></table></div><div class="blk"><p>الشبكة الأمامية ضعف الانتباه تقريباً.</p></div><div class="step">النموذج كاملاً</div><div class="tablewrap"><table><thead><tr><th>الجزء</th><th>المعاملات</th></tr></thead><tbody><tr><td>التضمين</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>38,597,376</mn><mo>+</mo><mn>786,432</mn><mo>=</mo><mn>39,383,808</mn></mrow></math></bdi></td></tr><tr><td>12 كتلة</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>12</mn><mo>×</mo><mn>7,087,872</mn><mo>=</mo><mn>85,054,464</mn></mrow></math></bdi></td></tr><tr><td>التطبيع الأخير</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>2</mn><mo>×</mo><mn>768</mn><mo>=</mo><mn>1,536</mn></mrow></math></bdi></td></tr><tr><td>الرأس</td><td>صفر: مربوط بتضمين الرموز</td></tr><tr><td><b>المجموع</b></td><td><b>124,439,808</b></td></tr></tbody></table></div><div class="blk"><p>هذا هو الرقم المشهور: 124 مليون معامل.</p></div><div class="step">قاعدة سريعة</div><div class="blk"><p>الكتل تقريباً <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>12</mn><mtext> </mtext><mi>L</mi><mtext> </mtext><msup><mi>d</mi><mn>2</mn></msup></mrow></math></bdi>، حيث <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>L</mi></mrow></math></bdi> عدد الكتل: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>12</mn><mo>×</mo><mn>12</mn><mo>×</mo><msup><mn>768</mn><mn>2</mn></msup><mo>≈</mo><mn>85</mn></mrow></math></bdi> مليوناً. قريب جداً من الحساب الدقيق.</p></div></div></section><h2>ثلاث عائلات</h2><div class="blk"><p>نفس الكتل، بثلاث طرق:</p></div><div class="tablewrap"><table><thead><tr><th>العائلة</th><th>الانتباه</th><th>مناسبة لـ</th><th>أمثلة</th></tr></thead><tbody><tr><td>المفكِّك فقط</td><td>بقناع سببي: كل رمز يرى ما قبله</td><td>توليد النص</td><td>جي بي تي، وكل النماذج اللغوية الكبيرة تقريباً</td></tr><tr><td>المرمِّز فقط</td><td>بلا قناع: كل رمز يرى الكل</td><td>الفهم، والتصنيف، والتضمينات</td><td>بيرت، ونماذج تضمين الجمل في الدرس 55</td></tr><tr><td>المرمِّز والمفكِّك</td><td>مرمِّز يقرأ المدخل كله، ومفكِّك يولّد وهو ينتبه إليه</td><td>الترجمة والتلخيص</td><td>الترانسفورمر الأصلي، و تي 5</td></tr></tbody></table></div><div class="blk"><div class="term" dir="ltr"><code>decoder-only · encoder-only · encoder-decoder</code></div></div><div class="blk"><p>في هذه الدورة نركّز على المفكِّك فقط، لأنه أساس النماذج اللغوية الكبيرة.</p></div><h2>أثناء التوليد</h2><div class="blk"><p>التدريب يحسب كل المواضع دفعة واحدة. لكن التوليد رمز بعد رمز: نأخذ درجات <b>آخر</b> موضع، ونختار رمزاً، ونضيفه، ونعيد.</p></div><div class="blk"><p>مشكلة: في كل خطوة نعيد حساب المفاتيح والقيم لكل الرموز السابقة، مع أنها لم تتغير!</p><p>الحل: نحفظها. في كل خطوة نحسب مفتاح وقيمة الرمز الجديد فقط، ونضيفهما للمحفوظ.</p><p>هذا سبب رئيسي لسرعة النماذج الحديثة في الكتابة، وسبب رئيسي لاستهلاكها الذاكرة مع النصوص الطويلة.</p></div><div class="blk"><div class="term" dir="ltr"><code>KV cache</code></div></div><h2>بالكود: جي بي تي كامل</h2><h3>الأجزاء</h3><div class="code "><div class="code-head"><span class="path">gpt.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn.functional</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">F</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">nn</span>
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">GPTConfig</span><span class="p">:</span>
+    <span class="n">vocab_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50257</span>
+    <span class="n">block_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1024</span>          <span class="c1"># context window</span>
+    <span class="n">n_layer</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">12</span>
+    <span class="n">n_head</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">12</span>
+    <span class="n">d_model</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">768</span>
+    <span class="n">dropout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">CausalSelfAttention</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cfg</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_head</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">n_head</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qkv</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">cfg</span><span class="o">.</span><span class="n">d_model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proj</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">d_model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">dropout</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">B</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">C</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">qkv</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_head</span><span class="p">,</span> <span class="n">C</span> <span class="o">//</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_head</span><span class="p">)</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">scaled_dot_product_attention</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">is_causal</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                           <span class="n">dropout_p</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dropout</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">training</span> <span class="k">else</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">proj</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">C</span><span class="p">))</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">MLP</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cfg</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">cfg</span><span class="o">.</span><span class="n">d_model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">proj</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">cfg</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">d_model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">drop</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">dropout</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proj</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">gelu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fc</span><span class="p">(</span><span class="n">x</span><span class="p">))))</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Block</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cfg</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ln1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">d_model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">attn</span> <span class="o">=</span> <span class="n">CausalSelfAttention</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ln2</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">d_model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mlp</span> <span class="o">=</span> <span class="n">MLP</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">attn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ln1</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>      <span class="c1"># tokens communicate</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">mlp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ln2</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>       <span class="c1"># each token computes</span>
+        <span class="k">return</span> <span class="n">x</span></pre></div><h3>النموذج</h3><div class="code "><div class="code-head"><span class="path">gpt_model.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="k">class</span><span class="w"> </span><span class="nc">GPT</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cfg</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span> <span class="o">=</span> <span class="n">cfg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tok_emb</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Embedding</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">vocab_size</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">d_model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pos_emb</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Embedding</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">block_size</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">d_model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">drop</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Dropout</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">dropout</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">blocks</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">([</span><span class="n">Block</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">n_layer</span><span class="p">)])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ln_f</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">LayerNorm</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">d_model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">d_model</span><span class="p">,</span> <span class="n">cfg</span><span class="o">.</span><span class="n">vocab_size</span><span class="p">,</span> <span class="n">bias</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="o">.</span><span class="n">weight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tok_emb</span><span class="o">.</span><span class="n">weight</span>            <span class="c1"># weight tying</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_init_weights</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_weights</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">m</span><span class="p">):</span>                            <span class="c1"># GPT-2 style initialization</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">,</span> <span class="n">nn</span><span class="o">.</span><span class="n">Embedding</span><span class="p">)):</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">normal_</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">std</span><span class="o">=</span><span class="mf">0.02</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">)</span> <span class="ow">and</span> <span class="n">m</span><span class="o">.</span><span class="n">bias</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">zeros_</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">bias</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">targets</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">B</span><span class="p">,</span> <span class="n">T</span> <span class="o">=</span> <span class="n">idx</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">assert</span> <span class="n">T</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="o">.</span><span class="n">block_size</span><span class="p">,</span> <span class="s2">&quot;sequence longer than the context window&quot;</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="n">device</span><span class="o">=</span><span class="n">idx</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tok_emb</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos_emb</span><span class="p">(</span><span class="n">pos</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blocks</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">block</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">logits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ln_f</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>                   <span class="c1"># (B, T, vocab_size)</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">targets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">cross_entropy</span><span class="p">(</span><span class="n">logits</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">logits</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)),</span> <span class="n">targets</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">logits</span><span class="p">,</span> <span class="n">loss</span></pre></div><div class="blk"><p>كل ما شرحناه في خمسة أجزاء، بأقل من مئة سطر. والتمرير العكسي؟ التدرّج التلقائي.</p></div><h3>عدّ معاملات جي بي تي 2، بدون بنائه في الذاكرة</h3><div class="blk"><p>نموذج بـ 124 مليون معامل يأخذ حوالي نصف غيغابايت. نبنيه على جهاز "وهمي" لا يحجز أي ذاكرة، فقط لنعدّ:</p></div><div class="code "><div class="code-head"><span class="path">count_gpt2.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">&quot;meta&quot;</span><span class="p">):</span>
+    <span class="n">gpt2</span> <span class="o">=</span> <span class="n">GPT</span><span class="p">(</span><span class="n">GPTConfig</span><span class="p">())</span>
+<span class="n">total</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">gpt2</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span>      <span class="c1"># the tied matrix is counted once</span>
+<span class="n">per_block</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">gpt2</span><span class="o">.</span><span class="n">blocks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;GPT-2 small: </span><span class="si">{</span><span class="n">total</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> parameters | one block: </span><span class="si">{</span><span class="n">per_block</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>GPT-2 small: 124,439,808 parameters | one block: 7,087,872</pre></div><div class="blk"><p>نفس رقم الحساب باليد.</p></div><h3>نموذج صغير، وأول تمرير</h3><div class="blk"><p>نموذج على مقاس حروف شكسبير: 65 رمزاً، و 4 كتل، وطول 128:</p></div><div class="code "><div class="code-head"><span class="path">tiny_gpt.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">cfg</span> <span class="o">=</span> <span class="n">GPTConfig</span><span class="p">(</span><span class="n">vocab_size</span><span class="o">=</span><span class="mi">65</span><span class="p">,</span> <span class="n">block_size</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">n_layer</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">n_head</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">d_model</span><span class="o">=</span><span class="mi">128</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">GPT</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;parameters: </span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">idx</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">65</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">64</span><span class="p">))</span>                  <span class="c1"># 2 random sequences of 64 tokens</span>
+<span class="n">targets</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">65</span><span class="p">,</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">64</span><span class="p">))</span>              <span class="c1"># random &quot;next tokens&quot;</span>
+<span class="n">logits</span><span class="p">,</span> <span class="n">loss</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;logits shape:&quot;</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">logits</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;initial loss </span><span class="si">{</span><span class="n">loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">   vs   ln(65) = </span><span class="si">{</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">65</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>parameters: 809,856
+logits shape: (2, 64, 65)
+initial loss 4.180   vs   ln(65) = 4.174</pre></div><div class="blk"><p>معاملات الكتل: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>12</mn><mo>×</mo><mn>4</mn><mo>×</mo><msup><mn>128</mn><mn>2</mn></msup><mo>=</mo><mn>786,432</mn></mrow></math></bdi>، والتطبيعات والإزاحات تضيف قليلاً. وخسارة البداية قريبة من <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>ln</mi><mo>⁡</mo><mn>65</mn></mrow></math></bdi>: الأوزان الابتدائية الصغيرة تعطي احتمالات متساوية تقريباً، كما يجب. في الدرس القادم ندرّبه.</p></div><h3>دالة التفعيل</h3><figure class="plot"><div class="svgwrap"><svg xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 363.19875 209.453937" xmlns="http://www.w3.org/2000/svg" version="1.1">
+<defs>
+</defs>
+<g id="figure_1">
+<g id="patch_1">
+<path d="M 0 209.453937 
+L 363.19875 209.453937 
+L 363.19875 0 
+L 0 0 
+L 0 209.453937 
+z
+" style="fill: none"/>
+</g>
+<g id="axes_1">
+<g id="patch_2">
+<path d="M 21.19875 184.608 
+L 355.99875 184.608 
+L 355.99875 7.2 
+L 21.19875 7.2 
+L 21.19875 184.608 
+z
+" style="fill: none"/>
+</g>
+<g id="matplotlib.axis_1">
+<g id="xtick_1">
+<g id="line2d_1">
+<path d="M 36.416932 184.608 
+L 36.416932 7.2 
+" clip-path="url(#p396dda2f5c)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_2">
+<defs>
+<path id="me5c0af4226" d="M 0 0 
+L 0 3.5 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#me5c0af4226" x="36.416932" y="184.608" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_1">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="36.416932" y="199.966281" transform="rotate(-0 36.416932 199.966281)">−4</text>
+</g>
+</g>
+<g id="xtick_2">
+<g id="line2d_3">
+<path d="M 74.462386 184.608 
+L 74.462386 7.2 
+" clip-path="url(#p396dda2f5c)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_4">
+<g>
+<use xlink:href="#me5c0af4226" x="74.462386" y="184.608" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_2">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="74.462386" y="199.966281" transform="rotate(-0 74.462386 199.966281)">−3</text>
+</g>
+</g>
+<g id="xtick_3">
+<g id="line2d_5">
+<path d="M 112.507841 184.608 
+L 112.507841 7.2 
+" clip-path="url(#p396dda2f5c)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_6">
+<g>
+<use xlink:href="#me5c0af4226" x="112.507841" y="184.608" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_3">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="112.507841" y="199.966281" transform="rotate(-0 112.507841 199.966281)">−2</text>
+</g>
+</g>
+<g id="xtick_4">
+<g id="line2d_7">
+<path d="M 150.553295 184.608 
+L 150.553295 7.2 
+" clip-path="url(#p396dda2f5c)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_8">
+<g>
+<use xlink:href="#me5c0af4226" x="150.553295" y="184.608" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_4">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="150.553295" y="199.966281" transform="rotate(-0 150.553295 199.966281)">−1</text>
+</g>
+</g>
+<g id="xtick_5">
+<g id="line2d_9">
+<path d="M 188.59875 184.608 
+L 188.59875 7.2 
+" clip-path="url(#p396dda2f5c)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_10">
+<g>
+<use xlink:href="#me5c0af4226" x="188.59875" y="184.608" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_5">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="188.59875" y="199.966281" transform="rotate(-0 188.59875 199.966281)">0</text>
+</g>
+</g>
+<g id="xtick_6">
+<g id="line2d_11">
+<path d="M 226.644205 184.608 
+L 226.644205 7.2 
+" clip-path="url(#p396dda2f5c)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_12">
+<g>
+<use xlink:href="#me5c0af4226" x="226.644205" y="184.608" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_6">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="226.644205" y="199.966281" transform="rotate(-0 226.644205 199.966281)">1</text>
+</g>
+</g>
+<g id="xtick_7">
+<g id="line2d_13">
+<path d="M 264.689659 184.608 
+L 264.689659 7.2 
+" clip-path="url(#p396dda2f5c)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_14">
+<g>
+<use xlink:href="#me5c0af4226" x="264.689659" y="184.608" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_7">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="264.689659" y="199.966281" transform="rotate(-0 264.689659 199.966281)">2</text>
+</g>
+</g>
+<g id="xtick_8">
+<g id="line2d_15">
+<path d="M 302.735114 184.608 
+L 302.735114 7.2 
+" clip-path="url(#p396dda2f5c)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_16">
+<g>
+<use xlink:href="#me5c0af4226" x="302.735114" y="184.608" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_8">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="302.735114" y="199.966281" transform="rotate(-0 302.735114 199.966281)">3</text>
+</g>
+</g>
+<g id="xtick_9">
+<g id="line2d_17">
+<path d="M 340.780568 184.608 
+L 340.780568 7.2 
+" clip-path="url(#p396dda2f5c)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_18">
+<g>
+<use xlink:href="#me5c0af4226" x="340.780568" y="184.608" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_9">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="340.780568" y="199.966281" transform="rotate(-0 340.780568 199.966281)">4</text>
+</g>
+</g>
+</g>
+<g id="matplotlib.axis_2">
+<g id="ytick_1">
+<g id="line2d_19">
+<path d="M 21.19875 169.970105 
+L 355.99875 169.970105 
+" clip-path="url(#p396dda2f5c)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_20">
+<defs>
+<path id="m03adca3813" d="M 0 0 
+L -3.5 0 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#m03adca3813" x="21.19875" y="169.970105" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_10">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="14.19875" y="174.149245" transform="rotate(-0 14.19875 174.149245)">0</text>
+</g>
+</g>
+<g id="ytick_2">
+<g id="line2d_21">
+<path d="M 21.19875 131.293578 
+L 355.99875 131.293578 
+" clip-path="url(#p396dda2f5c)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_22">
+<g>
+<use xlink:href="#m03adca3813" x="21.19875" y="131.293578" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_11">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="14.19875" y="135.472719" transform="rotate(-0 14.19875 135.472719)">1</text>
+</g>
+</g>
+<g id="ytick_3">
+<g id="line2d_23">
+<path d="M 21.19875 92.617052 
+L 355.99875 92.617052 
+" clip-path="url(#p396dda2f5c)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_24">
+<g>
+<use xlink:href="#m03adca3813" x="21.19875" y="92.617052" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_12">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="14.19875" y="96.796193" transform="rotate(-0 14.19875 96.796193)">2</text>
+</g>
+</g>
+<g id="ytick_4">
+<g id="line2d_25">
+<path d="M 21.19875 53.940526 
+L 355.99875 53.940526 
+" clip-path="url(#p396dda2f5c)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_26">
+<g>
+<use xlink:href="#m03adca3813" x="21.19875" y="53.940526" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_13">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="14.19875" y="58.119667" transform="rotate(-0 14.19875 58.119667)">3</text>
+</g>
+</g>
+<g id="ytick_5">
+<g id="line2d_27">
+<path d="M 21.19875 15.264 
+L 355.99875 15.264 
+" clip-path="url(#p396dda2f5c)" style="fill: none; stroke: currentColor; stroke-opacity: 0.4; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_28">
+<g>
+<use xlink:href="#m03adca3813" x="21.19875" y="15.264" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_14">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="14.19875" y="19.443141" transform="rotate(-0 14.19875 19.443141)">4</text>
+</g>
+</g>
+</g>
+<g id="line2d_29">
+<path d="M 36.416932 169.970105 
+L 188.217341 169.970105 
+L 188.980159 169.582369 
+L 340.780568 15.264 
+L 340.780568 15.264 
+" clip-path="url(#p396dda2f5c)" style="fill: none; stroke: #1f77b4; stroke-width: 2; stroke-linecap: square"/>
+</g>
+<g id="line2d_30">
+<path d="M 36.416932 169.974996 
+L 72.269289 170.10203 
+L 87.525608 170.375562 
+L 98.205039 170.774371 
+L 107.358834 171.32179 
+L 116.512624 172.099942 
+L 125.666419 173.108138 
+L 152.364984 176.248664 
+L 157.704697 176.514817 
+L 162.281592 176.512817 
+L 166.095674 176.309135 
+L 169.909754 175.890811 
+L 173.723834 175.231032 
+L 177.537915 174.306247 
+L 180.58918 173.362471 
+L 183.640444 172.229049 
+L 186.691709 170.90069 
+L 189.742975 169.374548 
+L 193.557056 167.188499 
+L 197.371136 164.69804 
+L 201.185217 161.91406 
+L 204.999298 158.852921 
+L 208.813377 155.535741 
+L 213.390275 151.252532 
+L 218.729988 145.899815 
+L 224.832516 139.413875 
+L 232.460678 130.931093 
+L 246.19137 115.230147 
+L 259.922058 99.66923 
+L 270.601489 87.904769 
+L 282.043723 75.642174 
+L 295.774416 61.280732 
+L 314.844819 41.688075 
+L 340.780568 15.268887 
+L 340.780568 15.268887 
+" clip-path="url(#p396dda2f5c)" style="fill: none; stroke: #ff7f0e; stroke-width: 2; stroke-linecap: square"/>
+</g>
+<g id="line2d_31">
+<path d="M 21.19875 169.970105 
+L 355.99875 169.970105 
+" clip-path="url(#p396dda2f5c)" style="fill: none; stroke: #808080; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_32">
+<path d="M 188.59875 184.608 
+L 188.59875 7.2 
+" clip-path="url(#p396dda2f5c)" style="fill: none; stroke: #808080; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="patch_3">
+<path d="M 21.19875 184.608 
+L 21.19875 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_4">
+<path d="M 355.99875 184.608 
+L 355.99875 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_5">
+<path d="M 21.19875 184.608 
+L 355.99875 184.608 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_6">
+<path d="M 21.19875 7.2 
+L 355.99875 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="legend_1">
+<g id="patch_7">
+<path d="M 28.89875 48.291875 
+L 93.202344 48.291875 
+Q 95.402344 48.291875 95.402344 46.091875 
+L 95.402344 14.9 
+Q 95.402344 12.7 93.202344 12.7 
+L 28.89875 12.7 
+Q 26.69875 12.7 26.69875 14.9 
+L 26.69875 46.091875 
+Q 26.69875 48.291875 28.89875 48.291875 
+L 28.89875 48.291875 
+z
+" style="fill: none; opacity: 0.35; stroke: currentColor; stroke-linejoin: miter"/>
+</g>
+<g id="line2d_33">
+<path d="M 31.09875 21.608281 
+L 42.09875 21.608281 
+L 53.09875 21.608281 
+" style="fill: none; stroke: #1f77b4; stroke-width: 2; stroke-linecap: square"/>
+</g>
+<g id="text_15">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="61.89875" y="25.458281" transform="rotate(-0 61.89875 25.458281)">ReLU</text>
+</g>
+<g id="line2d_34">
+<path d="M 31.09875 37.754219 
+L 42.09875 37.754219 
+L 53.09875 37.754219 
+" style="fill: none; stroke: #ff7f0e; stroke-width: 2; stroke-linecap: square"/>
+</g>
+<g id="text_16">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="61.89875" y="41.604219" transform="rotate(-0 61.89875 41.604219)">GELU</text>
+</g>
+</g>
+</g>
+</g>
+<defs>
+<clipPath id="p396dda2f5c">
+<rect x="21.19875" y="7.2" width="334.8" height="177.408"/>
+</clipPath>
+</defs>
+</svg></div><figcaption>دالة جيلو تشبه ريلو بعيداً عن الصفر، لكنها ناعمة قرب الصفر، وتنزل قليلاً تحته قبل أن تعود. قيمتها عند 1 تقريباً 0.841، وعند سالب 1 تقريباً سالب 0.159.</figcaption></figure><details class="setup"><summary>كود الرسم</summary><div class="dbody"><div class="code "><div class="code-head"><span class="path">gelu_plot.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="n">z</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">400</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">3.2</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">F</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="n">z</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;ReLU&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">F</span><span class="o">.</span><span class="n">gelu</span><span class="p">(</span><span class="n">z</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;GELU&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">0.8</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span> <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></pre></div></div></details><div class="code "><div class="code-head"><span class="path">gelu_values.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="nb">print</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">gelu</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">])))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>tensor([-0.0455, -0.1587,  0.0000,  0.8413,  1.9545])</pre></div><div class="callout mistake"><div class="ct">نسيان ربط الأوزان عند العدّ</div><div class="blk"><p>إذا عددت المعاملات بجمع أحجام كل الطبقات يدوياً، ستحسب مصفوفة التضمين مرتين، وتصل إلى 163 مليوناً بدل 124.</p><p>دالة المعاملات في باي تورش تعدّ المصفوفة المشتركة مرة واحدة فقط.</p></div></div><div class="callout interview"><div class="ct">سؤال مقابلة</div><div class="blk"><p>سؤال قد تسمعه في المقابلة:</p></div><div class="en" dir="ltr"><p>Describe the structure of a GPT-style transformer block.</p></div><div class="blk"><p>جواب قصير وجيد:</p></div><div class="en" dir="ltr"><p>With pre-normalization, each block computes x = x + Attention(LayerNorm(x)) and then x = x + MLP(LayerNorm(x)). The attention is multi-head and causally masked, and the MLP expands the dimension by four with a GELU activation before projecting back. The residual connections form a residual stream that every block reads from and writes to, which keeps gradients flowing through deep stacks.</p></div><div class="blk"><p>سؤال قد تسمعه في المقابلة:</p></div><div class="en" dir="ltr"><p>Where are most of the parameters in a transformer?</p></div><div class="blk"><p>جواب قصير وجيد:</p></div><div class="en" dir="ltr"><p>In the blocks, and within each block mostly in the MLP: about 8·d² for the MLP versus 4·d² for attention. For large models the blocks dominate, roughly 12·L·d². For small models with large vocabularies, the embedding matrix is also a big share.</p></div><div class="blk"><p>سؤال قد تسمعه في المقابلة:</p></div><div class="en" dir="ltr"><p>What is the difference between encoder-only, decoder-only and encoder-decoder transformers?</p></div><div class="blk"><p>جواب قصير وجيد:</p></div><div class="en" dir="ltr"><p>Encoder-only models like BERT use bidirectional attention and are good for understanding tasks and embeddings. Decoder-only models like GPT use causal masking and generate text autoregressively. Encoder-decoder models like the original transformer or T5 encode the input bidirectionally and decode the output with cross-attention, which suits translation and summarization.</p></div><div class="blk"><p>سؤال قد تسمعه في المقابلة:</p></div><div class="en" dir="ltr"><p>What is a KV cache?</p></div><div class="blk"><p>جواب قصير وجيد:</p></div><div class="en" dir="ltr"><p>During generation, keys and values of previous tokens do not change, so they are stored and reused. Each new step computes attention only for the new token against the cached keys and values, which makes generation much faster at the cost of memory that grows with the context length.</p></div></div><section class="summary"><div class="ct">الخلاصة</div><ul class="l"><li>جي بي تي: تضمين وموضع، ثم كتل مكررة، ثم تطبيع ورأس يعطي درجات للمفردات.</li><li>الكتلة: انتباه بعد تطبيع، مع جمع. ثم شبكة أمامية بعد تطبيع، مع جمع.</li><li>الانتباه تواصل بين الرموز، والشبكة الأمامية حساب على كل رمز.</li><li>مجرى البقايا: كل كتلة تقرأ منه، وتضيف إليه.</li><li>المعاملات تقريباً <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>12</mn><mi>L</mi><msup><mi>d</mi><mn>2</mn></msup></mrow></math></bdi> للكتل، والشبكة الأمامية أكثرها. وجي بي تي 2 الصغير: 124,439,808.</li><li>المفكِّك فقط للتوليد، والمرمِّز فقط للفهم، والاثنان معاً للترجمة.</li><li>أثناء التوليد، ذاكرة المفاتيح والقيم توفّر إعادة الحساب.</li></ul></section><section class="quiz" data-quiz="l48-q"><h2>اختبر فهمك</h2><div class="q" data-answer="1"><div class="qt"><span class="qn">1.</span>في كتلة ترانسفورمر بطول <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>d</mi></mrow></math></bdi>، كم معاملاً تقريباً في الشبكة الأمامية؟</div><div class="opts"><button type="button" class="opt"><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>4</mn><msup><mi>d</mi><mn>2</mn></msup></mrow></math></bdi></button><button type="button" class="opt"><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>8</mn><msup><mi>d</mi><mn>2</mn></msup></mrow></math></bdi></button><button type="button" class="opt"><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msup><mi>d</mi><mn>2</mn></msup></mrow></math></bdi></button></div><div class="explain" hidden><span class="verdict"></span><p><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>d</mi><mo>×</mo><mn>4</mn><mi>d</mi></mrow></math></bdi>، ثم <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>4</mn><mi>d</mi><mo>×</mo><mi>d</mi></mrow></math></bdi>.</p></div></div><div class="q" data-answer="0"><div class="qt"><span class="qn">2.</span>ما دور الانتباه، وما دور الشبكة الأمامية، في الكتلة؟</div><div class="opts"><button type="button" class="opt">الانتباه ينقل المعلومات بين الرموز، والشبكة الأمامية تعالج كل رمز وحده</button><button type="button" class="opt">الانتباه يعالج كل رمز وحده، والشبكة الأمامية تنقل المعلومات بين الرموز</button><button type="button" class="opt">الاثنان يفعلان نفس الشيء</button></div><div class="explain" hidden><span class="verdict"></span><p>تواصل، ثم حساب.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">3.</span>لماذا نربط مصفوفة الرأس الأخير بمصفوفة التضمين؟</div><div class="opts"><button type="button" class="opt">لكي يصبح النموذج أسرع في التدريب فقط</button><button type="button" class="opt">لأنهما بنفس الحجم ودورهما متقارب، فنوفر عشرات الملايين من المعاملات</button><button type="button" class="opt">لأن باي تورش تشترط ذلك</button></div><div class="explain" hidden><span class="verdict"></span><p>الرأس يقارن المتجه بمتجهات كل الرموز.</p></div></div><div class="q" data-answer="0"><div class="qt"><span class="qn">4.</span>أي عائلة تناسب تصنيف المشاعر في مراجعات المنتجات أكثر؟</div><div class="opts"><button type="button" class="opt">المرمِّز فقط، لأن كل رمز يرى الجملة كلها</button><button type="button" class="opt">المفكِّك فقط دائماً</button><button type="button" class="opt">المرمِّز والمفكِّك فقط</button></div><div class="explain" hidden><span class="verdict"></span><p>الفهم يستفيد من رؤية السياق من الجهتين. والنماذج الكبيرة من العائلة الأخرى تستطيع ذلك أيضاً بالتعليمات.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">5.</span>نموذج بـ 24 كتلة، وطول 1024. كم معاملاً تقريباً في الكتل؟</div><div class="opts"><button type="button" class="opt">25 مليوناً</button><button type="button" class="opt">302 مليون تقريباً</button><button type="button" class="opt">مليار</button></div><div class="explain" hidden><span class="verdict"></span><p><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>12</mn><mo>×</mo><mn>24</mn><mo>×</mo><msup><mn>1024</mn><mn>2</mn></msup><mo>≈</mo><mn>302</mn></mrow></math></bdi> مليون. هذا تقريباً حجم جي بي تي 2 المتوسط.</p></div></div><div class="row"><span class="score"></span><button type="button" class="btn ghost quiz-reset">أعد المحاولة</button></div></section><section class="exercise"><div class="xt">تمرين: معاملات نموذجك</div><div class="blk"><p>نموذج الحروف في الكود: 65 رمزاً، وسياق 64، و 4 كتل، و 4 رؤوس، وطول 128.</p></div><ol class="l"><li>احسب بيدك معاملات: تضمين الرموز، وتضمين المواضع، وكتلة واحدة، والتطبيع الأخير.</li><li>اجمعها، وتذكّر أن الرأس مربوط.</li><li>تحقق من رقم الكود.</li></ol><details><summary>تلميح</summary><div class="dbody"><div class="blk"><p>الكتلة: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>4</mn><msup><mi>d</mi><mn>2</mn></msup><mo>+</mo><mn>4</mn><mi>d</mi></mrow></math></bdi> للانتباه، و <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>8</mn><msup><mi>d</mi><mn>2</mn></msup><mo>+</mo><mn>5</mn><mi>d</mi></mrow></math></bdi> للشبكة الأمامية، و <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>4</mn><mi>d</mi></mrow></math></bdi> للتطبيعين.</p></div></div></details><details class="sol"><summary>الحل (افتحه بعد أن تحاول)</summary><div class="dbody"><div class="blk"><p>مع <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>d</mi><mo>=</mo><mn>128</mn></mrow></math></bdi>:</p></div><div class="tablewrap"><table><thead><tr><th>الجزء</th><th>الحساب</th><th>المعاملات</th></tr></thead><tbody><tr><td>تضمين الرموز</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>65</mn><mo>×</mo><mn>128</mn></mrow></math></bdi></td><td>8,320</td></tr><tr><td>تضمين المواضع</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>64</mn><mo>×</mo><mn>128</mn></mrow></math></bdi></td><td>8,192</td></tr><tr><td>الانتباه</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>4</mn><mo>×</mo><msup><mn>128</mn><mn>2</mn></msup><mo>+</mo><mn>4</mn><mo>×</mo><mn>128</mn></mrow></math></bdi></td><td>66,048</td></tr><tr><td>الشبكة الأمامية</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>8</mn><mo>×</mo><msup><mn>128</mn><mn>2</mn></msup><mo>+</mo><mn>5</mn><mo>×</mo><mn>128</mn></mrow></math></bdi></td><td>131,712</td></tr><tr><td>تطبيعان</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>4</mn><mo>×</mo><mn>128</mn></mrow></math></bdi></td><td>512</td></tr><tr><td>كتلة واحدة</td><td></td><td>198,272</td></tr><tr><td>4 كتل</td><td></td><td>793,088</td></tr><tr><td>التطبيع الأخير</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>2</mn><mo>×</mo><mn>128</mn></mrow></math></bdi></td><td>256</td></tr><tr><td><b>المجموع</b></td><td></td><td><b>809,856</b></td></tr></tbody></table></div><div class="code "><div class="code-head"><span class="path"></span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="n">d</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">ctx</span><span class="p">,</span> <span class="n">L</span> <span class="o">=</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">65</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">4</span>
+<span class="n">block</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">d</span> <span class="o">*</span> <span class="n">d</span> <span class="o">+</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">d</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">8</span> <span class="o">*</span> <span class="n">d</span> <span class="o">*</span> <span class="n">d</span> <span class="o">+</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">d</span><span class="p">)</span> <span class="o">+</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">d</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">V</span> <span class="o">*</span> <span class="n">d</span> <span class="o">+</span> <span class="n">ctx</span> <span class="o">*</span> <span class="n">d</span> <span class="o">+</span> <span class="n">L</span> <span class="o">*</span> <span class="n">block</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">d</span><span class="p">)</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>809856</pre></div><div class="blk"><p>لاحظ: هنا التضمين صغير جداً، لأن المفردات 65 رمزاً فقط. في جي بي تي 2، التضمين وحده ثلث النموذج تقريباً.</p></div></div></details><div class="askbox" data-kind="review" hidden><div class="al">اطلب من كلود أن يراجع حلّك</div><div class="ah">اكتب إجابتك أو الصق الكود. سيقارنه بالحل ويشرح لك بالعربي. هذا يستهلك من رصيد استخدامك.</div><textarea id="rv-l48-1" dir="auto" placeholder="اكتب إجابتك هنا"></textarea><div class="row"><button type="button" class="btn ask-go">راجع حلّي</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></div><pre hidden class="x-task">نموذج الحروف في الكود: 65 رمزاً، وسياق 64، و 4 كتل، و 4 رؤوس، وطول 128.
+
+1. احسب بيدك معاملات: تضمين الرموز، وتضمين المواضع، وكتلة واحدة، والتطبيع الأخير.
+2. اجمعها، وتذكّر أن الرأس مربوط.
+3. تحقق من رقم الكود.</pre><pre hidden class="x-solution">مع $d = 128$:
+
+| الجزء | الحساب | المعاملات |
+|---|---|---|
+| تضمين الرموز | $65 \times 128$ | 8,320 |
+| تضمين المواضع | $64 \times 128$ | 8,192 |
+| الانتباه | $4 \times 128^2 + 4 \times 128$ | 66,048 |
+| الشبكة الأمامية | $8 \times 128^2 + 5 \times 128$ | 131,712 |
+| تطبيعان | $4 \times 128$ | 512 |
+| كتلة واحدة | | 198,272 |
+| 4 كتل | | 793,088 |
+| التطبيع الأخير | $2 \times 128$ | 256 |
+| المجموع | | 809,856 |
+
+```python
+d, V, ctx, L = 128, 65, 64, 4
+block = (4 * d * d + 4 * d) + (8 * d * d + 5 * d) + 4 * d
+print(V * d + ctx * d + L * block + 2 * d)
+```
+
+لاحظ: هنا التضمين صغير جداً، لأن المفردات 65 رمزاً فقط. في جي بي تي 2، التضمين وحده ثلث النموذج تقريباً.</pre></section></article><section class="askbox" data-kind="ask" hidden><div class="al">عندك سؤال عن هذا الدرس؟ اسأل كلود</div><div class="ah">اكتب سؤالك بالعربي. كلود يقرأ نص الدرس ويجيبك. هذا يستهلك من رصيد استخدامك.</div><textarea id="ask-l48" dir="auto" placeholder="مثلاً: لماذا نضرب هنا في المشتقة؟"></textarea><div class="row"><button type="button" class="btn ask-go">اسأل</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></section><div class="donebox"><span class="dmsg"></span><button type="button" class="btn">أنهيت هذا الدرس</button></div><nav class="pager" aria-label="التنقل بين الدروس"><a class="prev" href="#l47"><small>الدرس السابق</small>الانتباه متعدد الرؤوس، وترتيب الكلمات</a><a class="next" href="#l49"><small>الدرس التالي</small>ابنِ نموذج جي بي تي صغيراً ودرّبه</a></nav></div>

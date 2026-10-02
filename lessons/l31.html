@@ -1,0 +1,635 @@
+<div class="page"><article><div class="eyebrow">الجزء الثالث · تقييم النماذج</div><h1>مقاييس الانحدار، والنموذج المرجعي</h1><div class="meta"><span>الدرس 31 من 59</span><span>المدة: حوالي 35 دقيقة</span><span class="nbdl-slot"></span></div><div class="chips" dir="ltr"><bdi class="chip">MAE</bdi><bdi class="chip">MSE</bdi><bdi class="chip">RMSE</bdi><bdi class="chip">R-squared</bdi><bdi class="chip">MAPE</bdi><bdi class="chip">residual plot</bdi><bdi class="chip">DummyRegressor</bdi></div><div class="goals"><b>بعد هذا الدرس ستعرف:</b><ul><li>تحسب مقاييس الانحدار الأربعة الأساسية بيدك</li><li>تفهم أثر القيم الشاذة على كل مقياس</li><li>تفهم معامل التحديد كمقارنة مع نموذج المتوسط</li><li>تختار المقياس المناسب لمشكلتك</li><li>تقيّم نموذج انحدار حقيقياً مقابل نموذج مرجعي</li></ul></div><h2>أربعة مقاييس، أربعة أسئلة</h2><div class="blk"><p>في الانحدار، الخطأ رقم: الحقيقة ناقص التوقع. لكن كيف نلخص مئات الأخطاء في رقم واحد؟</p></div><div class="tablewrap"><table><thead><tr><th>المقياس</th><th>المعادلة</th><th>السؤال الذي يجيب عنه</th></tr></thead><tbody><tr><td>متوسط الخطأ المطلق</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mfrac><mn>1</mn><mi>n</mi></mfrac><mo>∑</mo><mo stretchy="false">∣</mo><mi>y</mi><mo>−</mo><mover accent="true"><mi>y</mi><mo>^</mo></mover><mo stretchy="false">∣</mo></mrow></math></bdi></td><td>كم نخطئ في المتوسط؟</td></tr><tr><td>متوسط مربعات الأخطاء</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mfrac><mn>1</mn><mi>n</mi></mfrac><mo>∑</mo><mo stretchy="false">(</mo><mi>y</mi><mo>−</mo><mover accent="true"><mi>y</mi><mo>^</mo></mover><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow></math></bdi></td><td>الخسارة التي ندرّب بها غالباً</td></tr><tr><td>جذره</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msqrt><mtext>MSE</mtext></msqrt></mrow></math></bdi></td><td>مثل السابق، لكن بوحدة الجواب</td></tr><tr><td>معامل التحديد</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1</mn><mo>−</mo><mfrac><mrow><mo>∑</mo><mo stretchy="false">(</mo><mi>y</mi><mo>−</mo><mover accent="true"><mi>y</mi><mo>^</mo></mover><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow><mrow><mo>∑</mo><mo stretchy="false">(</mo><mi>y</mi><mo>−</mo><mover accent="true"><mi>y</mi><mo>ˉ</mo></mover><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow></mfrac></mrow></math></bdi></td><td>كم أفضل من توقع المتوسط دائماً؟</td></tr></tbody></table></div><div class="blk"><div class="term" dir="ltr"><code>MAE · MSE · RMSE · R²</code></div></div><h3>معامل التحديد: مقارنة مع أبسط نموذج</h3><div class="blk"><p>البسط: مجموع مربعات أخطاء نموذجك.</p><p>المقام: مجموع مربعات أخطاء نموذج كسول يتوقع <b>المتوسط</b> دائماً.</p></div><ul class="l"><li>واحد: نموذج مثالي، بلا أخطاء.</li><li>صفر: نموذجك مثل توقع المتوسط. لم يتعلّم شيئاً مفيداً.</li><li>سالب: نموذجك <b>أسوأ</b> من توقع المتوسط! نعم، هذا ممكن على بيانات الاختبار.</li></ul><div class="blk"><div class="term" dir="ltr"><code>R-squared (coefficient of determination)</code></div></div><section class="hand"><div class="hand-h"><span class="hand-tag">مثال محلول باليد</span><div class="hand-t">أربعة توقعات</div></div><div class="hand-body"><div class="tablewrap"><table><thead><tr><th>المثال</th><th>الحقيقة <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>y</mi></mrow></math></bdi></th><th>التوقع <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mover accent="true"><mi>y</mi><mo>^</mo></mover></mrow></math></bdi></th><th>الخطأ <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>y</mi><mo>−</mo><mover accent="true"><mi>y</mi><mo>^</mo></mover></mrow></math></bdi></th></tr></thead><tbody><tr><td>1</td><td>3</td><td>2.5</td><td>0.5</td></tr><tr><td>2</td><td>5</td><td>5</td><td>0</td></tr><tr><td>3</td><td>2</td><td>3</td><td>−1</td></tr><tr><td>4</td><td>8</td><td>6</td><td>2</td></tr></tbody></table></div><div class="step">متوسط الخطأ المطلق</div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>MAE</mtext><mo>=</mo><mfrac><mrow><mn>0.5</mn><mo>+</mo><mn>0</mn><mo>+</mo><mn>1</mn><mo>+</mo><mn>2</mn></mrow><mn>4</mn></mfrac><mo>=</mo><mfrac><mn>3.5</mn><mn>4</mn></mfrac><mo>=</mo><mn>0.875</mn></mrow></math></div></div><div class="step">متوسط مربعات الأخطاء</div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>MSE</mtext><mo>=</mo><mfrac><mrow><mn>0.25</mn><mo>+</mo><mn>0</mn><mo>+</mo><mn>1</mn><mo>+</mo><mn>4</mn></mrow><mn>4</mn></mfrac><mo>=</mo><mfrac><mn>5.25</mn><mn>4</mn></mfrac><mo>=</mo><mn>1.3125</mn></mrow></math></div></div><div class="step">جذره</div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>RMSE</mtext><mo>=</mo><msqrt><mn>1.3125</mn></msqrt><mo>≈</mo><mn>1.146</mn></mrow></math></div></div><div class="blk"><p>لاحظ: الجذر أكبر من متوسط الخطأ المطلق. هذا دائماً صحيح، أو يساويه.</p><p>الفرق بينهما يكبر عندما توجد أخطاء كبيرة قليلة. هنا الخطأ 2 هو السبب.</p></div><div class="step">معامل التحديد</div><div class="blk"><p>متوسط الحقيقة <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mover accent="true"><mi>y</mi><mo>ˉ</mo></mover><mo>=</mo><mn>4.5</mn></mrow></math></bdi>. أخطاء توقع المتوسط: سالب 1.5، و 0.5، وسالب 2.5، و 3.5:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mo>∑</mo><mo stretchy="false">(</mo><mi>y</mi><mo>−</mo><mover accent="true"><mi>y</mi><mo>ˉ</mo></mover><msup><mo stretchy="false">)</mo><mn>2</mn></msup><mo>=</mo><mn>2.25</mn><mo>+</mo><mn>0.25</mn><mo>+</mo><mn>6.25</mn><mo>+</mo><mn>12.25</mn><mo>=</mo><mn>21</mn></mrow></math></div></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msup><mi>R</mi><mn>2</mn></msup><mo>=</mo><mn>1</mn><mo>−</mo><mfrac><mn>5.25</mn><mn>21</mn></mfrac><mo>=</mo><mn>1</mn><mo>−</mo><mn>0.25</mn><mo>=</mo><mn>0.75</mn></mrow></math></div></div><div class="blk"><p>النموذج أزال 75% من الخطأ التربيعي، مقارنة بتوقع المتوسط دائماً.</p></div></div></section><h2>القيم الشاذة: من يتأثر؟</h2><div class="blk"><p>خطأ واحد كبير جداً، مثل 20 بدل 2:</p></div><ul class="l"><li>متوسط الخطأ المطلق: يزيد بمقدار الخطأ مقسوماً على العدد. تأثر خطي.</li><li>متوسط المربعات وجذره: الخطأ يُربّع أولاً، فيصبح 400 بدل 4. الخطأ الواحد يسيطر على كل شيء.</li></ul><div class="tablewrap"><table><thead><tr><th>متى تستخدم</th><th>المقياس</th></tr></thead><tbody><tr><td>تريد رقماً سهل الشرح لمدير: "نخطئ بـ 50 ألفاً في المتوسط"</td><td>متوسط الخطأ المطلق</td></tr><tr><td>الأخطاء الكبيرة خطيرة جداً، ويجب معاقبتها</td><td>الجذر، أو متوسط المربعات</td></tr><tr><td>تريد المقارنة مع الأساس، أو بين مشاكل مختلفة</td><td>معامل التحديد</td></tr><tr><td>الخطأ النسبي هو المهم، والقيم بعيدة عن الصفر</td><td>متوسط الخطأ النسبي</td></tr></tbody></table></div><div class="callout warn"><div class="ct">متوسط الخطأ النسبي خطير</div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>MAPE</mtext><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><mo>∑</mo><mrow><mo fence="true">∣</mo><mfrac><mrow><mi>y</mi><mo>−</mo><mover accent="true"><mi>y</mi><mo>^</mo></mover></mrow><mi>y</mi></mfrac><mo fence="true">∣</mo></mrow></mrow></math></div></div><div class="blk"><p>إذا كانت قيمة حقيقية قريبة من الصفر، ينفجر الرقم. مبيعات يوم كانت 1، والتوقع 5: خطأ 400%.</p><p>ويعاقب التوقع الزائد أكثر من الناقص. استخدمه بحذر.</p></div></div><h2>بالكود</h2><div class="blk"><p>بيانات جاهزة في المكتبة: مرضى السكري، وعشر ميزات، والهدف رقم يقيس تقدم المرض بعد سنة.</p></div><div class="code "><div class="code-head"><span class="path">setup.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_diabetes</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.linear_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinearRegression</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.ensemble</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomForestRegressor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.dummy</span><span class="w"> </span><span class="kn">import</span> <span class="n">DummyRegressor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">mean_absolute_error</span><span class="p">,</span> <span class="n">mean_squared_error</span><span class="p">,</span> <span class="n">r2_score</span>
+
+<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">load_diabetes</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">X_tr</span><span class="p">,</span> <span class="n">X_te</span><span class="p">,</span> <span class="n">y_tr</span><span class="p">,</span> <span class="n">y_te</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;target range:&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="s2">&quot;to&quot;</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="s2">&quot; mean:&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="mi">1</span><span class="p">))</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">report</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_tr</span><span class="p">,</span> <span class="n">y_tr</span><span class="p">)</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_te</span><span class="p">)</span>
+    <span class="n">mae</span> <span class="o">=</span> <span class="n">mean_absolute_error</span><span class="p">(</span><span class="n">y_te</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+    <span class="n">rmse</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mean_squared_error</span><span class="p">(</span><span class="n">y_te</span><span class="p">,</span> <span class="n">p</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">:</span><span class="s2">14</span><span class="si">}</span><span class="s2"> MAE = </span><span class="si">{</span><span class="n">mae</span><span class="si">:</span><span class="s2">6.1f</span><span class="si">}</span><span class="s2">   RMSE = </span><span class="si">{</span><span class="n">rmse</span><span class="si">:</span><span class="s2">6.1f</span><span class="si">}</span><span class="s2">   R2 = </span><span class="si">{</span><span class="n">r2_score</span><span class="p">(</span><span class="n">y_te</span><span class="p">,</span><span class="w"> </span><span class="n">p</span><span class="p">)</span><span class="si">:</span><span class="s2">6.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">p</span>
+
+<span class="n">report</span><span class="p">(</span><span class="s2">&quot;mean baseline&quot;</span><span class="p">,</span> <span class="n">DummyRegressor</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">))</span>
+<span class="n">p_lin</span> <span class="o">=</span> <span class="n">report</span><span class="p">(</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span> <span class="n">LinearRegression</span><span class="p">())</span>
+<span class="n">report</span><span class="p">(</span><span class="s2">&quot;forest&quot;</span><span class="p">,</span> <span class="n">RandomForestRegressor</span><span class="p">(</span><span class="n">n_estimators</span><span class="o">=</span><span class="mi">300</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>target range: 25.0 to 346.0  mean: 152.1
+mean baseline  MAE =   58.3   RMSE =   70.5   R2 = -0.000
+linear         MAE =   45.1   RMSE =   56.4   R2 =  0.359
+forest         MAE =   48.3   RMSE =   61.1   R2 =  0.247</pre></div><div class="blk"><p>النموذج المرجعي معامل تحديده صفر تقريباً، كما يجب. وقد يكون سالباً قليلاً على الاختبار، لأن المتوسط محسوب من التدريب.</p><p>النموذج الخطي يشرح حوالي ثلث التباين، والغابة أقل منه هنا. المشكلة صعبة، والبيانات قليلة: 442 مريضاً فقط.</p><p>ثلث ليس رقماً سيئاً في مشكلة كهذه. كلمة "جيد" دائماً نسبية للمشكلة وللأساس.</p><p>ولاحظ: النموذج البسيط تفوق على الغابة. مع بيانات قليلة وضجيج كثير، البساطة تفوز أحياناً.</p></div><h3>رسم البواقي</h3><div class="code "><div class="code-head"><span class="path">residuals.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="n">res</span> <span class="o">=</span> <span class="n">y_te</span> <span class="o">-</span> <span class="n">p_lin</span>
+<span class="n">fig</span><span class="p">,</span> <span class="p">(</span><span class="n">a1</span><span class="p">,</span> <span class="n">a2</span><span class="p">)</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="mf">3.4</span><span class="p">))</span>
+<span class="n">a1</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">y_te</span><span class="p">,</span> <span class="n">p_lin</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="n">lims</span> <span class="o">=</span> <span class="p">[</span><span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()]</span>
+<span class="n">a1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">lims</span><span class="p">,</span> <span class="n">lims</span><span class="p">,</span> <span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">)</span>
+<span class="n">a1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;true value&quot;</span><span class="p">);</span> <span class="n">a1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;prediction&quot;</span><span class="p">);</span> <span class="n">a1</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;prediction vs truth&quot;</span><span class="p">)</span>
+<span class="n">a2</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">p_lin</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C1&quot;</span><span class="p">)</span>
+<span class="n">a2</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">)</span>
+<span class="n">a2</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;prediction&quot;</span><span class="p">);</span> <span class="n">a2</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;residual&quot;</span><span class="p">);</span> <span class="n">a2</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;residuals&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></pre></div><figure class="plot"><div class="svgwrap"><svg xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 638.602187 234.17" xmlns="http://www.w3.org/2000/svg" version="1.1">
+<defs>
+</defs>
+<g id="figure_1">
+<g id="patch_1">
+<path d="M 0 234.17 
+L 638.602187 234.17 
+L 638.602187 0 
+L 0 0 
+L 0 234.17 
+z
+" style="fill: none"/>
+</g>
+<g id="axes_1">
+<g id="patch_2">
+<path d="M 49.842188 194.678125 
+L 308.797188 194.678125 
+L 308.797188 22.318125 
+L 49.842188 22.318125 
+L 49.842188 194.678125 
+z
+" style="fill: none"/>
+</g>
+<g id="PathCollection_1">
+<defs>
+<path id="m4bdd9b3d99" d="M 0 2 
+C 0.530406 2 1.03916 1.789267 1.414214 1.414214 
+C 1.789267 1.03916 2 0.530406 2 0 
+C 2 -0.530406 1.789267 -1.03916 1.414214 -1.414214 
+C 1.03916 -1.789267 0.530406 -2 0 -2 
+C -0.530406 -2 -1.03916 -1.789267 -1.414214 -1.414214 
+C -1.789267 -1.03916 -2 -0.530406 -2 0 
+C -2 0.530406 -1.789267 1.03916 -1.414214 1.414214 
+C -1.03916 1.789267 -0.530406 2 0 2 
+z
+" style="stroke: #1f77b4"/>
+</defs>
+<g clip-path="url(#pa806903bfc)">
+<use xlink:href="#m4bdd9b3d99" x="278.69211" y="80.994007" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="200.954274" y="76.955188" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="136.417202" y="118.520603" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="90.214526" y="140.902284" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="171.619241" y="107.164564" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="244.956823" y="71.859071" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="174.552745" y="143.8497" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="213.421663" y="106.036629" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="147.41784" y="124.905644" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="115.88268" y="83.600831" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="228.089179" y="116.665763" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="170.885866" y="110.926191" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="137.883954" y="145.760752" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="97.548284" y="155.017369" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="236.889689" y="79.582468" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="79.213889" y="154.832276" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="106.348794" y="124.602455" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="98.28166" y="166.353322" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="117.349431" y="151.188709" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="156.951725" y="93.904449" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="167.952362" y="102.53841" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="245.690199" y="120.498158" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="123.949814" y="119.536449" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="143.017585" y="121.798452" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="93.148029" y="100.225282" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="137.150578" y="116.811383" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="118.816183" y="140.534072" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="111.482425" y="158.503477" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="183.353254" y="106.310791" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="187.020134" y="119.470921" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="202.421026" y="112.608261" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="176.019496" y="158.693078" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="166.485611" y="128.495709" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="189.953637" y="127.741185" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="203.887777" y="129.859966" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="249.357078" y="103.769835" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="154.018222" y="118.904997" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="231.756058" y="106.717253" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="79.213889" y="136.501473" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="188.486885" y="98.430147" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="113.682552" y="158.706769" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="174.552745" y="118.531158" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="112.949176" y="128.530635" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="188.486885" y="110.178287" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="222.222173" y="111.957984" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="108.548921" y="163.630705" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="200.220898" y="129.391321" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="176.752872" y="130.493407" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="104.882042" y="139.616857" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="241.289944" y="84.967238" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="157.685101" y="119.932353" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="144.484336" y="161.509105" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="126.149941" y="123.050739" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="139.350706" y="122.585828" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="186.286758" y="82.817698" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="168.685738" y="113.253079" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="132.750323" y="105.900204" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="88.014399" y="140.724629" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="211.954911" y="134.947577" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="215.62179" y="114.967108" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="81.414016" y="94.370644" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="132.016947" y="115.425604" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="148.884591" y="122.559355" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="121.749686" y="144.876071" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="140.084081" y="73.209164" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="264.75797" y="123.557466" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="82.147392" y="159.456253" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="275.758607" y="88.110758" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="143.750961" y="98.76109" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="85.080895" y="176.142659" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="115.149304" y="160.83615" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="167.952362" y="134.840854" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="107.815546" y="147.482011" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="109.282297" y="128.189746" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="92.414654" y="133.708527" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="162.818732" y="106.636648" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="119.549559" y="150.575281" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="179.686375" y="100.363605" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="175.286121" y="90.838917" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="250.823829" y="106.610857" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="146.684464" y="125.702568" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="153.284846" y="97.097925" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="77.747137" y="175.599187" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="261.091091" y="98.189141" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="119.549559" y="161.64103" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="79.213889" y="153.795559" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="118.816183" y="126.708855" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="147.41784" y="104.057153" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="86.547647" y="134.084779" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="105.615418" y="126.525959" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="143.750961" y="151.447753" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="82.147392" y="138.241949" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="80.68064" y="158.7794" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="187.753509" y="125.13369" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="142.284209" y="138.1196" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="96.081533" y="147.650227" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="195.820643" y="83.744267" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="217.088542" y="88.000839" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="149.617967" y="136.38123" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="123.949814" y="118.848982" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="257.424212" y="104.664473" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="114.415928" y="144.453797" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="187.753509" y="99.288324" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="159.151853" y="157.681137" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="162.818732" y="92.780613" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="89.48115" y="143.587964" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="184.08663" y="91.060566" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="214.155039" y="68.375662" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="93.148029" y="142.607213" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="160.618604" y="143.408092" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m4bdd9b3d99" x="173.819369" y="103.854948" style="fill: #1f77b4; stroke: #1f77b4"/>
+</g>
+</g>
+<g id="matplotlib.axis_1">
+<g id="xtick_1">
+<g id="line2d_1">
+<defs>
+<path id="m4ccf4a3af3" d="M 0 0 
+L 0 3.5 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#m4ccf4a3af3" x="116.616055" y="194.678125" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_1">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="116.616055" y="210.036406" transform="rotate(-0 116.616055 210.036406)">100</text>
+</g>
+</g>
+<g id="xtick_2">
+<g id="line2d_2">
+<g>
+<use xlink:href="#m4ccf4a3af3" x="189.953637" y="194.678125" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_2">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="189.953637" y="210.036406" transform="rotate(-0 189.953637 210.036406)">200</text>
+</g>
+</g>
+<g id="xtick_3">
+<g id="line2d_3">
+<g>
+<use xlink:href="#m4ccf4a3af3" x="263.291218" y="194.678125" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_3">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="263.291218" y="210.036406" transform="rotate(-0 263.291218 210.036406)">300</text>
+</g>
+</g>
+<g id="text_4">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="179.319688" y="224.682344" transform="rotate(-0 179.319688 224.682344)">true value</text>
+</g>
+</g>
+<g id="matplotlib.axis_2">
+<g id="ytick_1">
+<g id="line2d_4">
+<defs>
+<path id="mf08d608673" d="M 0 0 
+L -3.5 0 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#mf08d608673" x="49.842188" y="150.233554" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_5">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="42.842188" y="154.412695" transform="rotate(-0 42.842188 154.412695)">100</text>
+</g>
+</g>
+<g id="ytick_2">
+<g id="line2d_5">
+<g>
+<use xlink:href="#mf08d608673" x="49.842188" y="101.420187" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_6">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="42.842188" y="105.599327" transform="rotate(-0 42.842188 105.599327)">200</text>
+</g>
+</g>
+<g id="ytick_3">
+<g id="line2d_6">
+<g>
+<use xlink:href="#mf08d608673" x="49.842188" y="52.606819" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_7">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="42.842188" y="56.78596" transform="rotate(-0 42.842188 56.78596)">300</text>
+</g>
+</g>
+<g id="text_8">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="15.558281" y="108.498125" transform="rotate(-90 15.558281 108.498125)">prediction</text>
+</g>
+</g>
+<g id="line2d_7">
+<path d="M 61.612869 186.84358 
+L 297.026506 30.15267 
+" clip-path="url(#pa806903bfc)" style="fill: none; stroke-dasharray: 5.55,2.4; stroke-dashoffset: 0; stroke: #808080; stroke-width: 1.5"/>
+</g>
+<g id="patch_3">
+<path d="M 49.842188 194.678125 
+L 49.842188 22.318125 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_4">
+<path d="M 308.797188 194.678125 
+L 308.797188 22.318125 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_5">
+<path d="M 49.842188 194.678125 
+L 308.797188 194.678125 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_6">
+<path d="M 49.842188 22.318125 
+L 308.797188 22.318125 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="text_9">
+<text style="font-size: 12px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="179.319688" y="16.318125" transform="rotate(-0 179.319688 16.318125)">prediction vs truth</text>
+</g>
+</g>
+<g id="axes_2">
+<g id="patch_7">
+<path d="M 372.447188 194.678125 
+L 631.402187 194.678125 
+L 631.402187 22.318125 
+L 372.447188 22.318125 
+L 372.447188 194.678125 
+z
+" style="fill: none"/>
+</g>
+<g id="PathCollection_2">
+<defs>
+<path id="m40e5c51759" d="M 0 2 
+C 0.530406 2 1.03916 1.789267 1.414214 1.414214 
+C 1.789267 1.03916 2 0.530406 2 0 
+C 2 -0.530406 1.789267 -1.03916 1.414214 -1.414214 
+C 1.03916 -1.789267 0.530406 -2 0 -2 
+C -0.530406 -2 -1.03916 -1.789267 -1.414214 -1.414214 
+C -1.789267 -1.03916 -2 -0.530406 -2 0 
+C -2 0.530406 -1.789267 1.03916 -1.414214 1.414214 
+C -1.03916 1.789267 -0.530406 2 0 2 
+z
+" style="stroke: #ff7f0e"/>
+</defs>
+<g clip-path="url(#pb7c14e3559)">
+<use xlink:href="#m40e5c51759" x="592.067126" y="64.645877" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="600.8898" y="122.444845" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="510.091449" y="123.885491" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="461.199368" y="132.559059" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="534.898362" y="111.374301" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="612.022108" y="97.377755" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="454.76083" y="71.338843" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="537.362301" y="83.712852" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="496.143527" y="109.682568" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="586.372601" y="174.230749" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="514.143291" y="62.583334" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="526.681205" y="107.982383" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="450.586196" y="94.648294" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="430.365406" y="112.875406" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="595.150587" y="94.93867" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="430.769736" y="125.712016" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="496.805835" y="138.321122" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="405.60237" y="100.623562" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="438.728993" y="103.186169" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="563.86467" y="135.229982" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="545.004052" y="118.696779" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="505.771543" y="46.473267" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="507.872365" y="131.431372" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="502.931091" y="115.936925" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="550.057006" y="172.684454" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="513.825188" y="125.150753" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="462.003715" y="113.214672" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="422.750113" y="99.653119" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="536.763402" y="104.166276" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="508.015509" y="88.00109" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="523.006777" y="84.490371" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="422.335935" y="54.946893" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="488.301143" y="92.812013" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="489.949377" y="77.408464" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="485.320967" y="65.602969" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="542.314041" y="61.277804" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="509.251753" y="111.348164" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="535.8755" y="70.362785" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="470.812802" y="144.705969" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="553.978422" y="108.791467" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="422.306027" y="97.925094" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="510.068393" y="97.573329" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="488.224848" y="129.698698" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="528.314978" y="96.618317" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="524.427286" y="71.507768" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="411.549843" y="96.363575" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="486.344706" y="68.617531" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="483.937234" y="83.660945" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="464.007343" y="123.775132" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="583.387727" y="86.32434" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="507.007527" y="107.754678" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="416.184411" y="73.77808" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="500.19551" y="126.272569" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="501.211094" y="117.650028" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="588.08333" y="126.486104" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="521.598191" y="107.088694" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="537.660317" y="139.49142" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="461.587449" y="134.260519" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="474.207238" y="54.767583" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="517.853949" y="72.941918" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="562.846281" y="186.84358" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="516.852379" y="130.127215" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="501.268922" y="111.102152" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="452.518754" y="106.692422" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="609.072871" y="168.30719" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="499.088581" y="30.15267" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="420.668802" y="118.897587" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="576.520806" y="59.294836" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="553.255489" y="139.301913" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="384.217869" y="99.584348" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="417.654461" y="94.707093" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="474.440373" y="85.225735" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="446.82616" y="113.602271" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="488.96951" y="132.580883" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="476.913904" y="138.495684" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="536.051577" y="117.990829" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="440.069008" y="102.304411" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="549.754844" y="112.857577" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="570.561228" y="125.761595" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="536.107918" y="57.322417" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="494.402673" y="109.362607" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="556.888619" y="134.449939" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="385.405067" y="105.205409" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="554.504893" y="58.967705" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="415.896224" y="90.838338" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="433.034411" y="126.786238" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="492.204469" y="127.540042" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="541.686403" y="131.285291" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="476.091994" y="142.152163" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="492.604001" y="136.833825" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="438.16312" y="84.709213" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="467.010786" y="140.879357" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="422.147367" y="120.610512" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="495.645368" y="81.627668" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="467.278053" y="99.531122" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="446.458696" y="121.520654" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="586.059268" y="118.950707" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="576.760921" y="99.872156" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="471.075468" y="96.274453" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="509.374115" y="132.14371" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="540.359733" y="54.78708" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="453.441199" y="112.187901" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="552.103762" y="108.408037" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="424.546487" y="67.628676" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="566.319653" y="132.348131" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="455.332583" y="130.282012" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="570.077043" y="119.462414" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="619.631506" y="122.23048" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="457.475005" y="128.76928" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="455.725509" y="81.40649" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m40e5c51759" x="542.128116" y="113.286271" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+</g>
+</g>
+<g id="matplotlib.axis_3">
+<g id="xtick_4">
+<g id="line2d_8">
+<g>
+<use xlink:href="#m4ccf4a3af3" x="387.499863" y="194.678125" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_10">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="387.499863" y="210.036406" transform="rotate(-0 387.499863 210.036406)">50</text>
+</g>
+</g>
+<g id="xtick_5">
+<g id="line2d_9">
+<g>
+<use xlink:href="#m4ccf4a3af3" x="440.8155" y="194.678125" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_11">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="440.8155" y="210.036406" transform="rotate(-0 440.8155 210.036406)">100</text>
+</g>
+</g>
+<g id="xtick_6">
+<g id="line2d_10">
+<g>
+<use xlink:href="#m4ccf4a3af3" x="494.131137" y="194.678125" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_12">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="494.131137" y="210.036406" transform="rotate(-0 494.131137 210.036406)">150</text>
+</g>
+</g>
+<g id="xtick_7">
+<g id="line2d_11">
+<g>
+<use xlink:href="#m4ccf4a3af3" x="547.446775" y="194.678125" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_13">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="547.446775" y="210.036406" transform="rotate(-0 547.446775 210.036406)">200</text>
+</g>
+</g>
+<g id="xtick_8">
+<g id="line2d_12">
+<g>
+<use xlink:href="#m4ccf4a3af3" x="600.762412" y="194.678125" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_14">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="600.762412" y="210.036406" transform="rotate(-0 600.762412 210.036406)">250</text>
+</g>
+</g>
+<g id="text_15">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="501.924688" y="224.682344" transform="rotate(-0 501.924688 224.682344)">prediction</text>
+</g>
+</g>
+<g id="matplotlib.axis_4">
+<g id="ytick_4">
+<g id="line2d_13">
+<g>
+<use xlink:href="#mf08d608673" x="372.447188" y="180.550592" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_16">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="365.447188" y="184.729733" transform="rotate(-0 365.447188 184.729733)">−150</text>
+</g>
+</g>
+<g id="ytick_5">
+<g id="line2d_14">
+<g>
+<use xlink:href="#mf08d608673" x="372.447188" y="155.260952" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_17">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="365.447188" y="159.440093" transform="rotate(-0 365.447188 159.440093)">−100</text>
+</g>
+</g>
+<g id="ytick_6">
+<g id="line2d_15">
+<g>
+<use xlink:href="#mf08d608673" x="372.447188" y="129.971312" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_18">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="365.447188" y="134.150453" transform="rotate(-0 365.447188 134.150453)">−50</text>
+</g>
+</g>
+<g id="ytick_7">
+<g id="line2d_16">
+<g>
+<use xlink:href="#mf08d608673" x="372.447188" y="104.681672" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_19">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="365.447188" y="108.860813" transform="rotate(-0 365.447188 108.860813)">0</text>
+</g>
+</g>
+<g id="ytick_8">
+<g id="line2d_17">
+<g>
+<use xlink:href="#mf08d608673" x="372.447188" y="79.392032" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_20">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="365.447188" y="83.571172" transform="rotate(-0 365.447188 83.571172)">50</text>
+</g>
+</g>
+<g id="ytick_9">
+<g id="line2d_18">
+<g>
+<use xlink:href="#mf08d608673" x="372.447188" y="54.102392" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_21">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="365.447188" y="58.281532" transform="rotate(-0 365.447188 58.281532)">100</text>
+</g>
+</g>
+<g id="ytick_10">
+<g id="line2d_19">
+<g>
+<use xlink:href="#mf08d608673" x="372.447188" y="28.812752" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_22">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="365.447188" y="32.991892" transform="rotate(-0 365.447188 32.991892)">150</text>
+</g>
+</g>
+<g id="text_23">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="328.945625" y="108.498125" transform="rotate(-90 328.945625 108.498125)">residual</text>
+</g>
+</g>
+<g id="line2d_20">
+<path d="M 372.447188 104.681672 
+L 631.402187 104.681672 
+" clip-path="url(#pb7c14e3559)" style="fill: none; stroke: #808080; stroke-width: 1.5; stroke-linecap: square"/>
+</g>
+<g id="patch_8">
+<path d="M 372.447188 194.678125 
+L 372.447188 22.318125 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_9">
+<path d="M 631.402187 194.678125 
+L 631.402187 22.318125 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_10">
+<path d="M 372.447188 194.678125 
+L 631.402187 194.678125 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_11">
+<path d="M 372.447188 22.318125 
+L 631.402187 22.318125 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="text_24">
+<text style="font-size: 12px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="501.924688" y="16.318125" transform="rotate(-0 501.924688 16.318125)">residuals</text>
+</g>
+</g>
+</g>
+<defs>
+<clipPath id="pa806903bfc">
+<rect x="49.842188" y="22.318125" width="258.955" height="172.36"/>
+</clipPath>
+<clipPath id="pb7c14e3559">
+<rect x="372.447188" y="22.318125" width="258.955" height="172.36"/>
+</clipPath>
+</defs>
+</svg></div><figcaption>يسار: كل نقطة مريض. النموذج المثالي يضع كل النقاط على الخط المتقطع. يمين: البواقي حول الصفر، بدون شكل واضح، لكن انتشارها كبير.</figcaption></figure><h3>القيمة الشاذة، بالأرقام</h3><div class="code "><div class="code-head"><span class="path">outlier.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="n">y_true</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mf">13.</span><span class="p">])</span>
+<span class="n">good</span> <span class="o">=</span> <span class="n">y_true</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">one_bad</span> <span class="o">=</span> <span class="n">good</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">one_bad</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">30</span>                      <span class="c1"># خطأ واحد كبير جداً</span>
+
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">[(</span><span class="s2">&quot;small errors&quot;</span><span class="p">,</span> <span class="n">good</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;one huge error&quot;</span><span class="p">,</span> <span class="n">one_bad</span><span class="p">)]:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">:</span><span class="s2">15</span><span class="si">}</span><span class="s2"> MAE = </span><span class="si">{</span><span class="n">mean_absolute_error</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span><span class="w"> </span><span class="n">p</span><span class="p">)</span><span class="si">:</span><span class="s2">5.2f</span><span class="si">}</span><span class="s2">   RMSE = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mean_squared_error</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span><span class="w"> </span><span class="n">p</span><span class="p">))</span><span class="si">:</span><span class="s2">5.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>small errors    MAE =  1.00   RMSE =  1.00
+one huge error  MAE =  4.00   RMSE =  9.85</pre></div><div class="blk"><p>خطأ واحد رفع متوسط الخطأ المطلق من 1 إلى 4 تقريباً، ورفع الجذر من 1 إلى أكثر من 9.</p><p>إذا رأيت الجذر أكبر بكثير من متوسط الخطأ المطلق، فابحث عن أخطاء كبيرة قليلة.</p></div><div class="callout mistake"><div class="ct">خطأ شائع: معامل التحديد على التدريب</div><div class="blk"><p>معامل التحديد على بيانات التدريب يزيد دائماً مع كل ميزة تضيفها، حتى لو كانت ضجيجاً.</p><p>الرقم الذي يهم هو على بيانات الاختبار أو بالتحقق المتقاطع.</p></div></div><div class="callout interview"><div class="ct">سؤال مقابلة</div><div class="blk"><p>سؤال قد تسمعه في المقابلة:</p></div><div class="en" dir="ltr"><p>What is the difference between MAE and RMSE, and what does R² tell you?</p></div><div class="blk"><p>جواب قصير وجيد:</p></div><div class="en" dir="ltr"><p>MAE is the average absolute error; it is easy to explain and robust to outliers. RMSE squares errors before averaging, so large errors count much more; it is always at least as large as MAE, and a big gap means a few large errors. R² compares the model's squared error with always predicting the mean: 1 is perfect, 0 is no better than the mean, negative is worse.</p></div></div><section class="summary"><div class="ct">الخلاصة</div><ul class="l"><li>متوسط الخطأ المطلق: سهل الشرح، وهادئ مع القيم الشاذة.</li><li>متوسط المربعات وجذره: يعاقبان الأخطاء الكبيرة بشدة. الجذر بوحدة الجواب.</li><li>معامل التحديد: كم أفضل من توقع المتوسط دائماً. صفر يعني لا فائدة، وسالب يعني أسوأ.</li><li>الفرق الكبير بين الجذر ومتوسط الخطأ المطلق علامة أخطاء كبيرة قليلة.</li><li>قارن دائماً بنموذج المتوسط، وعلى بيانات الاختبار.</li></ul></section><section class="quiz" data-quiz="l31-q"><h2>اختبر فهمك</h2><div class="q" data-answer="1"><div class="qt"><span class="qn">1.</span>الأخطاء: 1، و −1، و 2، و −2. ما متوسط الخطأ المطلق؟</div><div class="opts"><button type="button" class="opt">صفر</button><button type="button" class="opt">1.5</button><button type="button" class="opt">2.5</button></div><div class="explain" hidden><span class="verdict"></span><p>نأخذ حجم كل خطأ بدون إشارة: 1 و 1 و 2 و 2، والمتوسط 1.5.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">2.</span>نفس الأخطاء. ما متوسط مربعاتها؟</div><div class="opts"><button type="button" class="opt">1.5</button><button type="button" class="opt">2.5</button><button type="button" class="opt">10</button></div><div class="explain" hidden><span class="verdict"></span><p>1 و 1 و 4 و 4، والمتوسط 2.5.</p></div></div><div class="q" data-answer="0"><div class="qt"><span class="qn">3.</span>معامل التحديد على الاختبار يساوي سالب 0.2. ماذا يعني؟</div><div class="opts"><button type="button" class="opt">النموذج أسوأ من توقع المتوسط دائماً</button><button type="button" class="opt">النموذج يشرح 20% من التباين</button><button type="button" class="opt">خطأ في الحساب بالتأكيد</button></div><div class="explain" hidden><span class="verdict"></span><p>ممكن على بيانات جديدة: النموذج أضاف أخطاء بدل أن يزيلها.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">4.</span>أي مقياس يتأثر أكثر بخطأ واحد كبير جداً؟</div><div class="opts"><button type="button" class="opt">متوسط الخطأ المطلق</button><button type="button" class="opt">جذر متوسط مربعات الأخطاء</button><button type="button" class="opt">كلاهما بنفس الدرجة</button></div><div class="explain" hidden><span class="verdict"></span><p>التربيع يضخّم الخطأ الكبير.</p></div></div><div class="q" data-answer="0"><div class="qt"><span class="qn">5.</span>تريد أن تشرح أداء نموذج أسعار لمدير لا يعرف الإحصاء. أي مقياس أسهل؟</div><div class="opts"><button type="button" class="opt">متوسط الخطأ المطلق: "نخطئ بكذا ألف في المتوسط"</button><button type="button" class="opt">متوسط مربعات الأخطاء</button><button type="button" class="opt">معامل التحديد</button></div><div class="explain" hidden><span class="verdict"></span><p>بنفس وحدة الجواب، ومعناه مباشر.</p></div></div><div class="row"><span class="score"></span><button type="button" class="btn ghost quiz-reset">أعد المحاولة</button></div></section><section class="exercise"><div class="xt">تمرين: قيّم بيدك وبالكود</div><div class="tablewrap"><table><thead><tr><th>الحقيقة</th><th>10</th><th>20</th><th>30</th><th>40</th></tr></thead><tbody><tr><td>التوقع</td><td>12</td><td>18</td><td>33</td><td>37</td></tr></tbody></table></div><ol class="l"><li>احسب متوسط الخطأ المطلق، ومتوسط المربعات، وجذره، ومعامل التحديد.</li><li>غيّر التوقع الأخير إلى 60. أعد حساب متوسط الخطأ المطلق والجذر. أيهما تغيّر أكثر، نسبياً؟</li><li>تحقق بالكود.</li></ol><details><summary>تلميح</summary><div class="dbody"><div class="blk"><p>الأخطاء في الحالة الأولى: سالب 2، و 2، وسالب 3، و 3. ومتوسط الحقيقة 25.</p></div></div></details><details class="sol"><summary>الحل (افتحه بعد أن تحاول)</summary><div class="dbody"><div class="blk"><p>الحالة الأولى:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>MAE</mtext><mo>=</mo><mfrac><mrow><mn>2</mn><mo>+</mo><mn>2</mn><mo>+</mo><mn>3</mn><mo>+</mo><mn>3</mn></mrow><mn>4</mn></mfrac><mo>=</mo><mn>2.5</mn><mspace width="2em"/><mtext>MSE</mtext><mo>=</mo><mfrac><mrow><mn>4</mn><mo>+</mo><mn>4</mn><mo>+</mo><mn>9</mn><mo>+</mo><mn>9</mn></mrow><mn>4</mn></mfrac><mo>=</mo><mn>6.5</mn><mspace width="2em"/><mtext>RMSE</mtext><mo>≈</mo><mn>2.55</mn></mrow></math></div></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mo>∑</mo><mo stretchy="false">(</mo><mi>y</mi><mo>−</mo><mover accent="true"><mi>y</mi><mo>ˉ</mo></mover><msup><mo stretchy="false">)</mo><mn>2</mn></msup><mo>=</mo><mn>225</mn><mo>+</mo><mn>25</mn><mo>+</mo><mn>25</mn><mo>+</mo><mn>225</mn><mo>=</mo><mn>500</mn><mspace width="2em"/><msup><mi>R</mi><mn>2</mn></msup><mo>=</mo><mn>1</mn><mo>−</mo><mfrac><mn>26</mn><mn>500</mn></mfrac><mo>=</mo><mn>0.948</mn></mrow></math></div></div><div class="blk"><p>الحالة الثانية: الخطأ الأخير يصبح سالب 20:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>MAE</mtext><mo>=</mo><mfrac><mrow><mn>2</mn><mo>+</mo><mn>2</mn><mo>+</mo><mn>3</mn><mo>+</mo><mn>20</mn></mrow><mn>4</mn></mfrac><mo>=</mo><mn>6.75</mn><mspace width="2em"/><mtext>RMSE</mtext><mo>=</mo><msqrt><mfrac><mrow><mn>4</mn><mo>+</mo><mn>4</mn><mo>+</mo><mn>9</mn><mo>+</mo><mn>400</mn></mrow><mn>4</mn></mfrac></msqrt><mo>≈</mo><mn>10.21</mn></mrow></math></div></div><div class="blk"><p>متوسط الخطأ المطلق تضاعف 2.7 مرة تقريباً، والجذر 4 مرات. التربيع يضخّم الخطأ الكبير.</p></div><div class="code "><div class="code-head"><span class="path"></span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="n">yt4</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mf">40.</span><span class="p">])</span>
+<span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">12</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">33</span><span class="p">,</span> <span class="mf">37.</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">12</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">33</span><span class="p">,</span> <span class="mf">60.</span><span class="p">])):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">mean_absolute_error</span><span class="p">(</span><span class="n">yt4</span><span class="p">,</span> <span class="n">p</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mean_squared_error</span><span class="p">(</span><span class="n">yt4</span><span class="p">,</span> <span class="n">p</span><span class="p">)),</span> <span class="mi">2</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">r2_score</span><span class="p">(</span><span class="n">yt4</span><span class="p">,</span> <span class="n">p</span><span class="p">),</span> <span class="mi">3</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>2.5 2.55 0.948
+6.75 10.21 0.166</pre></div></div></details><div class="askbox" data-kind="review" hidden><div class="al">اطلب من كلود أن يراجع حلّك</div><div class="ah">اكتب إجابتك أو الصق الكود. سيقارنه بالحل ويشرح لك بالعربي. هذا يستهلك من رصيد استخدامك.</div><textarea id="rv-l31-1" dir="auto" placeholder="اكتب إجابتك هنا"></textarea><div class="row"><button type="button" class="btn ask-go">راجع حلّي</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></div><pre hidden class="x-task">| الحقيقة | 10 | 20 | 30 | 40 |
+|---|---|---|---|---|
+| التوقع | 12 | 18 | 33 | 37 |
+
+1. احسب متوسط الخطأ المطلق، ومتوسط المربعات، وجذره، ومعامل التحديد.
+2. غيّر التوقع الأخير إلى 60. أعد حساب متوسط الخطأ المطلق والجذر. أيهما تغيّر أكثر، نسبياً؟
+3. تحقق بالكود.</pre><pre hidden class="x-solution">الحالة الأولى:
+
+$$\text{MAE} = \frac{2 + 2 + 3 + 3}{4} = 2.5 \qquad \text{MSE} = \frac{4 + 4 + 9 + 9}{4} = 6.5 \qquad \text{RMSE} \approx 2.55$$
+
+$$\sum (y - \bar{y})^2 = 225 + 25 + 25 + 225 = 500 \qquad R^2 = 1 - \frac{26}{500} = 0.948$$
+
+الحالة الثانية: الخطأ الأخير يصبح سالب 20:
+
+$$\text{MAE} = \frac{2 + 2 + 3 + 20}{4} = 6.75 \qquad \text{RMSE} = \sqrt{\frac{4 + 4 + 9 + 400}{4}} \approx 10.21$$
+
+متوسط الخطأ المطلق تضاعف 2.7 مرة تقريباً، والجذر 4 مرات. التربيع يضخّم الخطأ الكبير.
+
+```python
+yt4 = np.array([10, 20, 30, 40.])
+for p in (np.array([12, 18, 33, 37.]), np.array([12, 18, 33, 60.])):
+    print(mean_absolute_error(yt4, p), round(np.sqrt(mean_squared_error(yt4, p)), 2), round(r2_score(yt4, p), 3))
+```</pre></section></article><section class="askbox" data-kind="ask" hidden><div class="al">عندك سؤال عن هذا الدرس؟ اسأل كلود</div><div class="ah">اكتب سؤالك بالعربي. كلود يقرأ نص الدرس ويجيبك. هذا يستهلك من رصيد استخدامك.</div><textarea id="ask-l31" dir="auto" placeholder="مثلاً: لماذا نضرب هنا في المشتقة؟"></textarea><div class="row"><button type="button" class="btn ask-go">اسأل</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></section><div class="donebox"><span class="dmsg"></span><button type="button" class="btn">أنهيت هذا الدرس</button></div><nav class="pager" aria-label="التنقل بين الدروس"><a class="prev" href="#l30"><small>الدرس السابق</small>اختيار العتبة، ومنحنى الأداء</a><a class="next" href="#l32"><small>الدرس التالي</small>التنظيم: معاقبة الأوزان الكبيرة</a></nav></div>

@@ -1,0 +1,521 @@
+<div class="page"><article><div class="eyebrow">الجزء الثاني · التعلم الآلي</div><h1>أشجار القرار</h1><div class="meta"><span>الدرس 20 من 59</span><span>المدة: حوالي 50 دقيقة</span><span class="nbdl-slot"></span></div><div class="chips" dir="ltr"><bdi class="chip">decision tree</bdi><bdi class="chip">node</bdi><bdi class="chip">leaf</bdi><bdi class="chip">split</bdi><bdi class="chip">Gini impurity</bdi><bdi class="chip">information gain</bdi><bdi class="chip">max_depth</bdi><bdi class="chip">feature importance</bdi></div><div class="goals"><b>بعد هذا الدرس ستعرف:</b><ul><li>تفهم شجرة القرار كسلسلة أسئلة نعم أو لا</li><li>تقيس نقاء مجموعة بمؤشر جيني</li><li>تختار أفضل سؤال بحساب مكسب النقاء، بيدك</li><li>ترى كيف تحفظ الشجرة العميقة بيانات التدريب، وكيف نحدّها</li><li>تستخدم الأشجار في سايكت ليرن، وتقرأ أهمية الميزات</li></ul></div><h2>لعبة العشرين سؤالاً</h2><div class="blk"><p>تعرف اللعبة: صديقك يفكر في شيء، وأنت تسأل أسئلة جوابها نعم أو لا.</p><p>اللاعب الماهر يبدأ بالأسئلة التي تقسم الاحتمالات إلى نصفين. لا يسأل "هل هو قطة؟" أولاً.</p></div><div class="blk"><p>شجرة القرار تفعل الشيء نفسه مع البيانات:</p><p>سؤال عن ميزة، ثم سؤال آخر حسب الجواب، حتى نصل إلى مجموعة صغيرة كلها من فئة واحدة تقريباً.</p></div><figure><div class="svgwrap"><svg viewBox="0 0 580 290" width="580" role="img" aria-label="شجرة قرار: السؤال الأول عن البطاقة، ثم سؤال العمر في كل فرع، وأربع أوراق" fill="none">
+  <defs><marker id="l20-ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L8,4 L0,8 z" fill="currentColor"/></marker></defs>
+  <g font-size="13" fill="currentColor" text-anchor="middle">
+    <rect x="215" y="10" width="150" height="50" rx="10" class="s-accent f-accent" fill-opacity=".12" stroke-width="1.6"/>
+    <text x="290" y="32" font-weight="600">عنده بطاقة ولاء؟</text><text x="290" y="51" font-size="11.5" class="mono">5 / 10</text>
+    <rect x="60" y="110" width="150" height="50" rx="10" class="s-accent f-accent" fill-opacity=".12" stroke-width="1.6"/>
+    <text x="135" y="132" font-weight="600">عمره أقل من 30؟</text><text x="135" y="151" font-size="11.5" class="mono">4 / 5</text>
+    <rect x="370" y="110" width="150" height="50" rx="10" class="s-accent f-accent" fill-opacity=".12" stroke-width="1.6"/>
+    <text x="445" y="132" font-weight="600">عمره أقل من 30؟</text><text x="445" y="151" font-size="11.5" class="mono">1 / 5</text>
+    <rect x="10" y="215" width="110" height="54" rx="27" class="s-good" stroke-width="1.8"/>
+    <text x="65" y="238" font-weight="600">يشتري</text><text x="65" y="257" font-size="11.5" class="mono">2 / 2</text>
+    <rect x="150" y="215" width="110" height="54" rx="27" class="s-good" stroke-width="1.8"/>
+    <text x="205" y="238" font-weight="600">يشتري</text><text x="205" y="257" font-size="11.5" class="mono">2 / 3</text>
+    <rect x="320" y="215" width="110" height="54" rx="27" stroke="currentColor" stroke-opacity=".5" stroke-dasharray="4 3"/>
+    <text x="375" y="238" font-weight="600">غير متأكد</text><text x="375" y="257" font-size="11.5" class="mono">1 / 2</text>
+    <rect x="460" y="215" width="110" height="54" rx="27" class="s-bad" stroke-width="1.8"/>
+    <text x="515" y="238" font-weight="600">لا يشتري</text><text x="515" y="257" font-size="11.5" class="mono">0 / 3</text>
+  </g>
+  <g stroke="currentColor" stroke-width="1.5">
+    <line x1="250" y1="60" x2="160" y2="106" marker-end="url(#l20-ar)"/><line x1="330" y1="60" x2="420" y2="106" marker-end="url(#l20-ar)"/>
+    <line x1="110" y1="160" x2="72" y2="211" marker-end="url(#l20-ar)"/><line x1="160" y1="160" x2="198" y2="211" marker-end="url(#l20-ar)"/>
+    <line x1="420" y1="160" x2="382" y2="211" marker-end="url(#l20-ar)"/><line x1="470" y1="160" x2="508" y2="211" marker-end="url(#l20-ar)"/>
+  </g>
+  <g font-size="12" fill="currentColor" text-anchor="middle">
+    <text x="190" y="78">نعم</text><text x="392" y="78">لا</text>
+    <text x="78" y="190">نعم</text><text x="195" y="190">لا</text><text x="388" y="190">نعم</text><text x="505" y="190">لا</text>
+  </g>
+</svg></div><figcaption>شجرة قرار لتوقع هل سيشتري الزبون. كل عقدة سؤال، وكل ورقة توقع. الأرقام: كم زبوناً اشترى من كل من وصل إلى هنا.</figcaption></figure><div class="blk"><p>الكلمات: كل سؤال <b>عقدة</b>، وكل نهاية <b>ورقة</b>. والورقة تتوقع الفئة الأكثر فيها.</p></div><div class="blk"><div class="term" dir="ltr"><code>node · leaf · split</code></div></div><div class="blk"><p>السؤال الكبير: <b>أي سؤال نسأل أولاً؟</b></p></div><h2>قياس النقاء: مؤشر جيني</h2><div class="blk"><p>نريد أسئلة تصنع مجموعات <b>نقية</b>: كلها من فئة واحدة.</p><p>نحتاج رقماً يقيس "كم المجموعة مختلطة". أشهر رقم هو مؤشر جيني:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>G</mi><mo>=</mo><mn>1</mn><mo>−</mo><munder><mo>∑</mo><mi>k</mi></munder><msubsup><mi>p</mi><mi>k</mi><mn>2</mn></msubsup></mrow></math></div></div><div class="blk"><p>حيث <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>p</mi><mi>k</mi></msub></mrow></math></bdi> نسبة الفئة رقم <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>k</mi></mrow></math></bdi> في المجموعة.</p></div><div class="tablewrap"><table><thead><tr><th>المجموعة</th><th>الحساب</th><th>جيني</th></tr></thead><tbody><tr><td>كلها من فئة واحدة</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1</mn><mo>−</mo><msup><mn>1</mn><mn>2</mn></msup></mrow></math></bdi></td><td>0: نقية تماماً</td></tr><tr><td>نصف ونصف</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1</mn><mo>−</mo><mo stretchy="false">(</mo><msup><mn>0.5</mn><mn>2</mn></msup><mo>+</mo><msup><mn>0.5</mn><mn>2</mn></msup><mo stretchy="false">)</mo></mrow></math></bdi></td><td>0.5: أسوأ حالة لفئتين</td></tr><tr><td>ثلاثة أرباع وربع</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1</mn><mo>−</mo><mo stretchy="false">(</mo><msup><mn>0.75</mn><mn>2</mn></msup><mo>+</mo><msup><mn>0.25</mn><mn>2</mn></msup><mo stretchy="false">)</mo></mrow></math></bdi></td><td>0.375</td></tr></tbody></table></div><div class="blk"><p>المعنى: لو اخترت مثالاً عشوائياً من المجموعة، وخمّنت فئته عشوائياً حسب النسب، فهذا احتمال أن تخطئ.</p></div><div class="blk"><div class="term" dir="ltr"><code>Gini impurity</code></div></div><div class="blk"><p>وبديل مشهور هو الإنتروبيا من الدرس 14. الفكرة نفسها، والنتائج متقاربة جداً عادة.</p></div><h3>المكسب من سؤال</h3><div class="blk"><p>السؤال يقسم المجموعة إلى مجموعتين. نحسب جيني لكل مجموعة، ثم المتوسط <b>الموزون بالحجم</b>.</p><p>المكسب هو كم نقص عدم النقاء:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>gain</mtext><mo>=</mo><msub><mi>G</mi><mtext>parent</mtext></msub><mo>−</mo><mrow><mo fence="true">(</mo><mfrac><msub><mi>n</mi><mtext>left</mtext></msub><mi>n</mi></mfrac><msub><mi>G</mi><mtext>left</mtext></msub><mo>+</mo><mfrac><msub><mi>n</mi><mtext>right</mtext></msub><mi>n</mi></mfrac><msub><mi>G</mi><mtext>right</mtext></msub><mo fence="true">)</mo></mrow></mrow></math></div></div><div class="blk"><p>نجرب كل سؤال ممكن، ونختار صاحب أكبر مكسب. ثم نكرر نفس الشيء داخل كل مجموعة.</p><p>هذه الطريقة <b>جشعة</b>: تختار أفضل سؤال الآن، دون أن تفكر في الأسئلة التي بعده.</p></div><section class="hand"><div class="hand-h"><span class="hand-tag">مثال محلول باليد</span><div class="hand-t">أي سؤال أولاً؟</div></div><div class="hand-body"><div class="blk"><p>عشرة زبائن. اشترى منهم خمسة.</p></div><div class="tablewrap"><table><thead><tr><th>الزبون</th><th>عمره أقل من 30</th><th>عنده بطاقة</th><th>اشترى</th></tr></thead><tbody><tr><td>1</td><td>نعم</td><td>نعم</td><td>نعم</td></tr><tr><td>2</td><td>نعم</td><td>نعم</td><td>نعم</td></tr><tr><td>3</td><td>نعم</td><td>لا</td><td>نعم</td></tr><tr><td>4</td><td>لا</td><td>نعم</td><td>نعم</td></tr><tr><td>5</td><td>لا</td><td>نعم</td><td>نعم</td></tr><tr><td>6</td><td>نعم</td><td>لا</td><td>لا</td></tr><tr><td>7</td><td>لا</td><td>نعم</td><td>لا</td></tr><tr><td>8</td><td>لا</td><td>لا</td><td>لا</td></tr><tr><td>9</td><td>لا</td><td>لا</td><td>لا</td></tr><tr><td>10</td><td>لا</td><td>لا</td><td>لا</td></tr></tbody></table></div><div class="step">جيني قبل أي سؤال</div><div class="blk"><p>خمسة من عشرة:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>G</mi><mo>=</mo><mn>1</mn><mo>−</mo><mo stretchy="false">(</mo><msup><mn>0.5</mn><mn>2</mn></msup><mo>+</mo><msup><mn>0.5</mn><mn>2</mn></msup><mo stretchy="false">)</mo><mo>=</mo><mn>0.5</mn></mrow></math></div></div><div class="step">السؤال الأول: هل عمره أقل من 30؟</div><div class="blk"><p>الشباب أربعة: ثلاثة اشتروا، وواحد لم يشترِ:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>G</mi><mtext>young</mtext></msub><mo>=</mo><mn>1</mn><mo>−</mo><mo stretchy="false">(</mo><msup><mn>0.75</mn><mn>2</mn></msup><mo>+</mo><msup><mn>0.25</mn><mn>2</mn></msup><mo stretchy="false">)</mo><mo>=</mo><mn>0.375</mn></mrow></math></div></div><div class="blk"><p>الباقون ستة: اثنان اشتريا، وأربعة لم يشتروا:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>G</mi><mtext>old</mtext></msub><mo>=</mo><mn>1</mn><mo>−</mo><mrow><mo fence="true">(</mo><mstyle scriptlevel="0" displaystyle="false"><mfrac><mn>1</mn><mn>9</mn></mfrac></mstyle><mo>+</mo><mstyle scriptlevel="0" displaystyle="false"><mfrac><mn>4</mn><mn>9</mn></mfrac></mstyle><mo fence="true">)</mo></mrow><mo>=</mo><mstyle scriptlevel="0" displaystyle="false"><mfrac><mn>4</mn><mn>9</mn></mfrac></mstyle><mo>≈</mo><mn>0.444</mn></mrow></math></div></div><div class="blk"><p>المتوسط الموزون:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mn>0.4</mn><mo>×</mo><mn>0.375</mn><mo>+</mo><mn>0.6</mn><mo>×</mo><mn>0.444</mn><mo>=</mo><mn>0.15</mn><mo>+</mo><mn>0.267</mn><mo>=</mo><mn>0.417</mn></mrow></math></div></div><div class="blk"><p>المكسب: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.5</mn><mo>−</mo><mn>0.417</mn><mo>=</mo><mn>0.083</mn></mrow></math></bdi>.</p></div><div class="step">السؤال الثاني: هل عنده بطاقة؟</div><div class="blk"><p>أصحاب البطاقات خمسة: أربعة اشتروا:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>G</mi><mtext>card</mtext></msub><mo>=</mo><mn>1</mn><mo>−</mo><mo stretchy="false">(</mo><msup><mn>0.8</mn><mn>2</mn></msup><mo>+</mo><msup><mn>0.2</mn><mn>2</mn></msup><mo stretchy="false">)</mo><mo>=</mo><mn>0.32</mn></mrow></math></div></div><div class="blk"><p>الباقون خمسة: واحد اشترى:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>G</mi><mtext>no card</mtext></msub><mo>=</mo><mn>1</mn><mo>−</mo><mo stretchy="false">(</mo><msup><mn>0.2</mn><mn>2</mn></msup><mo>+</mo><msup><mn>0.8</mn><mn>2</mn></msup><mo stretchy="false">)</mo><mo>=</mo><mn>0.32</mn></mrow></math></div></div><div class="blk"><p>المتوسط الموزون <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.32</mn></mrow></math></bdi>، والمكسب: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.5</mn><mo>−</mo><mn>0.32</mn><mo>=</mo><mn>0.18</mn></mrow></math></bdi>.</p></div><div class="step">القرار</div><div class="blk"><p>سؤال البطاقة يعطي مكسباً أكبر: 0.18 مقابل 0.083. نبدأ به.</p><p>ثم نكرر داخل كل فرع. هكذا بُنيت الشجرة في الرسم.</p></div></div></section><h2>خطر الشجرة العميقة</h2><div class="blk"><p>إذا تركنا الشجرة تكبر بلا حد، ستستمر في السؤال حتى تصبح كل ورقة مثالاً واحداً.</p><p>عندها دقة التدريب 100%. لكنها حفظت البيانات، ومعها الضجيج والأخطاء.</p><p>مع بيانات جديدة، تكون أسوأ بكثير.</p></div><div class="blk"><p>لذلك نحدّ الشجرة بمعاملات فائقة، أشهرها:</p></div><div class="tablewrap"><table><thead><tr><th>المعامل</th><th>معناه</th></tr></thead><tbody><tr><td><bdi class="chip" dir="ltr">max_depth</bdi></td><td>أقصى عدد أسئلة من الجذر إلى أي ورقة</td></tr><tr><td><bdi class="chip" dir="ltr">min_samples_leaf</bdi></td><td>أقل عدد أمثلة مسموح في الورقة</td></tr><tr><td><bdi class="chip" dir="ltr">min_samples_split</bdi></td><td>أقل عدد أمثلة لكي نسأل سؤالاً جديداً</td></tr></tbody></table></div><h2>أشياء جميلة في الأشجار</h2><ul class="l"><li><b>لا تحتاج توحيد مقياس.</b> السؤال "هل المساحة أكبر من 100؟" لا يهمه إن كانت المساحة بالمتر أو بالقدم.</li><li><b>سهلة الشرح.</b> تستطيع أن تطبع الشجرة وتقرأها كقواعد.</li><li><b>تفهم العلاقات غير الخطية</b> والتفاعل بين الميزات، مثل: البطاقة مهمة فقط للكبار.</li><li><b>للانحدار أيضاً:</b> الورقة تتوقع متوسط الأجوبة فيها، والسؤال يختار ما يقلل مربعات الأخطاء.</li></ul><div class="blk"><p>لكن الشجرة الواحدة <b>غير مستقرة</b>: تغيير صغير في البيانات قد يغيّر السؤال الأول، فتتغير الشجرة كلها.</p><p>الحل في الدرس القادم: غابة من الأشجار.</p></div><h2>بالكود</h2><h3>جيني بيدنا</h3><div class="code "><div class="code-head"><span class="path">gini.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s2">&quot;young&quot;</span><span class="p">:</span>  <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+    <span class="s2">&quot;card&quot;</span><span class="p">:</span>   <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+    <span class="s2">&quot;bought&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+<span class="p">})</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">gini</span><span class="p">(</span><span class="n">labels</span><span class="p">):</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">minlength</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">p</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">split_gain</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">feature</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="s2">&quot;bought&quot;</span><span class="p">):</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">gini</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">target</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+    <span class="n">weighted</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">for</span> <span class="n">value</span><span class="p">,</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">feature</span><span class="p">):</span>
+        <span class="n">weighted</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">part</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">*</span> <span class="n">gini</span><span class="p">(</span><span class="n">part</span><span class="p">[</span><span class="n">target</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">parent</span> <span class="o">-</span> <span class="n">weighted</span>
+
+<span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;young&quot;</span><span class="p">,</span> <span class="s2">&quot;card&quot;</span><span class="p">]:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;gain of &#39;</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">&#39;: </span><span class="si">{</span><span class="n">split_gain</span><span class="p">(</span><span class="n">df</span><span class="p">,</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>gain of 'young': 0.083
+gain of 'card': 0.180</pre></div><h3>نفس الشجرة بمكتبة سايكت ليرن</h3><div class="code "><div class="code-head"><span class="path">tree_sklearn.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.tree</span><span class="w"> </span><span class="kn">import</span> <span class="n">DecisionTreeClassifier</span><span class="p">,</span> <span class="n">export_text</span>
+
+<span class="n">tree</span> <span class="o">=</span> <span class="n">DecisionTreeClassifier</span><span class="p">(</span><span class="n">max_depth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">tree</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">df</span><span class="p">[[</span><span class="s2">&quot;young&quot;</span><span class="p">,</span> <span class="s2">&quot;card&quot;</span><span class="p">]],</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;bought&quot;</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">export_text</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">feature_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;young&quot;</span><span class="p">,</span> <span class="s2">&quot;card&quot;</span><span class="p">]))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>|--- card &lt;= 0.50
+|   |--- young &lt;= 0.50
+|   |   |--- class: 0
+|   |--- young &gt;  0.50
+|   |   |--- class: 0
+|--- card &gt;  0.50
+|   |--- young &lt;= 0.50
+|   |   |--- class: 1
+|   |--- young &gt;  0.50
+|   |   |--- class: 1</pre></div><div class="blk"><p>الشجرة المطبوعة تبدأ بسؤال البطاقة، مثل حسابنا.</p><p>والأرقام 0.5 في الأسئلة معناها: القيمة أقل من نصف، أي صفر. أي: لا.</p></div><h3>عمق الشجرة والإفراط في التعلّم</h3><div class="code "><div class="code-head"><span class="path">depth.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_breast_cancer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">load_breast_cancer</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">X_tr</span><span class="p">,</span> <span class="n">X_te</span><span class="p">,</span> <span class="n">y_tr</span><span class="p">,</span> <span class="n">y_te</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">stratify</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+
+<span class="n">depths</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
+<span class="n">tr_acc</span><span class="p">,</span> <span class="n">te_acc</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">depths</span><span class="p">:</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">DecisionTreeClassifier</span><span class="p">(</span><span class="n">max_depth</span><span class="o">=</span><span class="n">d</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_tr</span><span class="p">,</span> <span class="n">y_tr</span><span class="p">)</span>
+    <span class="n">tr_acc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_tr</span><span class="p">,</span> <span class="n">y_tr</span><span class="p">))</span>
+    <span class="n">te_acc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_te</span><span class="p">,</span> <span class="n">y_te</span><span class="p">))</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">3.4</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">depths</span><span class="p">,</span> <span class="n">tr_acc</span><span class="p">,</span> <span class="s2">&quot;o-&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">depths</span><span class="p">,</span> <span class="n">te_acc</span><span class="p">,</span> <span class="s2">&quot;o-&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;max_depth&quot;</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;accuracy&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span> <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="n">full</span> <span class="o">=</span> <span class="n">DecisionTreeClassifier</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_tr</span><span class="p">,</span> <span class="n">y_tr</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;unlimited tree: depth&quot;</span><span class="p">,</span> <span class="n">full</span><span class="o">.</span><span class="n">get_depth</span><span class="p">(),</span> <span class="s2">&quot;| leaves&quot;</span><span class="p">,</span> <span class="n">full</span><span class="o">.</span><span class="n">get_n_leaves</span><span class="p">(),</span>
+      <span class="s2">&quot;| train&quot;</span><span class="p">,</span> <span class="n">full</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_tr</span><span class="p">,</span> <span class="n">y_tr</span><span class="p">),</span> <span class="s2">&quot;| test&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">full</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_te</span><span class="p">,</span> <span class="n">y_te</span><span class="p">),</span> <span class="mi">3</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>unlimited tree: depth 6 | leaves 16 | train 1.0 | test 0.906</pre></div><figure class="plot"><div class="svgwrap"><svg xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 395.338125 235.493812" xmlns="http://www.w3.org/2000/svg" version="1.1">
+<defs>
+</defs>
+<g id="figure_1">
+<g id="patch_1">
+<path d="M 0 235.493812 
+L 395.338125 235.493812 
+L 395.338125 0 
+L 0 0 
+L 0 235.493812 
+z
+" style="fill: none"/>
+</g>
+<g id="axes_1">
+<g id="patch_2">
+<path d="M 53.338125 195.696 
+L 388.138125 195.696 
+L 388.138125 7.2 
+L 53.338125 7.2 
+L 53.338125 195.696 
+z
+" style="fill: none"/>
+</g>
+<g id="matplotlib.axis_1">
+<g id="xtick_1">
+<g id="line2d_1">
+<path d="M 90.296567 195.696 
+L 90.296567 7.2 
+" clip-path="url(#paad5c66ca3)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_2">
+<defs>
+<path id="m6d8f9494df" d="M 0 0 
+L 0 3.5 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#m6d8f9494df" x="90.296567" y="195.696" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_1">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="90.296567" y="211.054281" transform="rotate(-0 90.296567 211.054281)">2</text>
+</g>
+</g>
+<g id="xtick_2">
+<g id="line2d_3">
+<path d="M 133.777086 195.696 
+L 133.777086 7.2 
+" clip-path="url(#paad5c66ca3)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_4">
+<g>
+<use xlink:href="#m6d8f9494df" x="133.777086" y="195.696" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_2">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="133.777086" y="211.054281" transform="rotate(-0 133.777086 211.054281)">4</text>
+</g>
+</g>
+<g id="xtick_3">
+<g id="line2d_5">
+<path d="M 177.257606 195.696 
+L 177.257606 7.2 
+" clip-path="url(#paad5c66ca3)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_6">
+<g>
+<use xlink:href="#m6d8f9494df" x="177.257606" y="195.696" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_3">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="177.257606" y="211.054281" transform="rotate(-0 177.257606 211.054281)">6</text>
+</g>
+</g>
+<g id="xtick_4">
+<g id="line2d_7">
+<path d="M 220.738125 195.696 
+L 220.738125 7.2 
+" clip-path="url(#paad5c66ca3)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_8">
+<g>
+<use xlink:href="#m6d8f9494df" x="220.738125" y="195.696" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_4">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="220.738125" y="211.054281" transform="rotate(-0 220.738125 211.054281)">8</text>
+</g>
+</g>
+<g id="xtick_5">
+<g id="line2d_9">
+<path d="M 264.218644 195.696 
+L 264.218644 7.2 
+" clip-path="url(#paad5c66ca3)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_10">
+<g>
+<use xlink:href="#m6d8f9494df" x="264.218644" y="195.696" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_5">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="264.218644" y="211.054281" transform="rotate(-0 264.218644 211.054281)">10</text>
+</g>
+</g>
+<g id="xtick_6">
+<g id="line2d_11">
+<path d="M 307.699164 195.696 
+L 307.699164 7.2 
+" clip-path="url(#paad5c66ca3)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_12">
+<g>
+<use xlink:href="#m6d8f9494df" x="307.699164" y="195.696" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_6">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="307.699164" y="211.054281" transform="rotate(-0 307.699164 211.054281)">12</text>
+</g>
+</g>
+<g id="xtick_7">
+<g id="line2d_13">
+<path d="M 351.179683 195.696 
+L 351.179683 7.2 
+" clip-path="url(#paad5c66ca3)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_14">
+<g>
+<use xlink:href="#m6d8f9494df" x="351.179683" y="195.696" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_7">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="351.179683" y="211.054281" transform="rotate(-0 351.179683 211.054281)">14</text>
+</g>
+</g>
+<g id="text_8">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="220.738125" y="225.700219" transform="rotate(-0 220.738125 225.700219)">max_depth</text>
+</g>
+</g>
+<g id="matplotlib.axis_2">
+<g id="ytick_1">
+<g id="line2d_15">
+<path d="M 53.338125 169.992 
+L 388.138125 169.992 
+" clip-path="url(#paad5c66ca3)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_16">
+<defs>
+<path id="m534c2e54a8" d="M 0 0 
+L -3.5 0 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#m534c2e54a8" x="53.338125" y="169.992" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_9">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="46.338125" y="174.171141" transform="rotate(-0 46.338125 174.171141)">0.90</text>
+</g>
+</g>
+<g id="ytick_2">
+<g id="line2d_17">
+<path d="M 53.338125 139.1472 
+L 388.138125 139.1472 
+" clip-path="url(#paad5c66ca3)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_18">
+<g>
+<use xlink:href="#m534c2e54a8" x="53.338125" y="139.1472" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_10">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="46.338125" y="143.326341" transform="rotate(-0 46.338125 143.326341)">0.92</text>
+</g>
+</g>
+<g id="ytick_3">
+<g id="line2d_19">
+<path d="M 53.338125 108.3024 
+L 388.138125 108.3024 
+" clip-path="url(#paad5c66ca3)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_20">
+<g>
+<use xlink:href="#m534c2e54a8" x="53.338125" y="108.3024" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_11">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="46.338125" y="112.481541" transform="rotate(-0 46.338125 112.481541)">0.94</text>
+</g>
+</g>
+<g id="ytick_4">
+<g id="line2d_21">
+<path d="M 53.338125 77.4576 
+L 388.138125 77.4576 
+" clip-path="url(#paad5c66ca3)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_22">
+<g>
+<use xlink:href="#m534c2e54a8" x="53.338125" y="77.4576" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_12">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="46.338125" y="81.636741" transform="rotate(-0 46.338125 81.636741)">0.96</text>
+</g>
+</g>
+<g id="ytick_5">
+<g id="line2d_23">
+<path d="M 53.338125 46.6128 
+L 388.138125 46.6128 
+" clip-path="url(#paad5c66ca3)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_24">
+<g>
+<use xlink:href="#m534c2e54a8" x="53.338125" y="46.6128" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_13">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="46.338125" y="50.791941" transform="rotate(-0 46.338125 50.791941)">0.98</text>
+</g>
+</g>
+<g id="ytick_6">
+<g id="line2d_25">
+<path d="M 53.338125 15.768 
+L 388.138125 15.768 
+" clip-path="url(#paad5c66ca3)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_26">
+<g>
+<use xlink:href="#m534c2e54a8" x="53.338125" y="15.768" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_14">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="46.338125" y="19.947141" transform="rotate(-0 46.338125 19.947141)">1.00</text>
+</g>
+</g>
+<g id="text_15">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="15.558281" y="101.448" transform="rotate(-90 15.558281 101.448)">accuracy</text>
+</g>
+</g>
+<g id="line2d_27">
+<path d="M 68.556307 120.392322 
+L 90.296567 104.892422 
+L 112.036826 46.767799 
+L 133.777086 31.267899 
+L 155.517346 19.642975 
+L 177.257606 15.768 
+L 198.997865 15.768 
+L 220.738125 15.768 
+L 242.478385 15.768 
+L 264.218644 15.768 
+L 285.958904 15.768 
+L 307.699164 15.768 
+L 329.439424 15.768 
+L 351.179683 15.768 
+L 372.919943 15.768 
+" clip-path="url(#paad5c66ca3)" style="fill: none; stroke: #1f77b4; stroke-width: 2; stroke-linecap: square"/>
+<defs>
+<path id="m871cf6c287" d="M 0 3 
+C 0.795609 3 1.55874 2.683901 2.12132 2.12132 
+C 2.683901 1.55874 3 0.795609 3 0 
+C 3 -0.795609 2.683901 -1.55874 2.12132 -2.12132 
+C 1.55874 -2.683901 0.795609 -3 0 -3 
+C -0.795609 -3 -1.55874 -2.683901 -2.12132 -2.12132 
+C -2.683901 -1.55874 -3 -0.795609 -3 0 
+C -3 0.795609 -2.683901 1.55874 -2.12132 2.12132 
+C -1.55874 2.683901 -0.795609 3 0 3 
+z
+" style="stroke: #1f77b4"/>
+</defs>
+<g clip-path="url(#paad5c66ca3)">
+<use xlink:href="#m871cf6c287" x="68.556307" y="120.392322" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m871cf6c287" x="90.296567" y="104.892422" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m871cf6c287" x="112.036826" y="46.767799" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m871cf6c287" x="133.777086" y="31.267899" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m871cf6c287" x="155.517346" y="19.642975" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m871cf6c287" x="177.257606" y="15.768" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m871cf6c287" x="198.997865" y="15.768" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m871cf6c287" x="220.738125" y="15.768" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m871cf6c287" x="242.478385" y="15.768" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m871cf6c287" x="264.218644" y="15.768" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m871cf6c287" x="285.958904" y="15.768" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m871cf6c287" x="307.699164" y="15.768" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m871cf6c287" x="329.439424" y="15.768" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m871cf6c287" x="351.179683" y="15.768" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m871cf6c287" x="372.919943" y="15.768" style="fill: #1f77b4; stroke: #1f77b4"/>
+</g>
+</g>
+<g id="line2d_28">
+<path d="M 68.556307 187.128 
+L 90.296567 160.071158 
+L 112.036826 169.090105 
+L 133.777086 160.071158 
+L 155.517346 151.052211 
+L 177.257606 160.071158 
+L 198.997865 160.071158 
+L 220.738125 160.071158 
+L 242.478385 160.071158 
+L 264.218644 160.071158 
+L 285.958904 160.071158 
+L 307.699164 160.071158 
+L 329.439424 160.071158 
+L 351.179683 160.071158 
+L 372.919943 160.071158 
+" clip-path="url(#paad5c66ca3)" style="fill: none; stroke: #ff7f0e; stroke-width: 2; stroke-linecap: square"/>
+<defs>
+<path id="m87086b26aa" d="M 0 3 
+C 0.795609 3 1.55874 2.683901 2.12132 2.12132 
+C 2.683901 1.55874 3 0.795609 3 0 
+C 3 -0.795609 2.683901 -1.55874 2.12132 -2.12132 
+C 1.55874 -2.683901 0.795609 -3 0 -3 
+C -0.795609 -3 -1.55874 -2.683901 -2.12132 -2.12132 
+C -2.683901 -1.55874 -3 -0.795609 -3 0 
+C -3 0.795609 -2.683901 1.55874 -2.12132 2.12132 
+C -1.55874 2.683901 -0.795609 3 0 3 
+z
+" style="stroke: #ff7f0e"/>
+</defs>
+<g clip-path="url(#paad5c66ca3)">
+<use xlink:href="#m87086b26aa" x="68.556307" y="187.128" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m87086b26aa" x="90.296567" y="160.071158" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m87086b26aa" x="112.036826" y="169.090105" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m87086b26aa" x="133.777086" y="160.071158" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m87086b26aa" x="155.517346" y="151.052211" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m87086b26aa" x="177.257606" y="160.071158" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m87086b26aa" x="198.997865" y="160.071158" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m87086b26aa" x="220.738125" y="160.071158" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m87086b26aa" x="242.478385" y="160.071158" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m87086b26aa" x="264.218644" y="160.071158" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m87086b26aa" x="285.958904" y="160.071158" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m87086b26aa" x="307.699164" y="160.071158" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m87086b26aa" x="329.439424" y="160.071158" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m87086b26aa" x="351.179683" y="160.071158" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m87086b26aa" x="372.919943" y="160.071158" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+</g>
+</g>
+<g id="patch_3">
+<path d="M 53.338125 195.696 
+L 53.338125 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_4">
+<path d="M 388.138125 195.696 
+L 388.138125 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_5">
+<path d="M 53.338125 195.696 
+L 388.138125 195.696 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_6">
+<path d="M 53.338125 7.2 
+L 388.138125 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="legend_1">
+<g id="patch_7">
+<path d="M 319.635625 119.243938 
+L 380.438125 119.243938 
+Q 382.638125 119.243938 382.638125 117.043938 
+L 382.638125 85.852062 
+Q 382.638125 83.652062 380.438125 83.652062 
+L 319.635625 83.652062 
+Q 317.435625 83.652062 317.435625 85.852062 
+L 317.435625 117.043938 
+Q 317.435625 119.243938 319.635625 119.243938 
+L 319.635625 119.243938 
+z
+" style="fill: none; opacity: 0.35; stroke: currentColor; stroke-linejoin: miter"/>
+</g>
+<g id="line2d_29">
+<path d="M 321.835625 92.560344 
+L 332.835625 92.560344 
+L 343.835625 92.560344 
+" style="fill: none; stroke: #1f77b4; stroke-width: 2; stroke-linecap: square"/>
+<g>
+<use xlink:href="#m871cf6c287" x="332.835625" y="92.560344" style="fill: #1f77b4; stroke: #1f77b4"/>
+</g>
+</g>
+<g id="text_16">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="352.635625" y="96.410344" transform="rotate(-0 352.635625 96.410344)">train</text>
+</g>
+<g id="line2d_30">
+<path d="M 321.835625 108.706281 
+L 332.835625 108.706281 
+L 343.835625 108.706281 
+" style="fill: none; stroke: #ff7f0e; stroke-width: 2; stroke-linecap: square"/>
+<g>
+<use xlink:href="#m87086b26aa" x="332.835625" y="108.706281" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+</g>
+</g>
+<g id="text_17">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="352.635625" y="112.556281" transform="rotate(-0 352.635625 112.556281)">test</text>
+</g>
+</g>
+</g>
+</g>
+<defs>
+<clipPath id="paad5c66ca3">
+<rect x="53.338125" y="7.2" width="334.8" height="188.496"/>
+</clipPath>
+</defs>
+</svg></div><figcaption>الرسم الذي يظهر عندما تشغّل الكود.</figcaption></figure><div class="blk"><p>دقة التدريب تصل إلى 100% مع العمق. لكن دقة الاختبار لا تتحسن بعد عمق صغير، وقد تسوء.</p><p>الفجوة بين الخطين هي علامة الإفراط في التعلّم. سنتعمق فيها في الدرس 27.</p></div><h3>أهمية الميزات</h3><div class="code "><div class="code-head"><span class="path">importance.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_breast_cancer</span>
+
+<span class="n">names</span> <span class="o">=</span> <span class="n">load_breast_cancer</span><span class="p">()</span><span class="o">.</span><span class="n">feature_names</span>
+<span class="n">t3</span> <span class="o">=</span> <span class="n">DecisionTreeClassifier</span><span class="p">(</span><span class="n">max_depth</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_tr</span><span class="p">,</span> <span class="n">y_tr</span><span class="p">)</span>
+<span class="n">top</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">t3</span><span class="o">.</span><span class="n">feature_importances_</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">][:</span><span class="mi">5</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">top</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s2">25</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">t3</span><span class="o">.</span><span class="n">feature_importances_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>worst perimeter           0.862
+mean texture              0.060
+worst concave points      0.046
+mean symmetry             0.011
+area error                0.011</pre></div><div class="blk"><p>أهمية الميزة: كم ساهمت أسئلتها في تقليل عدم النقاء، في كل الشجرة. مجموع الأهميات واحد.</p></div><div class="callout mistake"><div class="ct">خطأ شائع: الثقة بأهمية الميزات كسبب</div><div class="blk"><p>الأهمية تقول إن الشجرة استخدمت هذه الميزة كثيراً. لا تقول إن الميزة <b>تسبب</b> النتيجة.</p><p>ومع ميزتين مترابطتين جداً، قد تأخذ واحدة كل الأهمية، والأخرى صفراً، بالصدفة.</p></div></div><div class="callout interview"><div class="ct">سؤال مقابلة</div><div class="blk"><p>سؤال قد تسمعه في المقابلة:</p></div><div class="en" dir="ltr"><p>How does a decision tree choose its splits?</p></div><div class="blk"><p>جواب قصير وجيد:</p></div><div class="en" dir="ltr"><p>At each node it tries possible questions on each feature and measures how pure the resulting groups are, usually with Gini impurity or entropy. It picks the split with the largest decrease in impurity, weighted by group sizes, then repeats in each child. It is greedy. Without limits like max_depth the tree memorizes the training data, so we restrict its growth.</p></div></div><section class="summary"><div class="ct">الخلاصة</div><ul class="l"><li>الشجرة سلسلة أسئلة نعم أو لا. والورقة تتوقع الفئة الأكثر فيها.</li><li>جيني يقيس الاختلاط: صفر للنقية، ونصف للخليط المتساوي بين فئتين.</li><li>نختار السؤال صاحب أكبر نقص في جيني الموزون، ثم نكرر في كل فرع.</li><li>الشجرة بلا حدود تحفظ التدريب. نحدّها بالعمق وحجم الورقة.</li><li>الأشجار لا تحتاج توحيد مقياس، وسهلة القراءة، لكنها غير مستقرة.</li></ul></section><section class="quiz" data-quiz="l20-q"><h2>اختبر فهمك</h2><div class="q" data-answer="0"><div class="qt"><span class="qn">1.</span>ما مؤشر جيني لمجموعة فيها 10 أمثلة، كلها من نفس الفئة؟</div><div class="opts"><button type="button" class="opt">صفر</button><button type="button" class="opt">0.5</button><button type="button" class="opt">1</button></div><div class="explain" hidden><span class="verdict"></span><p>مجموعة نقية تماماً.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">2.</span>ما مؤشر جيني لمجموعة فيها 2 من فئة و 2 من أخرى؟</div><div class="opts"><button type="button" class="opt">صفر</button><button type="button" class="opt">0.5</button><button type="button" class="opt">0.25</button></div><div class="explain" hidden><span class="verdict"></span><p>واحد ناقص ربع ناقص ربع.</p></div></div><div class="q" data-answer="0"><div class="qt"><span class="qn">3.</span>سؤالان: الأول يعطي جيني موزون 0.3، والثاني 0.4. المجموعة الأصلية جيني 0.5. أيهما تختار الشجرة؟</div><div class="opts"><button type="button" class="opt">الأول، لأن مكسبه أكبر</button><button type="button" class="opt">الثاني، لأن رقمه أكبر</button><button type="button" class="opt">لا فرق</button></div><div class="explain" hidden><span class="verdict"></span><p>المكسب 0.2 مقابل 0.1. نريد أكبر نقص في الاختلاط.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">4.</span>شجرة بعمق غير محدود حققت دقة تدريب 100% ودقة اختبار 88%. ماذا يحدث غالباً؟</div><div class="opts"><button type="button" class="opt">النموذج ممتاز</button><button type="button" class="opt">الشجرة حفظت بيانات التدريب: إفراط في التعلّم</button><button type="button" class="opt">البيانات قليلة جداً للتدريب</button></div><div class="explain" hidden><span class="verdict"></span><p>الفجوة الكبيرة بين التدريب والاختبار علامة الإفراط.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">5.</span>هل تحتاج أشجار القرار توحيد مقياس الميزات؟</div><div class="opts"><button type="button" class="opt">نعم، دائماً</button><button type="button" class="opt">لا، لأن الأسئلة مقارنات بعتبة، والترتيب لا يتغير بالتوحيد</button><button type="button" class="opt">فقط في الانحدار</button></div><div class="explain" hidden><span class="verdict"></span><p>التوحيد لا يغير أي مثال أكبر من أي مثال.</p></div></div><div class="row"><span class="score"></span><button type="button" class="btn ghost quiz-reset">أعد المحاولة</button></div></section><section class="exercise"><div class="xt">تمرين: السؤال الثاني في كل فرع</div><div class="blk"><p>في الفرع الذي فيه أصحاب البطاقات: خمسة زبائن، أربعة اشتروا.</p></div><ol class="l"><li>احسب مكسب سؤال العمر داخل هذا الفرع.</li><li>وفي الفرع الآخر، بدون بطاقات: احسب مكسب سؤال العمر.</li><li>في أي فرع كان سؤال العمر أكثر فائدة؟</li><li>تحقق بالكود بدالة المكسب، على كل فرع وحده.</li></ol><details><summary>تلميح</summary><div class="dbody"><div class="blk"><p>أصحاب البطاقات هم الزبائن 1، 2، 4، 5، 7. الشباب منهم 1 و 2.</p></div></div></details><details class="sol"><summary>الحل (افتحه بعد أن تحاول)</summary><div class="dbody"><div class="blk"><p>أصحاب البطاقات: جيني قبل السؤال 0.32.</p><p>الشباب منهم اثنان، وكلاهما اشترى: جيني صفر. الكبار ثلاثة، اثنان اشتريا: جيني <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>4</mn><mi mathvariant="normal">/</mi><mn>9</mn></mrow></math></bdi>.</p><p>المتوسط الموزون: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.4</mn><mo>×</mo><mn>0</mn><mo>+</mo><mn>0.6</mn><mo>×</mo><mn>0.444</mn><mo>=</mo><mn>0.267</mn></mrow></math></bdi>. المكسب: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.32</mn><mo>−</mo><mn>0.267</mn><mo>=</mo><mn>0.053</mn></mrow></math></bdi>.</p></div><div class="blk"><p>بدون بطاقات: جيني قبل السؤال 0.32.</p><p>الشباب اثنان: واحد اشترى، وواحد لا: جيني 0.5. الكبار ثلاثة، لم يشترِ أحد: جيني صفر.</p><p>المتوسط الموزون: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.4</mn><mo>×</mo><mn>0.5</mn><mo>+</mo><mn>0.6</mn><mo>×</mo><mn>0</mn><mo>=</mo><mn>0.2</mn></mrow></math></bdi>. المكسب: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.32</mn><mo>−</mo><mn>0.2</mn><mo>=</mo><mn>0.12</mn></mrow></math></bdi>.</p></div><div class="blk"><p>سؤال العمر أكثر فائدة في فرع بدون بطاقات: عزل ثلاثة كبار لا يشترون، في ورقة نقية.</p></div><div class="code "><div class="code-head"><span class="path"></span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="n">card_yes</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;card&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+<span class="n">card_no</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;card&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;card = 1:&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">split_gain</span><span class="p">(</span><span class="n">card_yes</span><span class="p">,</span> <span class="s2">&quot;young&quot;</span><span class="p">),</span> <span class="mi">3</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;card = 0:&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">split_gain</span><span class="p">(</span><span class="n">card_no</span><span class="p">,</span> <span class="s2">&quot;young&quot;</span><span class="p">),</span> <span class="mi">3</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>card = 1: 0.053
+card = 0: 0.12</pre></div></div></details><div class="askbox" data-kind="review" hidden><div class="al">اطلب من كلود أن يراجع حلّك</div><div class="ah">اكتب إجابتك أو الصق الكود. سيقارنه بالحل ويشرح لك بالعربي. هذا يستهلك من رصيد استخدامك.</div><textarea id="rv-l20-1" dir="auto" placeholder="اكتب إجابتك هنا"></textarea><div class="row"><button type="button" class="btn ask-go">راجع حلّي</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></div><pre hidden class="x-task">في الفرع الذي فيه أصحاب البطاقات: خمسة زبائن، أربعة اشتروا.
+
+1. احسب مكسب سؤال العمر داخل هذا الفرع.
+2. وفي الفرع الآخر، بدون بطاقات: احسب مكسب سؤال العمر.
+3. في أي فرع كان سؤال العمر أكثر فائدة؟
+4. تحقق بالكود بدالة المكسب، على كل فرع وحده.</pre><pre hidden class="x-solution">أصحاب البطاقات: جيني قبل السؤال 0.32.
+الشباب منهم اثنان، وكلاهما اشترى: جيني صفر. الكبار ثلاثة، اثنان اشتريا: جيني $4/9$.
+المتوسط الموزون: $0.4 \times 0 + 0.6 \times 0.444 = 0.267$. المكسب: $0.32 - 0.267 = 0.053$.
+
+بدون بطاقات: جيني قبل السؤال 0.32.
+الشباب اثنان: واحد اشترى، وواحد لا: جيني 0.5. الكبار ثلاثة، لم يشترِ أحد: جيني صفر.
+المتوسط الموزون: $0.4 \times 0.5 + 0.6 \times 0 = 0.2$. المكسب: $0.32 - 0.2 = 0.12$.
+
+سؤال العمر أكثر فائدة في فرع بدون بطاقات: عزل ثلاثة كبار لا يشترون، في ورقة نقية.
+
+```python
+card_yes = df[df["card"] == 1]
+card_no = df[df["card"] == 0]
+print("card = 1:", round(split_gain(card_yes, "young"), 3))
+print("card = 0:", round(split_gain(card_no, "young"), 3))
+```</pre></section></article><section class="askbox" data-kind="ask" hidden><div class="al">عندك سؤال عن هذا الدرس؟ اسأل كلود</div><div class="ah">اكتب سؤالك بالعربي. كلود يقرأ نص الدرس ويجيبك. هذا يستهلك من رصيد استخدامك.</div><textarea id="ask-l20" dir="auto" placeholder="مثلاً: لماذا نضرب هنا في المشتقة؟"></textarea><div class="row"><button type="button" class="btn ask-go">اسأل</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></section><div class="donebox"><span class="dmsg"></span><button type="button" class="btn">أنهيت هذا الدرس</button></div><nav class="pager" aria-label="التنقل بين الدروس"><a class="prev" href="#l19"><small>الدرس السابق</small>بايز الساذج وتصنيف النصوص</a><a class="next" href="#l21"><small>الدرس التالي</small>الغابات العشوائية والتعزيز</a></nav></div>

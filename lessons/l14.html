@@ -1,0 +1,425 @@
+<div class="page"><article><div class="eyebrow">الجزء الأول · الرياضيات والإحصاء</div><h1>الأرجحية والإنتروبيا المتقاطعة</h1><div class="meta"><span>الدرس 14 من 59</span><span>المدة: حوالي 50 دقيقة</span><span class="nbdl-slot"></span></div><div class="chips" dir="ltr"><bdi class="chip">likelihood</bdi><bdi class="chip">maximum likelihood</bdi><bdi class="chip">log-likelihood</bdi><bdi class="chip">negative log-likelihood</bdi><bdi class="chip">cross-entropy</bdi><bdi class="chip">binary cross-entropy</bdi><bdi class="chip">entropy</bdi><bdi class="chip">perplexity</bdi></div><div class="goals"><b>بعد هذا الدرس ستعرف:</b><ul><li>تفهم الأرجحية: كم يجعل النموذج البيانات التي رأيناها محتملة</li><li>تختار أفضل معامل بطريقة الأرجحية العظمى</li><li>تفهم لماذا نأخذ سالب لوغاريتم الأرجحية كخسارة</li><li>تحسب الإنتروبيا المتقاطعة للتصنيف، وتفهم الرقم 2.303</li><li>تعرف الإنتروبيا والحيرة، وأين تظهر في النماذج اللغوية</li></ul></div><h2>السؤال المقلوب</h2><div class="blk"><p>في الدروس السابقة كنا نسأل: النموذج معروف، فما احتمال هذه النتيجة؟</p><p>الآن نقلب السؤال:</p></div><div class="key">البيانات معروفة. فأي نموذج يجعل هذه البيانات أكثر احتمالاً؟</div><div class="blk"><p>هذه الفكرة البسيطة تعطينا دالة الخسارة لكل مصنّف تقريباً، ولكل نموذج لغوي.</p></div><h2>الأرجحية</h2><div class="blk"><p>رميت قطعة نقود أربع مرات، فظهر: صورة، صورة، كتابة، صورة.</p><p>قطعة النقود ربما غير عادلة. نسمي احتمال الصورة فيها <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>p</mi></mrow></math></bdi>، ولا نعرفه.</p></div><div class="blk"><p>لكل قيمة ممكنة لـ <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>p</mi></mrow></math></bdi>، نستطيع أن نحسب احتمال ما رأيناه بالضبط.</p><p>الرميات مستقلة، فنضرب:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi mathvariant="script">L</mi><mo stretchy="false">(</mo><mi>p</mi><mo stretchy="false">)</mo><mo>=</mo><mi>p</mi><mo>×</mo><mi>p</mi><mo>×</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><mo stretchy="false">)</mo><mo>×</mo><mi>p</mi><mo>=</mo><msup><mi>p</mi><mn>3</mn></msup><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><mo stretchy="false">)</mo></mrow></math></div></div><div class="blk"><p>هذه الدالة اسمها <b>الأرجحية</b>. مدخلها المعامل، ومخرجها احتمال البيانات المشاهدة.</p></div><div class="blk"><div class="term" dir="ltr"><code>likelihood</code></div></div><div class="blk"><p><b>الأرجحية العظمى:</b> نختار قيمة المعامل التي تجعل الأرجحية أكبر ما يمكن.</p></div><div class="blk"><div class="term" dir="ltr"><code>maximum likelihood estimation (MLE)</code></div></div><section class="hand"><div class="hand-h"><span class="hand-tag">مثال محلول باليد</span><div class="hand-t">أي قطعة نقود رأينا؟</div></div><div class="hand-body"><div class="blk"><p>البيانات: صورة، صورة، كتابة، صورة. ثلاث صور وكتابة واحدة.</p></div><div class="step">نجرب ثلاث قيم</div><div class="tablewrap"><table><thead><tr><th>احتمال الصورة <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>p</mi></mrow></math></bdi></th><th>الأرجحية <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msup><mi>p</mi><mn>3</mn></msup><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><mo stretchy="false">)</mo></mrow></math></bdi></th></tr></thead><tbody><tr><td>0.5</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.125</mn><mo>×</mo><mn>0.5</mn><mo>=</mo><mn>0.0625</mn></mrow></math></bdi></td></tr><tr><td>0.75</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.4219</mn><mo>×</mo><mn>0.25</mn><mo>=</mo><mn>0.1055</mn></mrow></math></bdi></td></tr><tr><td>0.9</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.729</mn><mo>×</mo><mn>0.1</mn><mo>=</mo><mn>0.0729</mn></mrow></math></bdi></td></tr></tbody></table></div><div class="blk"><p>القيمة 0.75 تجعل ما رأيناه أكثر احتمالاً من القيمتين الأخريين.</p></div><div class="step">القيمة الأفضل على الإطلاق</div><div class="blk"><p>نستطيع أن نثبت بالمشتقة أن أفضل قيمة هي بالضبط <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>3</mn><mi mathvariant="normal">/</mi><mn>4</mn></mrow></math></bdi>: نسبة الصور في البيانات.</p><p>هذا منطقي جداً: أفضل تخمين لاحتمال الصورة هو نسبة ظهورها.</p><p>الطريقة الرسمية تعطي الجواب البديهي. وهذه علامة جيدة.</p></div><div class="step">باللوغاريتم</div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>ln</mi><mo>⁡</mo><mi mathvariant="script">L</mi><mo stretchy="false">(</mo><mn>0.75</mn><mo stretchy="false">)</mo><mo>=</mo><mn>3</mn><mi>ln</mi><mo>⁡</mo><mn>0.75</mn><mo>+</mo><mi>ln</mi><mo>⁡</mo><mn>0.25</mn><mo>=</mo><mn>3</mn><mo stretchy="false">(</mo><mo>−</mo><mn>0.288</mn><mo stretchy="false">)</mo><mo>+</mo><mo stretchy="false">(</mo><mo>−</mo><mn>1.386</mn><mo stretchy="false">)</mo><mo>≈</mo><mo>−</mo><mn>2.249</mn></mrow></math></div></div><div class="blk"><p>الضرب صار جمعاً، كما في الدرس السابق.</p></div></div></section><h2>من الأرجحية إلى الخسارة</h2><div class="blk"><p>نريد أن <b>نكبّر</b> الأرجحية. لكن كل أدواتنا تُصغّر: النزول بالتدرّج ينزل.</p><p>الحل سهل: نأخذ اللوغاريتم، ثم السالب:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>NLL</mtext><mo>=</mo><mo>−</mo><mi>ln</mi><mo>⁡</mo><mi mathvariant="script">L</mi></mrow></math></div></div><ul class="l"><li>اللوغاريتم يحوّل الضرب إلى جمع، ويحمي من التلاشي.</li><li>السالب يقلب التكبير إلى تصغير.</li></ul><div class="blk"><div class="term" dir="ltr"><code>negative log-likelihood (NLL)</code></div></div><div class="blk"><p>تكبير الأرجحية وتصغير سالب لوغاريتمها نفس الشيء تماماً، لأن اللوغاريتم يحافظ على الترتيب.</p></div><h2>الإنتروبيا المتقاطعة: خسارة التصنيف</h2><div class="blk"><p>الآن نطبق الفكرة على مصنّف.</p><p>لكل مثال، المصنّف يعطي توزيعاً على الفئات، والبيانات تقول الفئة الصحيحة.</p></div><div class="blk"><p>احتمال البيانات حسب النموذج: الاحتمال الذي أعطاه للفئة الصحيحة في كل مثال، مضروبة في بعضها.</p><p>نأخذ سالب اللوغاريتم، ثم المتوسط على الأمثلة:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>CE</mtext><mo>=</mo><mo>−</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mi>ln</mi><mo>⁡</mo><msub><mi>p</mi><mi>i</mi></msub><mo stretchy="false">(</mo><mtext>correct class</mtext><mo stretchy="false">)</mo></mrow></math></div></div><div class="blk"><p>هذه <b>الإنتروبيا المتقاطعة</b>. أهم دالة خسارة في التعلّم العميق.</p></div><div class="blk"><div class="term" dir="ltr"><code>cross-entropy loss</code></div></div><div class="blk"><p>الفكرة في جملة: <b>كم أعطى النموذج من الاحتمال للجواب الصحيح؟</b></p></div><div class="tablewrap"><table><thead><tr><th>احتمال الفئة الصحيحة</th><th>الخسارة <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo>−</mo><mi>ln</mi><mo>⁡</mo><mi>p</mi></mrow></math></bdi></th><th>المعنى</th></tr></thead><tbody><tr><td>1.0</td><td>0</td><td>متأكد، ومصيب</td></tr><tr><td>0.9</td><td>0.105</td><td>واثق، ومصيب</td></tr><tr><td>0.5</td><td>0.693</td><td>متردد</td></tr><tr><td>0.1</td><td>2.303</td><td>واثق من جواب خاطئ</td></tr><tr><td>0.01</td><td>4.605</td><td>واثق جداً من جواب خاطئ: عقاب شديد</td></tr></tbody></table></div><div class="blk"><p>لاحظ كيف تكبر الخسارة بسرعة عندما يعطي النموذج احتمالاً صغيراً للجواب الصحيح.</p><p>الثقة الخاطئة تُعاقب بشدة. وهذا ما نريده.</p></div><h3>سر الرقم 2.303</h3><div class="blk"><p>تخيل مصنّفاً لعشر فئات لم يتعلّم شيئاً بعد. يعطي كل فئة نفس الاحتمال: 0.1.</p><p>خسارته على أي مثال:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mo>−</mo><mi>ln</mi><mo>⁡</mo><mn>0.1</mn><mo>=</mo><mi>ln</mi><mo>⁡</mo><mn>10</mn><mo>≈</mo><mn>2.303</mn></mrow></math></div></div><div class="blk"><p>هذا بالضبط الرقم الذي يبدأ منه منحنى تقدمك في هذه الدورة!</p><p>كل درس تنهيه ينزل بالخسارة، مثل نموذج يتدرّب.</p></div><div class="key">عندما تدرّب مصنّفاً لعدد فئات، أول خسارة يجب أن تكون قريبة من لوغاريتم عدد الفئات. إذا كانت بعيدة جداً، فغالباً في الكود خطأ.</div><h3>فئتان فقط: الإنتروبيا المتقاطعة الثنائية</h3><div class="blk"><p>مع فئتين، المصنّف يعطي احتمالاً واحداً <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>p</mi></mrow></math></bdi> للفئة 1. والجواب <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>y</mi></mrow></math></bdi> إما 1 أو 0:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>BCE</mtext><mo>=</mo><mo>−</mo><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">[</mo><mtext> </mtext><mi>y</mi><mi>ln</mi><mo>⁡</mo><mi>p</mi><mo>+</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>y</mi><mo stretchy="false">)</mo><mi>ln</mi><mo>⁡</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><mo stretchy="false">)</mo><mtext> </mtext><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">]</mo></mrow></math></div></div><div class="blk"><p>لا تخف من شكلها. أحد الحدين يختفي دائماً:</p></div><ul class="l"><li>إذا كان الجواب 1: الخسارة <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo>−</mo><mi>ln</mi><mo>⁡</mo><mi>p</mi></mrow></math></bdi>.</li><li>إذا كان الجواب 0: الخسارة <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo>−</mo><mi>ln</mi><mo>⁡</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><mo stretchy="false">)</mo></mrow></math></bdi>.</li></ul><div class="blk"><p>أي أنها نفس الفكرة: سالب لوغاريتم الاحتمال الذي أعطاه النموذج للجواب الصحيح.</p></div><section class="hand"><div class="hand-h"><span class="hand-tag">مثال محلول باليد</span><div class="hand-t">خسارة مصنّف على ثلاثة أمثلة</div></div><div class="hand-body"><div class="blk"><p>مصنّف صور بثلاث فئات. هذه الاحتمالات التي أعطاها للفئة <b>الصحيحة</b> في ثلاثة أمثلة:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mn>0.9</mn><mspace width="2em"/><mn>0.5</mn><mspace width="2em"/><mn>0.1</mn></mrow></math></div></div><div class="step">الخسارة لكل مثال</div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mo>−</mo><mi>ln</mi><mo>⁡</mo><mn>0.9</mn><mo>=</mo><mn>0.105</mn><mspace width="2em"/><mo>−</mo><mi>ln</mi><mo>⁡</mo><mn>0.5</mn><mo>=</mo><mn>0.693</mn><mspace width="2em"/><mo>−</mo><mi>ln</mi><mo>⁡</mo><mn>0.1</mn><mo>=</mo><mn>2.303</mn></mrow></math></div></div><div class="step">المتوسط</div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>CE</mtext><mo>=</mo><mfrac><mrow><mn>0.105</mn><mo>+</mo><mn>0.693</mn><mo>+</mo><mn>2.303</mn></mrow><mn>3</mn></mfrac><mo>≈</mo><mn>1.034</mn></mrow></math></div></div><div class="blk"><p>المثال الثالث وحده أعطى أكثر من ثلثي الخسارة. النموذج كان واثقاً من جواب خاطئ هناك.</p></div><div class="step">مصنّف ثنائي</div><div class="blk"><p>النموذج أعطى احتمال 0.8 أن الرسالة مزعجة.</p><p>إذا كانت مزعجة فعلاً:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mo>−</mo><mi>ln</mi><mo>⁡</mo><mn>0.8</mn><mo>≈</mo><mn>0.223</mn></mrow></math></div></div><div class="blk"><p>وإذا كانت عادية، فالاحتمال الذي أعطاه للجواب الصحيح هو 0.2:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mo>−</mo><mi>ln</mi><mo>⁡</mo><mn>0.2</mn><mo>≈</mo><mn>1.609</mn></mrow></math></div></div></div></section><h2>الإنتروبيا: كم التوزيع غير مؤكد؟</h2><div class="blk"><p>كلمة الإنتروبيا وحدها تقيس عدم اليقين في توزيع:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>H</mi><mo stretchy="false">(</mo><mi>p</mi><mo stretchy="false">)</mo><mo>=</mo><mo>−</mo><munder><mo>∑</mo><mi>k</mi></munder><msub><mi>p</mi><mi>k</mi></msub><mi>ln</mi><mo>⁡</mo><msub><mi>p</mi><mi>k</mi></msub></mrow></math></div></div><div class="tablewrap"><table><thead><tr><th>التوزيع</th><th>الإنتروبيا</th></tr></thead><tbody><tr><td>متأكد تماماً: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>1</mn><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">)</mo></mrow></math></bdi></td><td>0</td></tr><tr><td>قطعة نقود مائلة: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>0.9</mn><mo separator="true">,</mo><mn>0.1</mn><mo stretchy="false">)</mo></mrow></math></bdi></td><td>0.325</td></tr><tr><td>قطعة نقود عادلة: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>0.5</mn><mo separator="true">,</mo><mn>0.5</mn><mo stretchy="false">)</mo></mrow></math></bdi></td><td>0.693</td></tr><tr><td>عشر فئات متساوية</td><td>2.303</td></tr></tbody></table></div><div class="blk"><p>أكبر إنتروبيا عندما تتساوى كل الاحتمالات: لا نعرف شيئاً.</p><p>سنستخدمها في أشجار القرار في الدرس 20، لنختار السؤال الذي يقلل عدم اليقين أكثر.</p></div><h2>الحيرة: رقم يفهمه البشر</h2><div class="blk"><p>في النماذج اللغوية، نحسب الإنتروبيا المتقاطعة لكل كلمة تالية، ثم المتوسط.</p><p>ثم نأخذ الأسّ:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>perplexity</mtext><mo>=</mo><msup><mi>e</mi><mtext>CE</mtext></msup></mrow></math></div></div><div class="blk"><p>المعنى: كأن النموذج في كل كلمة يحتار بين هذا العدد من الخيارات المتساوية.</p><p>مصنّفنا السابق بخسارة 1.034 حيرته <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msup><mi>e</mi><mn>1.034</mn></msup><mo>≈</mo><mn>2.8</mn></mrow></math></bdi>.</p><p>ونموذج لغوي بحيرة 20 يعني: كأنه في كل كلمة يختار بين 20 كلمة متساوية.</p><p>كلما صغرت الحيرة، كان النموذج أفضل. سنحسبها لنموذجنا اللغوي في الدرس 45.</p></div><div class="blk"><div class="term" dir="ltr"><code>perplexity</code></div></div><h2>بالكود</h2><h3>منحنى الأرجحية لقطعة النقود</h3><div class="code "><div class="code-head"><span class="path">likelihood_plot.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">,</span> <span class="mi">300</span><span class="p">)</span>
+<span class="n">likelihood</span> <span class="o">=</span> <span class="n">p</span><span class="o">**</span><span class="mi">3</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">p</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">3.2</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">likelihood</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">2.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="mf">0.75</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C1&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;best p = 0.75&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;p = probability of heads&quot;</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;likelihood of H,H,T,H&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span> <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;best p on the grid:&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">likelihood</span><span class="p">)],</span> <span class="mi">3</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>best p on the grid: 0.751</pre></div><figure class="plot"><div class="svgwrap"><svg xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 395.338125 224.099875" xmlns="http://www.w3.org/2000/svg" version="1.1">
+<defs>
+</defs>
+<g id="figure_1">
+<g id="patch_1">
+<path d="M 0 224.099875 
+L 395.338125 224.099875 
+L 395.338125 0 
+L 0 0 
+L 0 224.099875 
+z
+" style="fill: none"/>
+</g>
+<g id="axes_1">
+<g id="patch_2">
+<path d="M 53.338125 184.608 
+L 388.138125 184.608 
+L 388.138125 7.2 
+L 53.338125 7.2 
+L 53.338125 184.608 
+z
+" style="fill: none"/>
+</g>
+<g id="matplotlib.axis_1">
+<g id="xtick_1">
+<g id="line2d_1">
+<path d="M 65.450555 184.608 
+L 65.450555 7.2 
+" clip-path="url(#pd4d51059e1)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_2">
+<defs>
+<path id="m9bb674b93d" d="M 0 0 
+L 0 3.5 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#m9bb674b93d" x="65.450555" y="184.608" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_1">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="65.450555" y="199.966281" transform="rotate(-0 65.450555 199.966281)">0.0</text>
+</g>
+</g>
+<g id="xtick_2">
+<g id="line2d_3">
+<path d="M 127.565583 184.608 
+L 127.565583 7.2 
+" clip-path="url(#pd4d51059e1)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_4">
+<g>
+<use xlink:href="#m9bb674b93d" x="127.565583" y="184.608" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_2">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="127.565583" y="199.966281" transform="rotate(-0 127.565583 199.966281)">0.2</text>
+</g>
+</g>
+<g id="xtick_3">
+<g id="line2d_5">
+<path d="M 189.680611 184.608 
+L 189.680611 7.2 
+" clip-path="url(#pd4d51059e1)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_6">
+<g>
+<use xlink:href="#m9bb674b93d" x="189.680611" y="184.608" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_3">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="189.680611" y="199.966281" transform="rotate(-0 189.680611 199.966281)">0.4</text>
+</g>
+</g>
+<g id="xtick_4">
+<g id="line2d_7">
+<path d="M 251.795639 184.608 
+L 251.795639 7.2 
+" clip-path="url(#pd4d51059e1)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_8">
+<g>
+<use xlink:href="#m9bb674b93d" x="251.795639" y="184.608" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_4">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="251.795639" y="199.966281" transform="rotate(-0 251.795639 199.966281)">0.6</text>
+</g>
+</g>
+<g id="xtick_5">
+<g id="line2d_9">
+<path d="M 313.910667 184.608 
+L 313.910667 7.2 
+" clip-path="url(#pd4d51059e1)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_10">
+<g>
+<use xlink:href="#m9bb674b93d" x="313.910667" y="184.608" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_5">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="313.910667" y="199.966281" transform="rotate(-0 313.910667 199.966281)">0.8</text>
+</g>
+</g>
+<g id="xtick_6">
+<g id="line2d_11">
+<path d="M 376.025695 184.608 
+L 376.025695 7.2 
+" clip-path="url(#pd4d51059e1)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_12">
+<g>
+<use xlink:href="#m9bb674b93d" x="376.025695" y="184.608" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_6">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="376.025695" y="199.966281" transform="rotate(-0 376.025695 199.966281)">1.0</text>
+</g>
+</g>
+<g id="text_7">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="220.738125" y="214.612219" transform="rotate(-0 220.738125 214.612219)">p = probability of heads</text>
+</g>
+</g>
+<g id="matplotlib.axis_2">
+<g id="ytick_1">
+<g id="line2d_13">
+<path d="M 53.338125 176.545514 
+L 388.138125 176.545514 
+" clip-path="url(#pd4d51059e1)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_14">
+<defs>
+<path id="m2969094067" d="M 0 0 
+L -3.5 0 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#m2969094067" x="53.338125" y="176.545514" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_8">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="46.338125" y="180.724655" transform="rotate(-0 46.338125 180.724655)">0.00</text>
+</g>
+</g>
+<g id="ytick_2">
+<g id="line2d_15">
+<path d="M 53.338125 145.961583 
+L 388.138125 145.961583 
+" clip-path="url(#pd4d51059e1)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_16">
+<g>
+<use xlink:href="#m2969094067" x="53.338125" y="145.961583" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_9">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="46.338125" y="150.140724" transform="rotate(-0 46.338125 150.140724)">0.02</text>
+</g>
+</g>
+<g id="ytick_3">
+<g id="line2d_17">
+<path d="M 53.338125 115.377653 
+L 388.138125 115.377653 
+" clip-path="url(#pd4d51059e1)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_18">
+<g>
+<use xlink:href="#m2969094067" x="53.338125" y="115.377653" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_10">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="46.338125" y="119.556793" transform="rotate(-0 46.338125 119.556793)">0.04</text>
+</g>
+</g>
+<g id="ytick_4">
+<g id="line2d_19">
+<path d="M 53.338125 84.793722 
+L 388.138125 84.793722 
+" clip-path="url(#pd4d51059e1)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_20">
+<g>
+<use xlink:href="#m2969094067" x="53.338125" y="84.793722" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_11">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="46.338125" y="88.972863" transform="rotate(-0 46.338125 88.972863)">0.06</text>
+</g>
+</g>
+<g id="ytick_5">
+<g id="line2d_21">
+<path d="M 53.338125 54.209792 
+L 388.138125 54.209792 
+" clip-path="url(#pd4d51059e1)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_22">
+<g>
+<use xlink:href="#m2969094067" x="53.338125" y="54.209792" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_12">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="46.338125" y="58.388932" transform="rotate(-0 46.338125 58.388932)">0.08</text>
+</g>
+</g>
+<g id="ytick_6">
+<g id="line2d_23">
+<path d="M 53.338125 23.625861 
+L 388.138125 23.625861 
+" clip-path="url(#pd4d51059e1)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_24">
+<g>
+<use xlink:href="#m2969094067" x="53.338125" y="23.625861" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_13">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="46.338125" y="27.805002" transform="rotate(-0 46.338125 27.805002)">0.10</text>
+</g>
+</g>
+<g id="text_14">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="15.558281" y="95.904" transform="rotate(-90 15.558281 95.904)">likelihood of H,H,T,H</text>
+</g>
+</g>
+<g id="line2d_25">
+<path d="M 68.556307 176.544 
+L 78.735693 176.430943 
+L 85.861263 176.139991 
+L 91.968894 175.67487 
+L 97.058587 175.097603 
+L 102.14828 174.32082 
+L 107.237973 173.321903 
+L 112.327666 172.080879 
+L 117.417359 170.580423 
+L 122.507052 168.805856 
+L 127.596745 166.745149 
+L 132.686438 164.388916 
+L 137.77613 161.730422 
+L 142.865823 158.765577 
+L 147.955516 155.492938 
+L 153.045209 151.913711 
+L 158.134902 148.031746 
+L 163.224595 143.853544 
+L 168.314288 139.388249 
+L 173.403981 134.647656 
+L 179.511612 128.616069 
+L 185.619244 122.238969 
+L 191.726875 115.551832 
+L 198.852445 107.413271 
+L 206.995954 97.759897 
+L 218.193279 84.102448 
+L 235.498234 62.97388 
+L 242.623805 54.603607 
+L 248.731436 47.733356 
+L 253.821129 42.292773 
+L 258.910822 37.170814 
+L 262.982576 33.342157 
+L 267.054331 29.786455 
+L 271.126085 26.536176 
+L 275.197839 23.624871 
+L 278.251655 21.684638 
+L 281.305471 19.96955 
+L 284.359286 18.494963 
+L 287.413102 17.276574 
+L 290.466918 16.330425 
+L 293.520734 15.6729 
+L 296.574549 15.320727 
+L 299.628365 15.290975 
+L 301.664242 15.45885 
+L 303.70012 15.783 
+L 305.735997 16.268737 
+L 307.771874 16.921441 
+L 309.807751 17.74656 
+L 311.843628 18.74961 
+L 313.879505 19.936172 
+L 315.915383 21.311899 
+L 317.95126 22.882508 
+L 319.987137 24.653787 
+L 322.023014 26.631589 
+L 324.058891 28.821836 
+L 327.112707 32.518663 
+L 330.166523 36.727486 
+L 333.220338 41.469149 
+L 336.274154 46.76484 
+L 339.32797 52.636088 
+L 342.381786 59.104767 
+L 345.435601 66.193095 
+L 348.489417 73.92363 
+L 351.543233 82.319274 
+L 354.597049 91.403275 
+L 357.650864 101.19922 
+L 360.70468 111.731041 
+L 363.758496 123.023014 
+L 366.812312 135.099756 
+L 369.866127 147.986228 
+L 372.919943 161.707735 
+L 372.919943 161.707735 
+" clip-path="url(#pd4d51059e1)" style="fill: none; stroke: #1f77b4; stroke-width: 2.5; stroke-linecap: square"/>
+</g>
+<g id="line2d_26">
+<path d="M 298.38191 184.608 
+L 298.38191 7.2 
+" clip-path="url(#pd4d51059e1)" style="fill: none; stroke-dasharray: 7.4,3.2; stroke-dashoffset: 0; stroke: #ff7f0e; stroke-width: 2"/>
+</g>
+<g id="patch_3">
+<path d="M 53.338125 184.608 
+L 53.338125 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_4">
+<path d="M 388.138125 184.608 
+L 388.138125 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_5">
+<path d="M 53.338125 184.608 
+L 388.138125 184.608 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_6">
+<path d="M 53.338125 7.2 
+L 388.138125 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="legend_1">
+<g id="patch_7">
+<path d="M 61.038125 32.145938 
+L 171.213438 32.145938 
+Q 173.413438 32.145938 173.413438 29.945938 
+L 173.413438 14.9 
+Q 173.413438 12.7 171.213438 12.7 
+L 61.038125 12.7 
+Q 58.838125 12.7 58.838125 14.9 
+L 58.838125 29.945938 
+Q 58.838125 32.145938 61.038125 32.145938 
+L 61.038125 32.145938 
+z
+" style="fill: none; opacity: 0.35; stroke: currentColor; stroke-linejoin: miter"/>
+</g>
+<g id="line2d_27">
+<path d="M 63.238125 21.608281 
+L 74.238125 21.608281 
+L 85.238125 21.608281 
+" style="fill: none; stroke-dasharray: 7.4,3.2; stroke-dashoffset: 0; stroke: #ff7f0e; stroke-width: 2"/>
+</g>
+<g id="text_15">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="94.038125" y="25.458281" transform="rotate(-0 94.038125 25.458281)">best p = 0.75</text>
+</g>
+</g>
+</g>
+</g>
+<defs>
+<clipPath id="pd4d51059e1">
+<rect x="53.338125" y="7.2" width="334.8" height="177.408"/>
+</clipPath>
+</defs>
+</svg></div><figcaption>الرسم الذي يظهر عندما تشغّل الكود.</figcaption></figure><h3>الإنتروبيا المتقاطعة من الصفر</h3><div class="code "><div class="code-head"><span class="path">cross_entropy.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="k">def</span><span class="w"> </span><span class="nf">cross_entropy</span><span class="p">(</span><span class="n">probs</span><span class="p">,</span> <span class="n">correct</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;probs: شكل (n, k)، احتمال كل فئة. correct: رقم الفئة الصحيحة لكل مثال.&quot;&quot;&quot;</span>
+    <span class="n">p_correct</span> <span class="o">=</span> <span class="n">probs</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">correct</span><span class="p">)),</span> <span class="n">correct</span><span class="p">]</span>
+    <span class="k">return</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">p_correct</span><span class="p">))</span>
+
+<span class="n">probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">],</span>     <span class="c1"># المثال 1: الصحيحة 0</span>
+                  <span class="p">[</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span>  <span class="mf">0.2</span> <span class="p">],</span>     <span class="c1"># المثال 2: الصحيحة 1</span>
+                  <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span>  <span class="mf">0.8</span> <span class="p">]])</span>    <span class="c1"># المثال 3: الصحيحة 0</span>
+<span class="n">correct</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;cross-entropy:&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">cross_entropy</span><span class="p">(</span><span class="n">probs</span><span class="p">,</span> <span class="n">correct</span><span class="p">),</span> <span class="mi">3</span><span class="p">))</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">log_loss</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;sklearn log_loss:&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">log_loss</span><span class="p">(</span><span class="n">correct</span><span class="p">,</span> <span class="n">probs</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span> <span class="mi">3</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;perplexity:&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">cross_entropy</span><span class="p">(</span><span class="n">probs</span><span class="p">,</span> <span class="n">correct</span><span class="p">)),</span> <span class="mi">2</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>cross-entropy: 1.034
+sklearn log_loss: 1.034
+perplexity: 2.81</pre></div><div class="blk"><p>السطر الذي يختار احتمال الفئة الصحيحة يستخدم فهرسة نمباي: لكل صف، نأخذ العمود المكتوب في المصفوفة الثانية.</p><p>والنتيجة نفس نتيجة المكتبة.</p></div><h3>نموذج عشوائي بعشر فئات</h3><div class="code "><div class="code-head"><span class="path">random_model.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="n">uniform</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="mf">0.1</span><span class="p">)</span>            <span class="c1"># 5 أمثلة، كل فئة 0.1</span>
+<span class="n">labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;loss of a model that knows nothing:&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">cross_entropy</span><span class="p">(</span><span class="n">uniform</span><span class="p">,</span> <span class="n">labels</span><span class="p">),</span> <span class="mi">3</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ln(10) =&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="mi">3</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>loss of a model that knows nothing: 2.303
+ln(10) = 2.303</pre></div><h3>الإنتروبيا</h3><div class="code "><div class="code-head"><span class="path">entropy.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="k">def</span><span class="w"> </span><span class="nf">entropy</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="n">p</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>                 <span class="c1"># صفر في لوغاريتم الصفر يساوي صفراً</span>
+    <span class="k">return</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">p</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">p</span><span class="p">))</span> <span class="o">+</span> <span class="mf">0.0</span>   <span class="c1"># + 0.0 يحوّل سالب الصفر إلى صفر</span>
+
+<span class="k">for</span> <span class="n">dist</span> <span class="ow">in</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">10</span><span class="p">]:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">dist</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span><span class="si">:</span><span class="s2">18</span><span class="si">}</span><span class="s2"> entropy = </span><span class="si">{</span><span class="n">entropy</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>[1, 0]             entropy = 0.000
+[0.9, 0.1]         entropy = 0.325
+[0.5, 0.5]         entropy = 0.693
+[0.1, 0.1, 0.1]    entropy = 2.303</pre></div><details class="more"><summary>لماذا متوسط مربعات الأخطاء؟ من الأرجحية أيضاً</summary><div class="dbody"><div class="blk"><p>في الانحدار، نفترض أن الجواب الحقيقي يساوي توقع النموذج زائد ضجيج طبيعي:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>y</mi><mo>=</mo><mover accent="true"><mi>y</mi><mo>^</mo></mover><mo>+</mo><mi>ε</mi><mspace width="2em"/><mi>ε</mi><mo>∼</mo><mi mathvariant="script">N</mi><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><msup><mi>σ</mi><mn>2</mn></msup><mo stretchy="false">)</mo></mrow></math></div></div><div class="blk"><p>احتمال كل مثال حسب منحنى الجرس:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>p</mi><mo stretchy="false">(</mo><mi>y</mi><mo>∣</mo><mover accent="true"><mi>y</mi><mo>^</mo></mover><mo stretchy="false">)</mo><mo>=</mo><mfrac><mn>1</mn><mrow><msqrt><mrow><mn>2</mn><mi>π</mi></mrow></msqrt><mtext> </mtext><mi>σ</mi></mrow></mfrac><mtext> </mtext><msup><mi>e</mi><mrow><mo>−</mo><mfrac><mrow><mo stretchy="false">(</mo><mi>y</mi><mo>−</mo><mover accent="true"><mi>y</mi><mo>^</mo></mover><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow><mrow><mn>2</mn><msup><mi>σ</mi><mn>2</mn></msup></mrow></mfrac></mrow></msup></mrow></math></div></div><div class="blk"><p>نأخذ سالب اللوغاريتم ونجمع على الأمثلة:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>NLL</mtext><mo>=</mo><munder><mo>∑</mo><mi>i</mi></munder><mfrac><mrow><mo stretchy="false">(</mo><msub><mi>y</mi><mi>i</mi></msub><mo>−</mo><msub><mover accent="true"><mi>y</mi><mo>^</mo></mover><mi>i</mi></msub><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow><mrow><mn>2</mn><msup><mi>σ</mi><mn>2</mn></msup></mrow></mfrac><mo>+</mo><mtext>const</mtext></mrow></math></div></div><div class="blk"><p>الثابت لا يعتمد على معاملات النموذج. والقسمة على رقم ثابت لا تغير أين القاع.</p><p>إذن تصغير سالب لوغاريتم الأرجحية هنا يساوي تصغير مجموع مربعات الأخطاء!</p></div><div class="blk"><p>الخلاصة الجميلة: متوسط مربعات الأخطاء في الانحدار، والإنتروبيا المتقاطعة في التصنيف، فكرة واحدة: الأرجحية العظمى، مع افتراضين مختلفين عن البيانات.</p></div></div></details><div class="callout mistake"><div class="ct">خطأ شائع: لوغاريتم الصفر</div><div class="blk"><p>إذا أعطى النموذج احتمالاً صفراً للجواب الصحيح، فالخسارة لانهاية.</p><p>المكتبات تحمي نفسها بإضافة رقم صغير جداً، أو بحساب الخسارة من الدرجات الخام مباشرة. لا تحسبها بيدك من احتمالات قد تكون صفراً.</p></div></div><div class="callout interview"><div class="ct">سؤال مقابلة</div><div class="blk"><p>سؤال قد تسمعه في المقابلة:</p></div><div class="en" dir="ltr"><p>Why do we use cross-entropy loss for classification instead of mean squared error?</p></div><div class="blk"><p>جواب قصير وجيد:</p></div><div class="en" dir="ltr"><p>Cross-entropy is the negative log-likelihood of the correct class, so minimizing it is maximum likelihood. It punishes confident wrong predictions very strongly, and with softmax or sigmoid it gives simple, large gradients when the model is wrong. MSE on probabilities gives weak gradients in that case, so training is slower.</p></div></div><section class="summary"><div class="ct">الخلاصة</div><ul class="l"><li>الأرجحية: احتمال البيانات المشاهدة حسب النموذج. والأرجحية العظمى تختار المعاملات التي تكبّرها.</li><li>نصغّر سالب لوغاريتم الأرجحية بدل تكبير الأرجحية: نفس النتيجة، وحساب أسهل.</li><li>الإنتروبيا المتقاطعة: سالب لوغاريتم احتمال الفئة الصحيحة، في المتوسط.</li><li>نموذج لا يعرف شيئاً بعشر فئات خسارته 2.303.</li><li>الإنتروبيا تقيس عدم اليقين. والحيرة هي الأسّ لمتوسط الخسارة.</li><li>متوسط مربعات الأخطاء أيضاً أرجحية عظمى، مع ضجيج طبيعي.</li></ul></section><section class="quiz" data-quiz="l14-q"><h2>اختبر فهمك</h2><div class="q" data-answer="0"><div class="qt"><span class="qn">1.</span>مصنّف أعطى الفئة الصحيحة احتمال 1. ما خسارته على هذا المثال؟</div><div class="opts"><button type="button" class="opt">صفر</button><button type="button" class="opt">1</button><button type="button" class="opt">لانهاية</button></div><div class="explain" hidden><span class="verdict"></span><p>سالب لوغاريتم الواحد يساوي صفراً.</p></div></div><div class="q" data-answer="2"><div class="qt"><span class="qn">2.</span>أي الحالات تعطي أكبر خسارة؟</div><div class="opts"><button type="button" class="opt">احتمال 0.5 للجواب الصحيح</button><button type="button" class="opt">احتمال 0.9 للجواب الصحيح</button><button type="button" class="opt">احتمال 0.02 للجواب الصحيح</button></div><div class="explain" hidden><span class="verdict"></span><p>كلما صغر الاحتمال الذي أُعطي للجواب الصحيح، كبرت الخسارة بسرعة.</p></div></div><div class="q" data-answer="0"><div class="qt"><span class="qn">3.</span>بدأت تدريب مصنّف لمئة فئة. أول خسارة تقريباً 4.6. هل هذا منطقي؟</div><div class="opts"><button type="button" class="opt">نعم، لأن لوغاريتم 100 يساوي 4.6 تقريباً</button><button type="button" class="opt">لا، يجب أن تبدأ من صفر</button><button type="button" class="opt">لا، يجب أن تبدأ من 2.303 دائماً</button></div><div class="explain" hidden><span class="verdict"></span><p>نموذج لا يعرف شيئاً يعطي كل فئة احتمالاً واحداً على مئة.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">4.</span>رمينا قطعة نقود عشر مرات، فظهرت الصورة سبع مرات. ما تقدير الأرجحية العظمى لاحتمال الصورة؟</div><div class="opts"><button type="button" class="opt">0.5</button><button type="button" class="opt">0.7</button><button type="button" class="opt">0.3</button></div><div class="explain" hidden><span class="verdict"></span><p>أفضل تقدير هو نسبة الصور في البيانات.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">5.</span>نموذج لغوي حيرته 10. ماذا يعني ذلك؟</div><div class="opts"><button type="button" class="opt">يعرف عشر كلمات فقط</button><button type="button" class="opt">كأنه في كل كلمة يختار بين عشرة خيارات متساوية</button><button type="button" class="opt">يخطئ في عشر كلمات من كل مئة</button></div><div class="explain" hidden><span class="verdict"></span><p>الحيرة هي الأسّ لمتوسط الإنتروبيا المتقاطعة.</p></div></div><div class="row"><span class="score"></span><button type="button" class="btn ghost quiz-reset">أعد المحاولة</button></div></section><section class="exercise"><div class="xt">تمرين: قيّم مصنّفين</div><div class="blk"><p>مصنّفان لثلاث فئات، على نفس المثالين. الفئة الصحيحة في المثال الأول هي الأولى، وفي الثاني هي الثالثة.</p></div><div class="tablewrap"><table><thead><tr><th></th><th>المثال الأول</th><th>المثال الثاني</th></tr></thead><tbody><tr><td>المصنّف أ</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>0.7</mn><mo separator="true">,</mo><mn>0.2</mn><mo separator="true">,</mo><mn>0.1</mn><mo stretchy="false">)</mo></mrow></math></bdi></td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>0.3</mn><mo separator="true">,</mo><mn>0.3</mn><mo separator="true">,</mo><mn>0.4</mn><mo stretchy="false">)</mo></mrow></math></bdi></td></tr><tr><td>المصنّف ب</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>0.4</mn><mo separator="true">,</mo><mn>0.3</mn><mo separator="true">,</mo><mn>0.3</mn><mo stretchy="false">)</mo></mrow></math></bdi></td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>0.1</mn><mo separator="true">,</mo><mn>0.1</mn><mo separator="true">,</mo><mn>0.8</mn><mo stretchy="false">)</mo></mrow></math></bdi></td></tr></tbody></table></div><ol class="l"><li>احسب الإنتروبيا المتقاطعة لكل مصنّف بيدك. استخدم: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>ln</mi><mo>⁡</mo><mn>0.7</mn><mo>=</mo><mo>−</mo><mn>0.357</mn></mrow></math></bdi> و <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>ln</mi><mo>⁡</mo><mn>0.4</mn><mo>=</mo><mo>−</mo><mn>0.916</mn></mrow></math></bdi> و <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>ln</mi><mo>⁡</mo><mn>0.8</mn><mo>=</mo><mo>−</mo><mn>0.223</mn></mrow></math></bdi>.</li><li>أي المصنّفين أفضل حسب هذه الخسارة؟</li><li>لاحظ: كلا المصنّفين يختار الفئة الصحيحة في المثالين. فلماذا تختلف الخسارة؟</li><li>تحقق بالكود بدالة الدرس.</li></ol><details><summary>تلميح</summary><div class="dbody"><div class="blk"><p>المصنّف أ أعطى الجواب الصحيح 0.7 ثم 0.4. والمصنّف ب أعطى 0.4 ثم 0.8.</p></div></div></details><details class="sol"><summary>الحل (افتحه بعد أن تحاول)</summary><div class="dbody"><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mtext>CE</mtext><mi>A</mi></msub><mo>=</mo><mfrac><mrow><mn>0.357</mn><mo>+</mo><mn>0.916</mn></mrow><mn>2</mn></mfrac><mo>≈</mo><mn>0.636</mn><mspace width="2em"/><msub><mtext>CE</mtext><mi>B</mi></msub><mo>=</mo><mfrac><mrow><mn>0.916</mn><mo>+</mo><mn>0.223</mn></mrow><mn>2</mn></mfrac><mo>≈</mo><mn>0.570</mn></mrow></math></div></div><div class="blk"><p>المصنّف ب أفضل قليلاً.</p><p>كلاهما يختار الفئة الصحيحة دائماً، فدقتهما متساوية: 100%.</p><p>لكن الإنتروبيا المتقاطعة ترى أكثر من الدقة: ترى <b>كم كان النموذج واثقاً</b> من الجواب الصحيح.</p></div><div class="code "><div class="code-head"><span class="path"></span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">]])</span>
+<span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">]])</span>
+<span class="n">correct</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;A:&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">cross_entropy</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">correct</span><span class="p">),</span> <span class="mi">3</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;B:&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">cross_entropy</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">correct</span><span class="p">),</span> <span class="mi">3</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>A: 0.636
+B: 0.57</pre></div></div></details><div class="askbox" data-kind="review" hidden><div class="al">اطلب من كلود أن يراجع حلّك</div><div class="ah">اكتب إجابتك أو الصق الكود. سيقارنه بالحل ويشرح لك بالعربي. هذا يستهلك من رصيد استخدامك.</div><textarea id="rv-l14-1" dir="auto" placeholder="اكتب إجابتك هنا"></textarea><div class="row"><button type="button" class="btn ask-go">راجع حلّي</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></div><pre hidden class="x-task">مصنّفان لثلاث فئات، على نفس المثالين. الفئة الصحيحة في المثال الأول هي الأولى، وفي الثاني هي الثالثة.
+
+| | المثال الأول | المثال الثاني |
+|---|---|---|
+| المصنّف أ | $(0.7, 0.2, 0.1)$ | $(0.3, 0.3, 0.4)$ |
+| المصنّف ب | $(0.4, 0.3, 0.3)$ | $(0.1, 0.1, 0.8)$ |
+
+1. احسب الإنتروبيا المتقاطعة لكل مصنّف بيدك. استخدم: $\ln 0.7 = -0.357$ و $\ln 0.4 = -0.916$ و $\ln 0.8 = -0.223$.
+2. أي المصنّفين أفضل حسب هذه الخسارة؟
+3. لاحظ: كلا المصنّفين يختار الفئة الصحيحة في المثالين. فلماذا تختلف الخسارة؟
+4. تحقق بالكود بدالة الدرس.</pre><pre hidden class="x-solution">$$\text{CE}_A = \frac{0.357 + 0.916}{2} \approx 0.636 \qquad \text{CE}_B = \frac{0.916 + 0.223}{2} \approx 0.570$$
+
+المصنّف ب أفضل قليلاً.
+كلاهما يختار الفئة الصحيحة دائماً، فدقتهما متساوية: 100%.
+لكن الإنتروبيا المتقاطعة ترى أكثر من الدقة: ترى كم كان النموذج واثقاً من الجواب الصحيح.
+
+```python
+A = np.array([[0.7, 0.2, 0.1], [0.3, 0.3, 0.4]])
+B = np.array([[0.4, 0.3, 0.3], [0.1, 0.1, 0.8]])
+correct = np.array([0, 2])
+print("A:", round(cross_entropy(A, correct), 3))
+print("B:", round(cross_entropy(B, correct), 3))
+```</pre></section></article><section class="askbox" data-kind="ask" hidden><div class="al">عندك سؤال عن هذا الدرس؟ اسأل كلود</div><div class="ah">اكتب سؤالك بالعربي. كلود يقرأ نص الدرس ويجيبك. هذا يستهلك من رصيد استخدامك.</div><textarea id="ask-l14" dir="auto" placeholder="مثلاً: لماذا نضرب هنا في المشتقة؟"></textarea><div class="row"><button type="button" class="btn ask-go">اسأل</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></section><div class="donebox"><span class="dmsg"></span><button type="button" class="btn">أنهيت هذا الدرس</button></div><nav class="pager" aria-label="التنقل بين الدروس"><a class="prev" href="#l13"><small>الدرس السابق</small>من الدرجات إلى الاحتمالات: الأسّ واللوغاريتم</a><a class="next" href="#l15"><small>الدرس التالي</small>ما هو التعلم الآلي؟ وأول نموذج: أقرب الجيران</a></nav></div>

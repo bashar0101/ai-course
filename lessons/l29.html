@@ -1,0 +1,232 @@
+<div class="page"><article><div class="eyebrow">الجزء الثالث · تقييم النماذج</div><h1>مقاييس التصنيف: الدقة والاستدعاء</h1><div class="meta"><span>الدرس 29 من 59</span><span>المدة: حوالي 50 دقيقة</span><span class="nbdl-slot"></span></div><div class="chips" dir="ltr"><bdi class="chip">confusion matrix</bdi><bdi class="chip">true positive</bdi><bdi class="chip">false positive</bdi><bdi class="chip">false negative</bdi><bdi class="chip">true negative</bdi><bdi class="chip">precision</bdi><bdi class="chip">recall</bdi><bdi class="chip">F1 score</bdi><bdi class="chip">specificity</bdi><bdi class="chip">macro average</bdi><bdi class="chip">weighted average</bdi></div><div class="goals"><b>بعد هذا الدرس ستعرف:</b><ul><li>تفهم لماذا تخدع الدقة مع البيانات غير المتوازنة</li><li>تبني مصفوفة الالتباس وتقرأها</li><li>تحسب الدقة الإيجابية والاستدعاء ومقياس إف واحد بيدك</li><li>تختار المقياس المناسب حسب كلفة كل نوع من الأخطاء</li><li>تستخدم تقرير التصنيف في سايكت ليرن، مع فئات كثيرة</li></ul></div><h2>حين تكذب الدقة</h2><div class="blk"><p>بنك فيه ألف عملية، منها 10 عمليات احتيال فقط.</p><p>نموذج كسول يقول دائماً: "ليست احتيالاً". لا ينظر إلى أي شيء.</p></div><div class="blk"><p>دقته:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mn>990</mn><mn>1000</mn></mfrac><mo>=</mo><mn>99</mn><mi mathvariant="normal">%</mi></mrow></math></div></div><div class="blk"><p>رقم رائع، ونموذج بلا أي فائدة: لم يكتشف عملية احتيال واحدة.</p><p>مع الفئات غير المتوازنة، الدقة وحدها تخدع. نحتاج أن نعرف <b>أين</b> يخطئ النموذج.</p></div><h2>مصفوفة الالتباس</h2><div class="blk"><p>نسمي الفئة التي نبحث عنها <b>الموجبة</b>: الاحتيال، أو المرض، أو الرسالة المزعجة.</p><p>كل توقع يقع في خانة من أربع:</p></div><div class="tablewrap"><table><thead><tr><th></th><th>النموذج قال: موجب</th><th>النموذج قال: سالب</th></tr></thead><tbody><tr><td><b>الحقيقة: موجب</b></td><td>إيجابي صحيح <bdi class="chip" dir="ltr">TP</bdi></td><td>سلبي كاذب <bdi class="chip" dir="ltr">FN</bdi></td></tr><tr><td><b>الحقيقة: سالب</b></td><td>إيجابي كاذب <bdi class="chip" dir="ltr">FP</bdi></td><td>سلبي صحيح <bdi class="chip" dir="ltr">TN</bdi></td></tr></tbody></table></div><div class="blk"><div class="term" dir="ltr"><code>confusion matrix</code></div></div><div class="blk"><p>الخانتان الخاطئتان لهما معنى مختلف تماماً:</p></div><ul class="l"><li><b>الإيجابي الكاذب:</b> إنذار كاذب. رسالة عادية ذهبت إلى المزعج. سليم قيل له إنه مريض.</li><li><b>السلبي الكاذب:</b> حالة فاتت. رسالة مزعجة وصلت. مريض قيل له إنه سليم.</li></ul><div class="blk"><p>في أغلب المشاكل، أحد الخطأين أغلى بكثير من الآخر.</p></div><h2>ثلاثة مقاييس من المصفوفة</h2><div class="blk"><p><b>الدقة الإيجابية:</b> من كل ما قال النموذج إنه موجب، كم كان صحيحاً؟</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>precision</mtext><mo>=</mo><mfrac><mrow><mi>T</mi><mi>P</mi></mrow><mrow><mi>T</mi><mi>P</mi><mo>+</mo><mi>F</mi><mi>P</mi></mrow></mfrac></mrow></math></div></div><div class="blk"><p><b>الاستدعاء:</b> من كل الموجب فعلاً، كم وجد النموذج؟</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>recall</mtext><mo>=</mo><mfrac><mrow><mi>T</mi><mi>P</mi></mrow><mrow><mi>T</mi><mi>P</mi><mo>+</mo><mi>F</mi><mi>N</mi></mrow></mfrac></mrow></math></div></div><div class="blk"><p><b>مقياس إف واحد:</b> رقم واحد يجمعهما. المتوسط التوافقي، وليس العادي:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>F</mi><mn>1</mn></msub><mo>=</mo><mfrac><mrow><mn>2</mn><mo>⋅</mo><mtext>precision</mtext><mo>⋅</mo><mtext>recall</mtext></mrow><mrow><mtext>precision</mtext><mo>+</mo><mtext>recall</mtext></mrow></mfrac></mrow></math></div></div><div class="blk"><p>لماذا التوافقي؟ لأنه يعاقب الرقم الصغير. نموذج بدقة إيجابية 100% واستدعاء 2%: المتوسط العادي 51%، ومقياس إف حوالي 4%.</p><p>لا يمكنك أن تغش بتكبير رقم واحد فقط.</p></div><div class="blk"><div class="term" dir="ltr"><code>precision · recall · F1 score</code></div></div><div class="callout tip"><div class="ct">طريقة لتذكّرهما</div><div class="blk"><p>الدقة الإيجابية تنظر إلى <b>عمود</b> "النموذج قال موجب": هل يمكنني أن أثق بإنذاراته؟</p><p>الاستدعاء ينظر إلى <b>صف</b> "الحقيقة موجب": هل وجد كل ما أبحث عنه؟</p></div></div><section class="hand"><div class="hand-h"><span class="hand-tag">مثال محلول باليد</span><div class="hand-t">عشرة مرضى</div></div><div class="hand-body"><div class="blk"><p>خمسة مرضى فعلاً، وخمسة أصحاء. هذه توقعات النموذج:</p></div><div class="tablewrap"><table><thead><tr><th>المريض</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th><th>8</th><th>9</th><th>10</th></tr></thead><tbody><tr><td>الحقيقة</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr><tr><td>التوقع</td><td>1</td><td>1</td><td>1</td><td>0</td><td>0</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td></tr></tbody></table></div><div class="step">نملأ المصفوفة</div><ul class="l"><li>إيجابي صحيح: المرضى 1 و 2 و 3. العدد 3.</li><li>سلبي كاذب: المريضان 4 و 5 فاتا. العدد 2.</li><li>إيجابي كاذب: الشخص 6 سليم، وقيل إنه مريض. العدد 1.</li><li>سلبي صحيح: 7 و 8 و 9 و 10. العدد 4.</li></ul><div class="step">الدقة</div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mn>3</mn><mo>+</mo><mn>4</mn></mrow><mn>10</mn></mfrac><mo>=</mo><mn>0.7</mn></mrow></math></div></div><div class="step">الدقة الإيجابية</div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mn>3</mn><mrow><mn>3</mn><mo>+</mo><mn>1</mn></mrow></mfrac><mo>=</mo><mn>0.75</mn></mrow></math></div></div><div class="blk"><p>عندما يقول النموذج "مريض"، هو محق في ثلاثة أرباع المرات.</p></div><div class="step">الاستدعاء</div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mn>3</mn><mrow><mn>3</mn><mo>+</mo><mn>2</mn></mrow></mfrac><mo>=</mo><mn>0.6</mn></mrow></math></div></div><div class="blk"><p>وجد 60% فقط من المرضى. فات اثنان من خمسة. في مرض خطير، هذا سيئ جداً.</p></div><div class="step">مقياس إف واحد</div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>F</mi><mn>1</mn></msub><mo>=</mo><mfrac><mrow><mn>2</mn><mo>×</mo><mn>0.75</mn><mo>×</mo><mn>0.6</mn></mrow><mrow><mn>0.75</mn><mo>+</mo><mn>0.6</mn></mrow></mfrac><mo>=</mo><mfrac><mn>0.9</mn><mn>1.35</mn></mfrac><mo>≈</mo><mn>0.667</mn></mrow></math></div></div><div class="step">النوعية</div><div class="blk"><p>من الأصحاء الخمسة، كم قال عنهم إنهم أصحاء؟</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mi>T</mi><mi>N</mi></mrow><mrow><mi>T</mi><mi>N</mi><mo>+</mo><mi>F</mi><mi>P</mi></mrow></mfrac><mo>=</mo><mfrac><mn>4</mn><mn>5</mn></mfrac><mo>=</mo><mn>0.8</mn></mrow></math></div></div></div></section><h2>أي مقياس أهم؟</h2><div class="blk"><p>يعتمد على كلفة كل خطأ في مشكلتك:</p></div><div class="tablewrap"><table><thead><tr><th>المشكلة</th><th>الخطأ الأغلى</th><th>المقياس الأهم</th></tr></thead><tbody><tr><td>فحص أولي للسرطان</td><td>سلبي كاذب: مريض لم نكتشفه</td><td>الاستدعاء</td></tr><tr><td>فلتر رسائل مزعجة</td><td>إيجابي كاذب: رسالة عمل مهمة ضاعت</td><td>الدقة الإيجابية</td></tr><tr><td>كشف الاحتيال</td><td>الاثنان مكلفان، بدرجات مختلفة</td><td>الاثنان، ومقياس إف أو كلفة حقيقية</td></tr><tr><td>فئات متوازنة وكلفة متساوية</td><td>لا فرق كبير</td><td>الدقة تكفي</td></tr></tbody></table></div><div class="key">لا يوجد مقياس صحيح دائماً. اسأل: ما الخطأ الأغلى في هذه المشكلة؟ ثم اختر المقياس.</div><div class="blk"><p>وستعرف في الدرس القادم كيف توازن بين الدقة الإيجابية والاستدعاء، بتحريك العتبة.</p></div><h2>فئات كثيرة</h2><div class="blk"><p>مع أكثر من فئتين، نحسب الدقة الإيجابية والاستدعاء لكل فئة، كأنها الموجبة والباقي سالب.</p><p>ثم نجمع بإحدى طرق:</p></div><div class="tablewrap"><table><thead><tr><th>الطريقة</th><th>كيف</th><th>متى</th></tr></thead><tbody><tr><td>المتوسط الكلي</td><td>متوسط عادي لكل الفئات، كل فئة بنفس الوزن</td><td>إذا كانت الفئات الصغيرة مهمة مثل الكبيرة</td></tr><tr><td>المتوسط الموزون</td><td>كل فئة بوزن عدد أمثلتها</td><td>إذا أردت رقماً يعكس توزيع البيانات</td></tr><tr><td>المتوسط الجزئي</td><td>نجمع كل الخانات أولاً، ثم نحسب</td><td>مع فئة واحدة لكل مثال، يساوي الدقة العادية</td></tr></tbody></table></div><div class="blk"><div class="term" dir="ltr"><code>macro · weighted · micro</code></div></div><h2>بالكود</h2><h3>انتبه: من هي الفئة الموجبة؟</h3><div class="blk"><p>في بيانات أورام الثدي في المكتبة، الرقم صفر يعني خبيث، والرقم واحد يعني حميد.</p><p>المكتبة تعتبر الرقم واحد هو الموجب افتراضياً. لكننا نبحث عن الخبيث!</p><p>نقلب الأرقام لكي يصبح الخبيث هو الموجب:</p></div><div class="code "><div class="code-head"><span class="path">setup.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_breast_cancer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_pipeline</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">StandardScaler</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.linear_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">LogisticRegression</span>
+
+<span class="n">X</span><span class="p">,</span> <span class="n">y_raw</span> <span class="o">=</span> <span class="n">load_breast_cancer</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">y_raw</span>                     <span class="c1"># الآن: 1 خبيث (موجب)، 0 حميد</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;malignant share:&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="mi">3</span><span class="p">))</span>
+
+<span class="n">X_tr</span><span class="p">,</span> <span class="n">X_te</span><span class="p">,</span> <span class="n">y_tr</span><span class="p">,</span> <span class="n">y_te</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">stratify</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">max_iter</span><span class="o">=</span><span class="mi">1000</span><span class="p">))</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_tr</span><span class="p">,</span> <span class="n">y_tr</span><span class="p">)</span>
+<span class="n">y_pred</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_te</span><span class="p">)</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>malignant share: 0.373</pre></div><h3>المصفوفة والمقاييس</h3><div class="code "><div class="code-head"><span class="path">metrics.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">confusion_matrix</span><span class="p">,</span> <span class="n">accuracy_score</span><span class="p">,</span> <span class="n">precision_score</span><span class="p">,</span> <span class="n">recall_score</span><span class="p">,</span> <span class="n">f1_score</span>
+
+<span class="n">cm</span> <span class="o">=</span> <span class="n">confusion_matrix</span><span class="p">(</span><span class="n">y_te</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">cm</span><span class="p">)</span>
+<span class="n">tn</span><span class="p">,</span> <span class="n">fp</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">tp</span> <span class="o">=</span> <span class="n">cm</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;TP=</span><span class="si">{</span><span class="n">tp</span><span class="si">}</span><span class="s2"> FN=</span><span class="si">{</span><span class="n">fn</span><span class="si">}</span><span class="s2"> FP=</span><span class="si">{</span><span class="n">fp</span><span class="si">}</span><span class="s2"> TN=</span><span class="si">{</span><span class="n">tn</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;accuracy :&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_te</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">),</span> <span class="mi">3</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;precision:&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">precision_score</span><span class="p">(</span><span class="n">y_te</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">),</span> <span class="mi">3</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;recall   :&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">recall_score</span><span class="p">(</span><span class="n">y_te</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">),</span> <span class="mi">3</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;f1       :&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">f1_score</span><span class="p">(</span><span class="n">y_te</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">),</span> <span class="mi">3</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>[[103   4]
+ [  4  60]]
+TP=60 FN=4 FP=4 TN=103
+accuracy : 0.953
+precision: 0.938
+recall   : 0.938
+f1       : 0.938</pre></div><div class="blk"><p>انتبه لترتيب المكتبة: الصف الأول للحقيقة صفر، والعمود الأول للتوقع صفر. أي أن السلبي الصحيح في أول خانة، عكس جدولنا.</p><p>لذلك نفك المصفوفة بالترتيب الذي كتبناه في السطر الرابع.</p></div><div class="code "><div class="code-head"><span class="path">cm_plot.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfusionMatrixDisplay</span>
+
+<span class="n">ConfusionMatrixDisplay</span><span class="o">.</span><span class="n">from_predictions</span><span class="p">(</span><span class="n">y_te</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">display_labels</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;benign&quot;</span><span class="p">,</span> <span class="s2">&quot;malignant&quot;</span><span class="p">],</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;Blues&quot;</span><span class="p">,</span> <span class="n">colorbar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></pre></div><figure class="plot"><div class="svgwrap"><svg xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 357.7045 312.803875" xmlns="http://www.w3.org/2000/svg" version="1.1">
+<defs>
+</defs>
+<g id="figure_1">
+<g id="patch_1">
+<path d="M 0 312.803875 
+L 357.7045 312.803875 
+L 357.7045 0 
+L 0 0 
+L 0 312.803875 
+z
+" style="fill: none"/>
+</g>
+<g id="axes_1">
+<g id="patch_2">
+<path d="M 84.3925 273.312 
+L 350.5045 273.312 
+L 350.5045 7.2 
+L 84.3925 7.2 
+L 84.3925 273.312 
+z
+" style="fill: none"/>
+</g>
+<g clip-path="url(#p6e4e77de88)">
+<image xlink:href="data:image/png;base64,
+iVBORw0KGgoAAAANSUhEUgAAAXIAAAFyCAYAAADoJFEJAAAFUUlEQVR4nO3WMQ0CQQBEUY4KOSjCAHaQgJtLsEJJQbGIuGw2n7ynYKqf2T7fMU7wx27P1+oJMNV59QAAjhFygDghB4gTcoA4IQeIE3KAOCEHiBNygDghB4gTcoA4IQeIE3KAOCEHiBNygDghB4gTcoA4IQeIE3KAOCEHiBNygDghB4gTcoA4IQeIE3KAOCEHiBNygDghB4gTcoA4IQeIE3KAOCEHiBNygDghB4gTcoA4IQeIE3KAOCEHiBNygDghB4gTcoA4IQeIE3KAOCEHiBNygDghB4gTcoA4IQeIE3KAOCEHiBNygDghB4gTcoA4IQeIE3KAOCEHiBNygDghB4gTcoA4IQeIE3KAOCEHiBNygDghB4gTcoA4IQeIE3KAOCEHiBNygDghB4gTcoA4IQeIE3KAOCEHiBNygDghB4gTcoA4IQeIE3KAOCEHiBNygDghB4gTcoA4IQeIE3KAOCEHiBNygDghB4gTcoA4IQeIE3KAOCEHiBNygDghB4gTcoA4IQeIE3KAOCEHiBNygDghB4gTcoA4IQeIE3KAOCEHiBNygDghB4gTcoA4IQeIE3KAOCEHiBNygDghB4gTcoA4IQeIE3KAOCEHiBNygDghB4gTcoA4IQeIE3KAOCEHiBNygDghB4gTcoA4IQeIE3KAOCEHiBNygDghB4gTcoA4IQeIE3KAOCEHiBNygDghB4gTcoA4IQeIE3KAOCEHiBNygDghB4gTcoA4IQeIE3KAOCEHiBNygDghB4gTcoA4IQeIE3KAOCEHiBNygDghB4gTcoA4IQeIE3KAOCEHiBNygDghB4gTcoA4IQeIE3KAOCEHiBNygDghB4gTcoA4IQeIE3KAOCEHiBNygDghB4gTcoA4IQeIE3KAOCEHiBNygDghB4gTcoA4IQeIE3KAOCEHiBNygDghB4gTcoC47XK9j9UjYKb3/lg9AabyyAHihBwgTsgB4oQcIE7IAeKEHCBOyAHihBwgTsgB4oQcIE7IAeKEHCBOyAHihBwgTsgB4oQcIE7IAeKEHCBOyAHihBwgTsgB4oQcIE7IAeKEHCBOyAHihBwgTsgB4oQcIE7IAeKEHCBOyAHihBwgTsgB4oQcIE7IAeKEHCBOyAHihBwgTsgB4oQcIE7IAeKEHCBOyAHihBwgTsgB4oQcIE7IAeKEHCBOyAHihBwgTsgB4oQcIE7IAeKEHCBOyAHihBwgTsgB4oQcIE7IAeKEHCBOyAHihBwgTsgB4oQcIE7IAeKEHCBOyAHihBwgTsgB4oQcIE7IAeKEHCBOyAHihBwgTsgB4oQcIE7IAeKEHCBOyAHihBwgTsgB4oQcIE7IAeKEHCBOyAHihBwgTsgB4oQcIE7IAeKEHCBOyAHihBwgTsgB4oQcIE7IAeKEHCBOyAHihBwgTsgB4oQcIE7IAeKEHCBOyAHihBwgTsgB4oQcIE7IAeKEHCBOyAHihBwgTsgB4oQcIE7IAeKEHCBOyAHihBwgTsgB4oQcIE7IAeKEHCBOyAHihBwgTsgB4oQcIE7IAeKEHCBOyAHihBwgTsgB4oQcIE7IAeKEHCBOyAHihBwgTsgB4oQcIE7IAeKEHCBOyAHihBwgTsgB4oQcIE7IAeKEHCBOyAHihBwgTsgB4oQcIE7IAeKEHCBOyAHihBwgTsgB4oQcIE7IAeKEHCBOyAHihBwgTsgB4oQcIE7IAeKEHCBOyAHihBwgTsgB4oQcIE7IAeKEHCBOyAHihBwgTsgB4oQcIE7IAeKEHCBOyAHihBwgTsgB4oQcIE7IAeKEHCBOyAHihBwgTsgB4oQcIO4HbCUMk7t9fIUAAAAASUVORK5CYII=" id="imagebbc560e41c" transform="scale(1 -1) translate(0 -266.4)" x="84.3925" y="-6.912" width="266.4" height="266.4"/>
+</g>
+<g id="matplotlib.axis_1">
+<g id="xtick_1">
+<g id="line2d_1">
+<defs>
+<path id="m697a8c2fb5" d="M 0 0 
+L 0 3.5 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#m697a8c2fb5" x="150.9205" y="273.312" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_1">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="150.9205" y="288.670281" transform="rotate(-0 150.9205 288.670281)">benign</text>
+</g>
+</g>
+<g id="xtick_2">
+<g id="line2d_2">
+<g>
+<use xlink:href="#m697a8c2fb5" x="283.9765" y="273.312" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_2">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="283.9765" y="288.670281" transform="rotate(-0 283.9765 288.670281)">malignant</text>
+</g>
+</g>
+<g id="text_3">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="217.4485" y="303.316219" transform="rotate(-0 217.4485 303.316219)">Predicted label</text>
+</g>
+</g>
+<g id="matplotlib.axis_2">
+<g id="ytick_1">
+<g id="line2d_3">
+<defs>
+<path id="m9f8eab77a9" d="M 0 0 
+L -3.5 0 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#m9f8eab77a9" x="84.3925" y="73.728" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_4">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="77.3925" y="77.907141" transform="rotate(-0 77.3925 77.907141)">benign</text>
+</g>
+</g>
+<g id="ytick_2">
+<g id="line2d_4">
+<g>
+<use xlink:href="#m9f8eab77a9" x="84.3925" y="206.784" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_5">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="77.3925" y="210.963141" transform="rotate(-0 77.3925 210.963141)">malignant</text>
+</g>
+</g>
+<g id="text_6">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="15.558281" y="140.256" transform="rotate(-90 15.558281 140.256)">True label</text>
+</g>
+</g>
+<g id="patch_3">
+<path d="M 84.3925 273.312 
+L 84.3925 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_4">
+<path d="M 350.5045 273.312 
+L 350.5045 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_5">
+<path d="M 84.3925 273.312 
+L 350.5045 273.312 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_6">
+<path d="M 84.3925 7.2 
+L 350.5045 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="text_7">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #f7fbff" x="150.9205" y="76.763312" transform="rotate(-0 150.9205 76.763312)">103</text>
+</g>
+<g id="text_8">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #08306b" x="283.9765" y="76.763312" transform="rotate(-0 283.9765 76.763312)">4</text>
+</g>
+<g id="text_9">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #08306b" x="150.9205" y="209.819312" transform="rotate(-0 150.9205 209.819312)">4</text>
+</g>
+<g id="text_10">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #f7fbff" x="283.9765" y="209.819312" transform="rotate(-0 283.9765 209.819312)">60</text>
+</g>
+</g>
+</g>
+<defs>
+<clipPath id="p6e4e77de88">
+<rect x="84.3925" y="7.2" width="266.112" height="266.112"/>
+</clipPath>
+</defs>
+</svg></div><figcaption>الرسم الذي يظهر عندما تشغّل الكود.</figcaption></figure><h3>تقرير كامل في سطر</h3><div class="code "><div class="code-head"><span class="path">report.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">classification_report</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">classification_report</span><span class="p">(</span><span class="n">y_te</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">target_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;benign&quot;</span><span class="p">,</span> <span class="s2">&quot;malignant&quot;</span><span class="p">],</span> <span class="n">digits</span><span class="o">=</span><span class="mi">3</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>              precision    recall  f1-score   support
+
+      benign      0.963     0.963     0.963       107
+   malignant      0.938     0.938     0.938        64
+
+    accuracy                          0.953       171
+   macro avg      0.950     0.950     0.950       171
+weighted avg      0.953     0.953     0.953       171</pre></div><div class="blk"><p>العمود الأخير اسمه الدعم: عدد الأمثلة الحقيقية من كل فئة.</p></div><h3>فئات كثيرة: أنواع النبيذ</h3><div class="code "><div class="code-head"><span class="path">multiclass.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_wine</span>
+
+<span class="n">Xw</span><span class="p">,</span> <span class="n">yw</span> <span class="o">=</span> <span class="n">load_wine</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">Xw_tr</span><span class="p">,</span> <span class="n">Xw_te</span><span class="p">,</span> <span class="n">yw_tr</span><span class="p">,</span> <span class="n">yw_te</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">Xw</span><span class="p">,</span> <span class="n">yw</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">stratify</span><span class="o">=</span><span class="n">yw</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.neighbors</span><span class="w"> </span><span class="kn">import</span> <span class="n">KNeighborsClassifier</span>
+
+<span class="n">mw</span> <span class="o">=</span> <span class="n">KNeighborsClassifier</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Xw_tr</span><span class="p">,</span> <span class="n">yw_tr</span><span class="p">)</span>     <span class="c1"># ضعيف عن قصد: بدون توحيد</span>
+<span class="n">pw</span> <span class="o">=</span> <span class="n">mw</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">Xw_te</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">confusion_matrix</span><span class="p">(</span><span class="n">yw_te</span><span class="p">,</span> <span class="n">pw</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;macro F1   :&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">f1_score</span><span class="p">(</span><span class="n">yw_te</span><span class="p">,</span> <span class="n">pw</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="s2">&quot;macro&quot;</span><span class="p">),</span> <span class="mi">3</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;weighted F1:&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">f1_score</span><span class="p">(</span><span class="n">yw_te</span><span class="p">,</span> <span class="n">pw</span><span class="p">,</span> <span class="n">average</span><span class="o">=</span><span class="s2">&quot;weighted&quot;</span><span class="p">),</span> <span class="mi">3</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">classification_report</span><span class="p">(</span><span class="n">yw_te</span><span class="p">,</span> <span class="n">pw</span><span class="p">,</span> <span class="n">digits</span><span class="o">=</span><span class="mi">3</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>[[18  0  0]
+ [ 2 13  6]
+ [ 4  3  8]]
+macro F1   : 0.704
+weighted F1: 0.712
+              precision    recall  f1-score   support
+
+           0      0.750     1.000     0.857        18
+           1      0.812     0.619     0.703        21
+           2      0.571     0.533     0.552        15
+
+    accuracy                          0.722        54
+   macro avg      0.711     0.717     0.704        54
+weighted avg      0.725     0.722     0.712        54</pre></div><div class="blk"><p>استخدمنا نموذجاً ضعيفاً عن قصد، لكي نرى أخطاء. انظر إلى الفئة الأصعب: استدعاؤها أقل بكثير من الباقي.</p><p>المتوسط الكلي يعطيها نفس وزن الفئات الأخرى، فيظهر أثرها أوضح.</p></div><h3>النموذج الكسول، بالأرقام</h3><div class="code "><div class="code-head"><span class="path">lazy.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="n">y_fraud</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">990</span><span class="p">)</span>
+<span class="n">lazy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;accuracy:&quot;</span><span class="p">,</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_fraud</span><span class="p">,</span> <span class="n">lazy</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;recall  :&quot;</span><span class="p">,</span> <span class="n">recall_score</span><span class="p">(</span><span class="n">y_fraud</span><span class="p">,</span> <span class="n">lazy</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;f1      :&quot;</span><span class="p">,</span> <span class="n">f1_score</span><span class="p">(</span><span class="n">y_fraud</span><span class="p">,</span> <span class="n">lazy</span><span class="p">,</span> <span class="n">zero_division</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>accuracy: 0.99
+recall  : 0.0
+f1      : 0.0</pre></div><div class="blk"><p>دقة 99%، واستدعاء صفر. هذا هو السبب في أننا لا نكتفي بالدقة أبداً مع بيانات غير متوازنة.</p></div><div class="callout mistake"><div class="ct">خطأ شائع: نسيان تعريف الفئة الموجبة</div><div class="blk"><p>الدقة الإيجابية والاستدعاء يتغيران كلياً إذا تغيرت الفئة الموجبة.</p><p>اكتب دائماً في تقريرك: ما الموجب هنا؟ وتحقق أن المكتبة تفهم نفس الشيء.</p></div></div><div class="callout interview"><div class="ct">سؤال مقابلة</div><div class="blk"><p>سؤال قد تسمعه في المقابلة:</p></div><div class="en" dir="ltr"><p>What is the difference between precision and recall? When would you prefer each?</p></div><div class="blk"><p>جواب قصير وجيد:</p></div><div class="en" dir="ltr"><p>Precision is, of all the cases the model called positive, how many really are positive. Recall is, of all the real positives, how many the model found. Prefer recall when missing a positive is costly, like cancer screening. Prefer precision when false alarms are costly, like a spam filter that could hide important emails. F1 combines both with a harmonic mean.</p></div></div><section class="summary"><div class="ct">الخلاصة</div><ul class="l"><li>الدقة تخدع مع الفئات غير المتوازنة.</li><li>مصفوفة الالتباس: إيجابي صحيح، وسلبي كاذب، وإيجابي كاذب، وسلبي صحيح.</li><li>الدقة الإيجابية: هل أثق بإنذارات النموذج؟ الاستدعاء: هل وجد كل ما أبحث عنه؟</li><li>مقياس إف واحد يجمعهما، ويعاقب الرقم الصغير.</li><li>اختر المقياس حسب كلفة كل خطأ. وعرّف الفئة الموجبة بوضوح.</li></ul></section><section class="quiz" data-quiz="l29-q"><h2>اختبر فهمك</h2><div class="q" data-answer="0"><div class="qt"><span class="qn">1.</span>نموذج كشف احتيال: 40 إيجابي صحيح، و 10 إيجابي كاذب، و 20 سلبي كاذب. ما الدقة الإيجابية؟</div><div class="opts"><button type="button" class="opt">0.8</button><button type="button" class="opt">0.67</button><button type="button" class="opt">0.5</button></div><div class="explain" hidden><span class="verdict"></span><p>أربعون من خمسين قال عنها احتيال.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">2.</span>في نفس النموذج، ما الاستدعاء؟</div><div class="opts"><button type="button" class="opt">0.8</button><button type="button" class="opt">0.67</button><button type="button" class="opt">0.33</button></div><div class="explain" hidden><span class="verdict"></span><p>أربعون من ستين عملية احتيال حقيقية.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">3.</span>في فحص أولي لمرض خطير، أي خطأ أغلى عادة؟</div><div class="opts"><button type="button" class="opt">الإيجابي الكاذب</button><button type="button" class="opt">السلبي الكاذب: مريض لم نكتشفه</button><button type="button" class="opt">كلاهما بنفس الكلفة دائماً</button></div><div class="explain" hidden><span class="verdict"></span><p>الفحص الأولي يجب ألا يفوّت مرضى. الفحص الثاني يصحح الإنذارات الكاذبة.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">4.</span>دقة إيجابية 1.0، واستدعاء 0.1. ما مقياس إف واحد تقريباً؟</div><div class="opts"><button type="button" class="opt">0.55</button><button type="button" class="opt">0.18</button><button type="button" class="opt">1.0</button></div><div class="explain" hidden><span class="verdict"></span><p>اثنان ضرب 0.1 على 1.1. المتوسط التوافقي يعاقب الرقم الصغير.</p></div></div><div class="q" data-answer="0"><div class="qt"><span class="qn">5.</span>مع خمس فئات، وفئة نادرة مهمة جداً، أي متوسط تختار؟</div><div class="opts"><button type="button" class="opt">المتوسط الكلي، لأن كل فئة لها نفس الوزن</button><button type="button" class="opt">المتوسط الموزون</button><button type="button" class="opt">الدقة فقط</button></div><div class="explain" hidden><span class="verdict"></span><p>الموزون يخفي أداء الفئة النادرة.</p></div></div><div class="row"><span class="score"></span><button type="button" class="btn ghost quiz-reset">أعد المحاولة</button></div></section><section class="exercise"><div class="xt">تمرين: فلتر رسائل</div><div class="blk"><p>فلتر رسائل مزعجة جُرّب على 200 رسالة: 50 مزعجة، و 150 عادية.</p><p>قال عن 45 رسالة إنها مزعجة. منها 40 مزعجة فعلاً.</p></div><ol class="l"><li>املأ مصفوفة الالتباس.</li><li>احسب الدقة، والدقة الإيجابية، والاستدعاء، ومقياس إف واحد.</li><li>مدير الشركة يقول: "لا أريد أن تضيع أي رسالة عمل". أي مقياس يهمه؟ وهل هذا الفلتر جيد له؟</li><li>تحقق بالكود: اصنع مصفوفتين تطابقان هذه الأرقام، واطبع تقرير التصنيف.</li></ol><details><summary>تلميح</summary><div class="dbody"><div class="blk"><p>الإيجابي الصحيح 40، والإيجابي الكاذب 5. المزعجة التي فاتت: 50 ناقص 40.</p></div></div></details><details class="sol"><summary>الحل (افتحه بعد أن تحاول)</summary><div class="dbody"><div class="tablewrap"><table><thead><tr><th></th><th>قال: مزعجة</th><th>قال: عادية</th></tr></thead><tbody><tr><td>مزعجة فعلاً</td><td>40</td><td>10</td></tr><tr><td>عادية فعلاً</td><td>5</td><td>145</td></tr></tbody></table></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>accuracy</mtext><mo>=</mo><mfrac><mn>185</mn><mn>200</mn></mfrac><mo>=</mo><mn>0.925</mn><mspace width="2em"/><mtext>precision</mtext><mo>=</mo><mfrac><mn>40</mn><mn>45</mn></mfrac><mo>≈</mo><mn>0.889</mn><mspace width="2em"/><mtext>recall</mtext><mo>=</mo><mfrac><mn>40</mn><mn>50</mn></mfrac><mo>=</mo><mn>0.8</mn></mrow></math></div></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>F</mi><mn>1</mn></msub><mo>=</mo><mfrac><mrow><mn>2</mn><mo>×</mo><mn>0.889</mn><mo>×</mo><mn>0.8</mn></mrow><mrow><mn>0.889</mn><mo>+</mo><mn>0.8</mn></mrow></mfrac><mo>≈</mo><mn>0.842</mn></mrow></math></div></div><div class="blk"><p>المدير يهتم بالدقة الإيجابية: كل إيجابي كاذب رسالة عمل ضاعت.</p><p>خمس رسائل عمل من 150 ذهبت إلى المزعج. قد يكون هذا كثيراً له. الحل: رفع العتبة، كما في الدرس القادم.</p></div><div class="code "><div class="code-head"><span class="path"></span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="n">y_true</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">50</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">150</span><span class="p">)</span>
+<span class="n">y_hat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">40</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">+</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="mi">5</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">145</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">confusion_matrix</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_hat</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">classification_report</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_hat</span><span class="p">,</span> <span class="n">target_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;normal&quot;</span><span class="p">,</span> <span class="s2">&quot;spam&quot;</span><span class="p">],</span> <span class="n">digits</span><span class="o">=</span><span class="mi">3</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>[[145   5]
+ [ 10  40]]
+              precision    recall  f1-score   support
+
+      normal      0.935     0.967     0.951       150
+        spam      0.889     0.800     0.842        50
+
+    accuracy                          0.925       200
+   macro avg      0.912     0.883     0.896       200
+weighted avg      0.924     0.925     0.924       200</pre></div></div></details><div class="askbox" data-kind="review" hidden><div class="al">اطلب من كلود أن يراجع حلّك</div><div class="ah">اكتب إجابتك أو الصق الكود. سيقارنه بالحل ويشرح لك بالعربي. هذا يستهلك من رصيد استخدامك.</div><textarea id="rv-l29-1" dir="auto" placeholder="اكتب إجابتك هنا"></textarea><div class="row"><button type="button" class="btn ask-go">راجع حلّي</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></div><pre hidden class="x-task">فلتر رسائل مزعجة جُرّب على 200 رسالة: 50 مزعجة، و 150 عادية.
+قال عن 45 رسالة إنها مزعجة. منها 40 مزعجة فعلاً.
+
+1. املأ مصفوفة الالتباس.
+2. احسب الدقة، والدقة الإيجابية، والاستدعاء، ومقياس إف واحد.
+3. مدير الشركة يقول: "لا أريد أن تضيع أي رسالة عمل". أي مقياس يهمه؟ وهل هذا الفلتر جيد له؟
+4. تحقق بالكود: اصنع مصفوفتين تطابقان هذه الأرقام، واطبع تقرير التصنيف.</pre><pre hidden class="x-solution">| | قال: مزعجة | قال: عادية |
+|---|---|---|
+| مزعجة فعلاً | 40 | 10 |
+| عادية فعلاً | 5 | 145 |
+
+$$\text{accuracy} = \frac{185}{200} = 0.925 \qquad \text{precision} = \frac{40}{45} \approx 0.889 \qquad \text{recall} = \frac{40}{50} = 0.8$$
+
+$$F_1 = \frac{2 \times 0.889 \times 0.8}{0.889 + 0.8} \approx 0.842$$
+
+المدير يهتم بالدقة الإيجابية: كل إيجابي كاذب رسالة عمل ضاعت.
+خمس رسائل عمل من 150 ذهبت إلى المزعج. قد يكون هذا كثيراً له. الحل: رفع العتبة، كما في الدرس القادم.
+
+```python
+y_true = np.array([1] * 50 + [0] * 150)
+y_hat = np.array([1] * 40 + [0] * 10 + [1] * 5 + [0] * 145)
+print(confusion_matrix(y_true, y_hat))
+print(classification_report(y_true, y_hat, target_names=["normal", "spam"], digits=3))
+```</pre></section></article><section class="askbox" data-kind="ask" hidden><div class="al">عندك سؤال عن هذا الدرس؟ اسأل كلود</div><div class="ah">اكتب سؤالك بالعربي. كلود يقرأ نص الدرس ويجيبك. هذا يستهلك من رصيد استخدامك.</div><textarea id="ask-l29" dir="auto" placeholder="مثلاً: لماذا نضرب هنا في المشتقة؟"></textarea><div class="row"><button type="button" class="btn ask-go">اسأل</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></section><div class="donebox"><span class="dmsg"></span><button type="button" class="btn">أنهيت هذا الدرس</button></div><nav class="pager" aria-label="التنقل بين الدروس"><a class="prev" href="#l28"><small>الدرس السابق</small>التحقق المتقاطع</a><a class="next" href="#l30"><small>الدرس التالي</small>اختيار العتبة، ومنحنى الأداء</a></nav></div>

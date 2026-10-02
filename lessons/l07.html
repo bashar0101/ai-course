@@ -1,0 +1,1102 @@
+<div class="page"><article><div class="eyebrow">الجزء الأول · الرياضيات والإحصاء</div><h1>المشتقات الجزئية والتدرّج</h1><div class="meta"><span>الدرس 7 من 59</span><span>المدة: حوالي 45 دقيقة</span><span class="nbdl-slot"></span></div><div class="chips" dir="ltr"><bdi class="chip">partial derivative</bdi><bdi class="chip">gradient</bdi><bdi class="chip">steepest ascent</bdi><bdi class="chip">contour plot</bdi></div><div class="goals"><b>بعد هذا الدرس ستعرف:</b><ul><li>تفهم الدوال التي لها أكثر من مدخل، مثل خطأ يعتمد على الميل والإزاحة معاً</li><li>تحسب المشتقة الجزئية: نحرك مدخلاً واحداً، ونثبّت الباقي</li><li>تفهم التدرّج كمتجه يشير إلى أسرع صعود</li><li>تنزل خطوة واحدة عكس التدرّج بيدك، وترى الخطأ ينقص</li></ul></div><h2>دالة لها مدخلان</h2><div class="blk"><p>في الدرس 3، خطأ النموذج كان يعتمد على الميل والإزاحة <b>معاً</b>.</p><p>إذن دالة الخطأ لها مدخلان. نكتبها هكذا:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>L</mi><mo stretchy="false">(</mo><mi>w</mi><mo separator="true">,</mo><mi>b</mi><mo stretchy="false">)</mo></mrow></math></div></div><div class="blk"><p>الحرف <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>L</mi></mrow></math></bdi> من كلمة الخسارة بالإنجليزية. سنسمي دالة الخطأ هكذا في كل الدورة:</p></div><div class="blk"><div class="term" dir="ltr"><code>loss function</code></div></div><div class="blk"><p>دالة لها مدخلان نتخيلها كأرض فيها تلال ووديان.</p><p>الموقع على الأرض هو قيم المعاملين. والارتفاع هو الخطأ.</p><p>التعلّم يعني: أن نمشي في هذه الأرض حتى نصل إلى أعمق وادٍ.</p></div><div class="blk"><p>لكننا في ضباب كثيف. لا نرى الوادي.</p><p>نرى فقط ميل الأرض تحت أقدامنا. وهذا يكفي.</p></div><h2>المشتقة الجزئية: غيّر واحداً، وثبّت الباقي</h2><div class="blk"><p>كيف نحسب ميل أرض لها اتجاهان؟ نسأل سؤالين منفصلين:</p></div><ul class="l"><li>إذا تحركت قليلاً في اتجاه الميل فقط، والإزاحة ثابتة، كم يتغير الخطأ؟</li><li>إذا تحركت قليلاً في اتجاه الإزاحة فقط، والميل ثابت، كم يتغير الخطأ؟</li></ul><div class="blk"><p>كل سؤال جوابه <b>مشتقة جزئية</b>.</p><p>نحسبها بنفس قواعد الدرس السابق تماماً، ونعامل المدخل الآخر كأنه رقم ثابت.</p></div><div class="blk"><p>نكتبها بحرف دال منحني، بدل الحرف العادي:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mi mathvariant="normal">∂</mi><mi>L</mi></mrow><mrow><mi mathvariant="normal">∂</mi><mi>w</mi></mrow></mfrac><mspace width="2em"/><mfrac><mrow><mi mathvariant="normal">∂</mi><mi>L</mi></mrow><mrow><mi mathvariant="normal">∂</mi><mi>b</mi></mrow></mfrac></mrow></math></div></div><div class="blk"><p>تُقرأ: المشتقة الجزئية للخسارة بالنسبة للميل، وبالنسبة للإزاحة.</p></div><h3>مثال قصير</h3><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>w</mi><mo separator="true">,</mo><mi>b</mi><mo stretchy="false">)</mo><mo>=</mo><msup><mi>w</mi><mn>2</mn></msup><mo>+</mo><mn>3</mn><mi>w</mi><mi>b</mi><mo>+</mo><msup><mi>b</mi><mn>2</mn></msup></mrow></math></div></div><div class="blk"><p>بالنسبة لـ <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>w</mi></mrow></math></bdi>: نعامل <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>b</mi></mrow></math></bdi> كرقم ثابت.</p><p>مشتقة <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msup><mi>w</mi><mn>2</mn></msup></mrow></math></bdi> هي <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>2</mn><mi>w</mi></mrow></math></bdi>. ومشتقة <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>3</mn><mi>w</mi><mi>b</mi></mrow></math></bdi> هي <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>3</mn><mi>b</mi></mrow></math></bdi>، لأن <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>3</mn><mi>b</mi></mrow></math></bdi> هنا مثل رقم مضروب في <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>w</mi></mrow></math></bdi>. والحد الأخير ثابت، مشتقته صفر:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mi mathvariant="normal">∂</mi><mi>f</mi></mrow><mrow><mi mathvariant="normal">∂</mi><mi>w</mi></mrow></mfrac><mo>=</mo><mn>2</mn><mi>w</mi><mo>+</mo><mn>3</mn><mi>b</mi></mrow></math></div></div><div class="blk"><p>وبالنسبة لـ <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>b</mi></mrow></math></bdi> بنفس الطريقة:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mi mathvariant="normal">∂</mi><mi>f</mi></mrow><mrow><mi mathvariant="normal">∂</mi><mi>b</mi></mrow></mfrac><mo>=</mo><mn>3</mn><mi>w</mi><mo>+</mo><mn>2</mn><mi>b</mi></mrow></math></div></div><h2>التدرّج: متجه المشتقات الجزئية</h2><div class="blk"><p>نضع المشتقات الجزئية معاً في متجه واحد. هذا المتجه اسمه <b>التدرّج</b>:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi mathvariant="normal">∇</mi><mi>L</mi><mo>=</mo><mrow><mo fence="true">(</mo><mfrac><mrow><mi mathvariant="normal">∂</mi><mi>L</mi></mrow><mrow><mi mathvariant="normal">∂</mi><mi>w</mi></mrow></mfrac><mo separator="true">,</mo><mtext>  </mtext><mfrac><mrow><mi mathvariant="normal">∂</mi><mi>L</mi></mrow><mrow><mi mathvariant="normal">∂</mi><mi>b</mi></mrow></mfrac><mo fence="true">)</mo></mrow></mrow></math></div></div><div class="blk"><p>الرمز المثلث المقلوب يُقرأ:</p></div><div class="blk"><div class="term" dir="ltr"><code>nabla</code></div></div><div class="blk"><p>واسم المتجه بالإنجليزية:</p></div><div class="blk"><div class="term" dir="ltr"><code>gradient</code></div></div><h3>ما السحري في هذا المتجه؟</h3><div class="key">التدرّج يشير إلى اتجاه أسرع صعود. وعكسه يشير إلى أسرع نزول.</div><div class="blk"><p>وطوله يقول كم الأرض شديدة الانحدار هنا.</p><p>في القاع، الأرض مسطحة، والتدرّج صفر في كل اتجاه.</p></div><div class="blk"><p>إذن طريقة النزول بسيطة: احسب التدرّج، ثم تحرك خطوة صغيرة <b>عكسه</b>. ثم كرر.</p></div><section class="hand"><div class="hand-h"><span class="hand-tag">مثال محلول باليد</span><div class="hand-t">خطوة نزول واحدة على أرض لها مدخلان</div></div><div class="hand-body"><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>w</mi><mo separator="true">,</mo><mi>b</mi><mo stretchy="false">)</mo><mo>=</mo><mo stretchy="false">(</mo><mi>w</mi><mo>−</mo><mn>2</mn><msup><mo stretchy="false">)</mo><mn>2</mn></msup><mo>+</mo><mn>2</mn><mo stretchy="false">(</mo><mi>b</mi><mo>+</mo><mn>1</mn><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow></math></div></div><div class="blk"><p>أعمق نقطة هنا واضحة: عند <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>w</mi><mo>=</mo><mn>2</mn></mrow></math></bdi> و <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>b</mi><mo>=</mo><mo>−</mo><mn>1</mn></mrow></math></bdi>، لأن كل قوس يصبح صفراً.</p><p>لكن لنتصرف كأننا لا نعرف، ونبدأ من النقطة <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">)</mo></mrow></math></bdi>.</p></div><div class="step">نفك الأقواس</div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>w</mi><mo separator="true">,</mo><mi>b</mi><mo stretchy="false">)</mo><mo>=</mo><msup><mi>w</mi><mn>2</mn></msup><mo>−</mo><mn>4</mn><mi>w</mi><mo>+</mo><mn>4</mn><mo>+</mo><mn>2</mn><msup><mi>b</mi><mn>2</mn></msup><mo>+</mo><mn>4</mn><mi>b</mi><mo>+</mo><mn>2</mn></mrow></math></div></div><div class="step">المشتقة الجزئية بالنسبة للميل</div><div class="blk"><p>نعامل <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>b</mi></mrow></math></bdi> كثابت. كل حدود <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>b</mi></mrow></math></bdi> تختفي:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mi mathvariant="normal">∂</mi><mi>f</mi></mrow><mrow><mi mathvariant="normal">∂</mi><mi>w</mi></mrow></mfrac><mo>=</mo><mn>2</mn><mi>w</mi><mo>−</mo><mn>4</mn></mrow></math></div></div><div class="step">المشتقة الجزئية بالنسبة للإزاحة</div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mi mathvariant="normal">∂</mi><mi>f</mi></mrow><mrow><mi mathvariant="normal">∂</mi><mi>b</mi></mrow></mfrac><mo>=</mo><mn>4</mn><mi>b</mi><mo>+</mo><mn>4</mn></mrow></math></div></div><div class="step">التدرّج عند نقطة البداية</div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi mathvariant="normal">∇</mi><mi>f</mi><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">)</mo><mo>=</mo><mo stretchy="false">(</mo><mn>2</mn><mo>×</mo><mn>0</mn><mo>−</mo><mn>4</mn><mo separator="true">,</mo><mtext>  </mtext><mtext>  </mtext><mn>4</mn><mo>×</mo><mn>0</mn><mo>+</mo><mn>4</mn><mo stretchy="false">)</mo><mo>=</mo><mo stretchy="false">(</mo><mo>−</mo><mn>4</mn><mo separator="true">,</mo><mtext>  </mtext><mn>4</mn><mo stretchy="false">)</mo></mrow></math></div></div><div class="blk"><p>والارتفاع هناك:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>f</mi><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">)</mo><mo>=</mo><mn>4</mn><mo>+</mo><mn>2</mn><mo>=</mo><mn>6</mn></mrow></math></div></div><div class="step">نتحرك عكس التدرّج</div><div class="blk"><p>عكس التدرّج هو <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>4</mn><mo separator="true">,</mo><mo>−</mo><mn>4</mn><mo stretchy="false">)</mo></mrow></math></bdi>. نأخذ منه خطوة صغيرة: نضربه في 0.1:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">)</mo><mo>+</mo><mn>0.1</mn><mo>×</mo><mo stretchy="false">(</mo><mn>4</mn><mo separator="true">,</mo><mo>−</mo><mn>4</mn><mo stretchy="false">)</mo><mo>=</mo><mo stretchy="false">(</mo><mn>0.4</mn><mo separator="true">,</mo><mtext>  </mtext><mo>−</mo><mn>0.4</mn><mo stretchy="false">)</mo></mrow></math></div></div><div class="step">هل نزلنا فعلاً؟</div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>f</mi><mo stretchy="false">(</mo><mn>0.4</mn><mo separator="true">,</mo><mo>−</mo><mn>0.4</mn><mo stretchy="false">)</mo><mo>=</mo><mo stretchy="false">(</mo><mn>0.4</mn><mo>−</mo><mn>2</mn><msup><mo stretchy="false">)</mo><mn>2</mn></msup><mo>+</mo><mn>2</mn><mo stretchy="false">(</mo><mo>−</mo><mn>0.4</mn><mo>+</mo><mn>1</mn><msup><mo stretchy="false">)</mo><mn>2</mn></msup><mo>=</mo><mn>2.56</mn><mo>+</mo><mn>0.72</mn><mo>=</mo><mn>3.28</mn></mrow></math></div></div><div class="blk"><p>الارتفاع نزل من 6 إلى 3.28 في خطوة واحدة.</p><p>ولاحظ الاتجاه: الميل زاد نحو 2، والإزاحة نقصت نحو سالب 1. تماماً نحو القاع.</p></div><div class="step">التدرّج عند القاع</div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi mathvariant="normal">∇</mi><mi>f</mi><mo stretchy="false">(</mo><mn>2</mn><mo separator="true">,</mo><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo><mo>=</mo><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">)</mo></mrow></math></div></div><div class="blk"><p>صفر في الاتجاهين: الأرض مسطحة هنا. هذا القاع.</p></div></div></section><h2>نرى الأرض من فوق</h2><div class="blk"><p>أفضل طريقة لرسم دالة لها مدخلان: من فوق، مثل خريطة.</p><p>كل خط يصل نقاطاً لها نفس الارتفاع، مثل خطوط الارتفاع في خرائط الجبال.</p><p>الخطوط المتقاربة تعني انحداراً شديداً.</p></div><figure class="plot"><div class="svgwrap"><svg xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 324.976406 283.719016" xmlns="http://www.w3.org/2000/svg" version="1.1">
+<defs>
+</defs>
+<g id="figure_1">
+<g id="patch_1">
+<path d="M 0 283.719016 
+L 324.976406 283.719016 
+L 324.976406 0 
+L 0 0 
+L 0 283.719016 
+z
+" style="fill: none"/>
+</g>
+<g id="axes_1">
+<g id="patch_2">
+<path d="M 55.557031 244.227141 
+L 314.277031 244.227141 
+L 314.277031 11.379141 
+L 55.557031 11.379141 
+L 55.557031 244.227141 
+z
+" style="fill: none"/>
+</g>
+<g id="matplotlib.axis_1">
+<g id="xtick_1">
+<g id="line2d_1">
+<defs>
+<path id="m23fa452e6b" d="M 0 0 
+L 0 3.5 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#m23fa452e6b" x="55.557031" y="244.227141" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_1">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="55.557031" y="259.585422" transform="rotate(-0 55.557031 259.585422)">−1</text>
+</g>
+</g>
+<g id="xtick_2">
+<g id="line2d_2">
+<g>
+<use xlink:href="#m23fa452e6b" x="107.301031" y="244.227141" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_2">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="107.301031" y="259.585422" transform="rotate(-0 107.301031 259.585422)">0</text>
+</g>
+</g>
+<g id="xtick_3">
+<g id="line2d_3">
+<g>
+<use xlink:href="#m23fa452e6b" x="159.045031" y="244.227141" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_3">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="159.045031" y="259.585422" transform="rotate(-0 159.045031 259.585422)">1</text>
+</g>
+</g>
+<g id="xtick_4">
+<g id="line2d_4">
+<g>
+<use xlink:href="#m23fa452e6b" x="210.789031" y="244.227141" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_4">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="210.789031" y="259.585422" transform="rotate(-0 210.789031 259.585422)">2</text>
+</g>
+</g>
+<g id="xtick_5">
+<g id="line2d_5">
+<g>
+<use xlink:href="#m23fa452e6b" x="262.533031" y="244.227141" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_5">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="262.533031" y="259.585422" transform="rotate(-0 262.533031 259.585422)">3</text>
+</g>
+</g>
+<g id="xtick_6">
+<g id="line2d_6">
+<g>
+<use xlink:href="#m23fa452e6b" x="314.277031" y="244.227141" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_6">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="314.277031" y="259.585422" transform="rotate(-0 314.277031 259.585422)">4</text>
+</g>
+</g>
+<g id="text_7">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="184.917031" y="274.231359" transform="rotate(-0 184.917031 274.231359)">w</text>
+</g>
+</g>
+<g id="matplotlib.axis_2">
+<g id="ytick_1">
+<g id="line2d_7">
+<defs>
+<path id="mae03f826c2" d="M 0 0 
+L -3.5 0 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#mae03f826c2" x="55.557031" y="244.227141" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_8">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="48.557031" y="248.406281" transform="rotate(-0 48.557031 248.406281)">−3.0</text>
+</g>
+</g>
+<g id="ytick_2">
+<g id="line2d_8">
+<g>
+<use xlink:href="#mae03f826c2" x="55.557031" y="218.355141" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_9">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="48.557031" y="222.534281" transform="rotate(-0 48.557031 222.534281)">−2.5</text>
+</g>
+</g>
+<g id="ytick_3">
+<g id="line2d_9">
+<g>
+<use xlink:href="#mae03f826c2" x="55.557031" y="192.483141" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_10">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="48.557031" y="196.662281" transform="rotate(-0 48.557031 196.662281)">−2.0</text>
+</g>
+</g>
+<g id="ytick_4">
+<g id="line2d_10">
+<g>
+<use xlink:href="#mae03f826c2" x="55.557031" y="166.611141" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_11">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="48.557031" y="170.790281" transform="rotate(-0 48.557031 170.790281)">−1.5</text>
+</g>
+</g>
+<g id="ytick_5">
+<g id="line2d_11">
+<g>
+<use xlink:href="#mae03f826c2" x="55.557031" y="140.739141" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_12">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="48.557031" y="144.918281" transform="rotate(-0 48.557031 144.918281)">−1.0</text>
+</g>
+</g>
+<g id="ytick_6">
+<g id="line2d_12">
+<g>
+<use xlink:href="#mae03f826c2" x="55.557031" y="114.867141" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_13">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="48.557031" y="119.046281" transform="rotate(-0 48.557031 119.046281)">−0.5</text>
+</g>
+</g>
+<g id="ytick_7">
+<g id="line2d_13">
+<g>
+<use xlink:href="#mae03f826c2" x="55.557031" y="88.995141" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_14">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="48.557031" y="93.174281" transform="rotate(-0 48.557031 93.174281)">0.0</text>
+</g>
+</g>
+<g id="ytick_8">
+<g id="line2d_14">
+<g>
+<use xlink:href="#mae03f826c2" x="55.557031" y="63.123141" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_15">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="48.557031" y="67.302281" transform="rotate(-0 48.557031 67.302281)">0.5</text>
+</g>
+</g>
+<g id="ytick_9">
+<g id="line2d_15">
+<g>
+<use xlink:href="#mae03f826c2" x="55.557031" y="37.251141" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_16">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="48.557031" y="41.430281" transform="rotate(-0 48.557031 41.430281)">1.0</text>
+</g>
+</g>
+<g id="ytick_10">
+<g id="line2d_16">
+<g>
+<use xlink:href="#mae03f826c2" x="55.557031" y="11.379141" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_17">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="48.557031" y="15.558281" transform="rotate(-0 48.557031 15.558281)">1.5</text>
+</g>
+</g>
+<g id="text_18">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="15.558281" y="127.803141" transform="rotate(-90 15.558281 127.803141)">b</text>
+</g>
+</g>
+<g id="QuadContourSet_1">
+<path d="M 210.764555 122.45285 
+L 211.569092 122.455634 
+L 212.869192 122.505119 
+L 213.318036 122.537734 
+L 214.169293 122.603698 
+L 215.469393 122.752418 
+L 216.769494 122.949112 
+L 218.069594 123.193781 
+L 219.369695 123.486423 
+L 220.21476 123.707824 
+L 220.669795 123.835522 
+L 221.969896 124.251759 
+L 223.269996 124.719384 
+L 223.667106 124.877914 
+L 224.570097 125.266008 
+L 225.870197 125.880098 
+L 226.196297 126.048005 
+L 227.170298 126.591111 
+L 228.208889 127.218095 
+L 228.470398 127.390244 
+L 229.770499 128.311421 
+L 229.871665 128.388186 
+L 231.070599 129.388401 
+L 231.261577 129.558276 
+L 232.3707 130.65379 
+L 232.441787 130.728367 
+L 233.433969 131.898457 
+L 233.6708 132.21734 
+L 234.268056 133.068548 
+L 234.970901 134.235656 
+L 234.972602 134.238638 
+L 235.53008 135.408729 
+L 235.977287 136.578819 
+L 236.271001 137.598807 
+L 236.312074 137.748909 
+L 236.527464 138.919 
+L 236.638069 140.08909 
+L 236.643891 141.259181 
+L 236.544928 142.429271 
+L 236.341181 143.599362 
+L 236.271001 143.865514 
+L 236.02017 144.769452 
+L 235.585215 145.939543 
+L 235.03999 147.109633 
+L 234.970901 147.23296 
+L 234.352096 148.279724 
+L 233.6708 149.26624 
+L 233.536608 149.449814 
+L 232.558112 150.619904 
+L 232.3707 150.818957 
+L 231.399662 151.789995 
+L 231.070599 152.085967 
+L 230.034393 152.960085 
+L 229.770499 153.16236 
+L 228.470398 154.092889 
+L 228.414325 154.130176 
+L 227.170298 154.888165 
+L 226.438051 155.300266 
+L 225.870197 155.59516 
+L 224.570097 156.214521 
+L 223.979902 156.470357 
+L 223.269996 156.756016 
+L 221.969896 157.227367 
+L 220.689858 157.640447 
+L 220.669795 157.646489 
+L 219.369695 157.989638 
+L 218.069594 158.284456 
+L 216.769494 158.530944 
+L 215.469393 158.7291 
+L 214.762726 158.810538 
+L 214.169293 158.874637 
+L 212.869192 158.969766 
+L 211.569092 159.019596 
+L 210.268991 159.024126 
+L 208.968891 158.983356 
+L 207.66879 158.897286 
+L 206.810275 158.810538 
+L 206.36869 158.762932 
+L 205.068589 158.574441 
+L 203.768489 158.33762 
+L 202.468388 158.052468 
+L 201.168288 157.718985 
+L 200.900862 157.640447 
+L 199.868187 157.315422 
+L 198.568087 156.85443 
+L 197.594324 156.470357 
+L 197.267986 156.331698 
+L 195.967886 155.723496 
+L 195.139208 155.300266 
+L 194.667785 155.039339 
+L 193.367685 154.259279 
+L 193.167993 154.130176 
+L 192.067584 153.353745 
+L 191.547108 152.960085 
+L 190.767484 152.311125 
+L 190.180803 151.789995 
+L 189.467383 151.085437 
+L 189.023887 150.619904 
+L 188.167283 149.607553 
+L 188.041267 149.449814 
+L 187.224165 148.279724 
+L 186.867182 147.682528 
+L 186.542845 147.109633 
+L 185.99185 145.939543 
+L 185.567082 144.808821 
+L 185.553035 144.769452 
+L 185.241403 143.599362 
+L 185.035608 142.429271 
+L 184.935651 141.259181 
+L 184.941531 140.08909 
+L 185.053248 138.919 
+L 185.270802 137.748909 
+L 185.567082 136.676918 
+L 185.595629 136.578819 
+L 186.047568 135.408729 
+L 186.610945 134.238638 
+L 186.867182 133.794338 
+L 187.309144 133.068548 
+L 188.139319 131.898457 
+L 188.167283 131.863937 
+L 189.141589 130.728367 
+L 189.467383 130.39058 
+L 190.320625 129.558276 
+L 190.767484 129.165732 
+L 191.71202 128.388186 
+L 192.067584 128.121959 
+L 192.13284 128.076379 
+" clip-path="url(#pbdc8307caa)" style="fill: none; stroke: #f7fbff; stroke-width: 1.5"/>
+<path d="M 179.054566 169.634089 
+L 176.466378 168.118691 
+L 173.135152 165.83108 
+L 171.265976 164.348821 
+L 168.665775 161.981897 
+L 166.782739 159.980628 
+L 164.765473 157.45605 
+L 163.320917 155.300266 
+L 162.018454 152.960085 
+L 160.865172 150.345338 
+L 160.159976 148.279724 
+L 159.565071 145.910245 
+L 159.206648 143.599362 
+L 159.054155 141.259181 
+L 159.112806 138.919 
+L 159.382601 136.578819 
+L 159.871213 134.238638 
+L 160.581088 131.898457 
+L 161.524484 129.558276 
+L 162.71209 127.218095 
+L 164.164313 124.877914 
+L 166.065574 122.342494 
+L 167.974232 120.197553 
+L 170.416914 117.857372 
+L 173.309248 115.517191 
+L 175.166277 114.204559 
+L 178.756957 112.00692 
+L 181.66678 110.5003 
+L 185.567082 108.795645 
+L 188.167283 107.837587 
+L 192.067584 106.634248 
+L 195.967886 105.688335 
+L 199.868187 104.974981 
+L 203.768489 104.493548 
+L 207.66879 104.221434 
+L 211.569092 104.158638 
+L 215.469393 104.305161 
+L 219.369695 104.661003 
+L 223.269996 105.234141 
+L 227.674459 106.156467 
+L 231.070599 107.081701 
+L 234.970901 108.39367 
+L 238.102849 109.666739 
+L 241.471403 111.282495 
+L 244.813807 113.17701 
+L 246.671805 114.378211 
+L 249.776929 116.687281 
+L 252.433154 119.027462 
+L 254.683246 121.367643 
+L 256.58109 123.707824 
+L 258.37271 126.374528 
+L 259.67281 128.755231 
+L 260.554899 130.728367 
+L 261.379566 133.068548 
+L 261.978078 135.408729 
+L 262.358928 137.748909 
+L 262.522332 140.08909 
+L 262.475645 142.429271 
+L 262.217483 144.769452 
+L 261.738673 147.109633 
+L 260.972911 149.645284 
+L 260.11266 151.789995 
+L 258.938656 154.130176 
+L 257.502255 156.470357 
+L 255.772509 158.820957 
+L 253.728091 161.150719 
+L 251.307437 163.490899 
+L 248.443248 165.83108 
+L 246.671805 167.098757 
+L 243.053278 169.341352 
+L 240.171303 170.851918 
+L 236.271001 172.57954 
+L 233.6708 173.550782 
+L 229.770499 174.772328 
+L 225.870197 175.734276 
+L 221.969896 176.461794 
+L 218.069594 176.95896 
+L 214.169293 177.246056 
+L 210.268991 177.323082 
+L 206.36869 177.190037 
+L 202.468388 176.846923 
+L 198.568087 176.291462 
+L 197.602654 176.114138 
+L 197.602654 176.114138 
+" clip-path="url(#pbdc8307caa)" style="fill: none; stroke: #ebf3fb; stroke-width: 1.5"/>
+<path d="M 184.31161 92.504478 
+L 188.167283 91.53317 
+L 192.067584 90.719326 
+L 197.267986 89.887261 
+L 202.468388 89.333855 
+L 207.66879 89.045308 
+L 212.869192 89.019077 
+L 218.069594 89.255161 
+L 223.43991 89.775201 
+L 228.470398 90.53144 
+L 232.3707 91.299599 
+L 236.271001 92.235012 
+L 240.171303 93.350207 
+L 244.071604 94.658992 
+L 247.971906 96.17663 
+L 251.967386 97.965834 
+L 256.448487 100.306015 
+L 259.67281 102.238248 
+L 262.273011 103.969787 
+L 265.219082 106.156467 
+L 268.019396 108.496648 
+L 270.506793 110.836829 
+L 272.720305 113.17701 
+L 275.274016 116.285588 
+L 277.20941 119.027462 
+L 278.641551 121.367643 
+L 279.885578 123.707824 
+L 280.951923 126.048005 
+L 281.85026 128.388186 
+L 282.888688 131.898457 
+L 283.384233 134.238638 
+L 283.726292 136.578819 
+L 283.918178 138.919 
+L 283.959893 141.259181 
+L 283.851435 143.599362 
+L 283.592805 145.939543 
+L 283.074619 148.770641 
+L 282.616871 150.619904 
+L 281.774519 153.29666 
+L 280.502054 156.470357 
+L 279.174318 159.14802 
+L 277.874217 161.403091 
+L 276.512096 163.490899 
+L 274.783367 165.83108 
+L 272.673815 168.350741 
+L 270.073614 171.066838 
+L 267.473413 173.45825 
+L 264.873212 175.590035 
+L 262.242088 177.531985 
+L 258.37271 180.047711 
+L 254.472408 182.251531 
+L 250.572107 184.164843 
+L 246.671805 185.833896 
+L 242.771504 187.276229 
+L 238.871202 188.517922 
+L 234.970901 189.573326 
+L 229.770499 190.70942 
+L 224.44781 191.57307 
+L 219.369695 192.12286 
+L 214.169293 192.425285 
+L 208.968891 192.464732 
+L 203.768489 192.2412 
+L 198.568087 191.75469 
+L 193.367685 190.991977 
+L 188.167283 189.945276 
+L 184.266981 188.962461 
+L 180.366679 187.796993 
+L 176.466378 186.434799 
+L 171.862979 184.552528 
+L 168.665775 183.047264 
+L 164.765473 180.966931 
+L 160.865172 178.569126 
+L 157.718229 176.361894 
+L 154.364669 173.683119 
+L 151.764468 171.320177 
+L 149.164267 168.637307 
+L 147.738677 167.001171 
+L 145.263966 163.770113 
+L 143.548785 161.150719 
+L 142.222616 158.810538 
+L 141.077835 156.470357 
+L 140.063564 154.016005 
+L 138.960018 150.619904 
+L 138.395528 148.279724 
+L 137.836648 144.769452 
+L 137.652447 142.429271 
+L 137.618956 140.08909 
+L 137.736175 137.748909 
+L 138.004102 135.408729 
+L 138.422739 133.068548 
+L 138.99625 130.728367 
+L 140.063564 127.466356 
+L 141.136448 124.877914 
+L 142.663765 121.855743 
+L 143.963865 119.660711 
+L 145.263966 117.706114 
+L 146.896403 115.517191 
+L 149.164267 112.840125 
+L 151.764468 110.158781 
+L 154.364669 107.795881 
+L 156.96487 105.687854 
+L 159.565071 103.786995 
+L 163.465373 101.274198 
+L 165.87119 99.895341 
+L 165.87119 99.895341 
+" clip-path="url(#pbdc8307caa)" style="fill: none; stroke: #dce9f6; stroke-width: 1.5"/>
+<path d="M 267.518802 79.538951 
+L 271.706331 81.584568 
+L 276.574117 84.252254 
+L 280.474418 86.641473 
+L 284.37472 89.288934 
+L 288.126313 92.115382 
+L 290.947241 94.455563 
+L 294.775524 97.984064 
+L 298.117034 101.476105 
+L 301.083175 104.986377 
+L 302.857907 107.326558 
+L 305.242133 110.836829 
+L 307.310001 114.3471 
+L 309.087563 117.857372 
+L 310.58397 121.367643 
+L 311.815996 124.877914 
+L 312.791321 128.388186 
+L 313.517023 131.898457 
+L 314.000739 135.408729 
+L 314.244816 138.919 
+L 314.249254 142.429271 
+L 314.014053 145.939543 
+L 313.539212 149.449814 
+L 312.822783 152.960085 
+L 311.856447 156.470357 
+L 310.634052 159.980628 
+L 309.076629 163.64119 
+L 307.38106 167.001171 
+L 305.176328 170.742231 
+L 302.951711 174.021713 
+L 300.243284 177.531985 
+L 297.375725 180.814579 
+L 294.775524 183.493092 
+L 291.096093 186.892708 
+L 288.275021 189.245115 
+L 284.37472 192.189262 
+L 280.474418 194.83747 
+L 276.574117 197.226775 
+L 272.673815 199.38828 
+L 268.773514 201.348297 
+L 263.573112 203.679537 
+L 258.37271 205.721185 
+L 253.172308 207.495306 
+L 247.617501 209.124427 
+L 242.771504 210.333677 
+L 237.347303 211.464608 
+L 232.3707 212.305348 
+L 227.170298 212.991614 
+L 221.969896 213.486002 
+L 216.471422 213.804789 
+L 211.569092 213.913341 
+L 206.36869 213.849082 
+L 201.168288 213.597939 
+L 195.967886 213.159519 
+L 190.767484 212.532895 
+L 185.567082 211.708036 
+L 180.366679 210.680692 
+L 175.166277 209.442284 
+L 169.875806 207.954337 
+L 164.765473 206.278924 
+L 159.565071 204.322223 
+L 154.364669 202.082471 
+L 149.164267 199.525665 
+L 145.263966 197.37893 
+L 141.363664 195.005681 
+L 137.463363 192.374991 
+L 133.563061 189.450032 
+L 130.482936 186.892708 
+L 127.062559 183.745292 
+L 124.411831 181.042256 
+L 121.335512 177.531985 
+L 118.626759 174.021713 
+L 116.255317 170.511442 
+L 114.061554 166.749708 
+L 112.431718 163.490899 
+L 110.944694 159.980628 
+L 109.722489 156.470357 
+L 108.755035 152.960085 
+L 108.038744 149.449814 
+L 107.561051 145.921231 
+L 107.329832 142.429271 
+L 107.334225 138.919 
+L 107.576046 135.408729 
+L 108.060989 131.898457 
+L 108.861152 128.090927 
+L 109.763044 124.877914 
+L 110.994906 121.367643 
+L 112.491841 117.857372 
+L 114.267213 114.3471 
+L 116.337176 110.836829 
+L 118.720828 107.326558 
+L 121.442502 103.816286 
+L 124.462358 100.382579 
+L 127.062559 97.732128 
+L 130.632269 94.455563 
+L 133.563061 92.027106 
+L 137.463363 89.103674 
+L 141.363664 86.473667 
+L 145.263966 84.10045 
+L 149.164267 81.953242 
+L 153.064569 80.005993 
+L 158.264971 77.690012 
+L 163.465373 75.661959 
+L 168.665775 73.900809 
+L 173.866177 72.379234 
+L 179.205837 71.053754 
+L 184.936631 69.883663 
+L 189.467383 69.134242 
+L 194.667785 68.457044 
+L 199.868187 67.972853 
+L 205.068589 67.674889 
+L 210.268991 67.563153 
+L 215.469393 67.637644 
+L 220.669795 67.898362 
+L 225.870197 68.345308 
+L 231.070599 68.98282 
+L 236.64292 69.883663 
+L 242.369066 71.053754 
+L 247.13031 72.223844 
+L 248.93115 72.717268 
+L 248.93115 72.717268 
+" clip-path="url(#pbdc8307caa)" style="fill: none; stroke: #b8d5ea; stroke-width: 1.5"/>
+<path d="M 314.277031 192.48084 
+L 311.575655 195.083342 
+L 307.588619 198.593613 
+L 303.163092 202.103884 
+L 298.675825 205.31483 
+L 294.626448 207.954337 
+L 289.575122 210.941435 
+L 285.67482 213.044551 
+L 280.474418 215.598724 
+L 275.274016 217.893698 
+L 270.073614 219.952361 
+L 264.259223 221.995422 
+L 258.37271 223.804669 
+L 253.563662 225.101471 
+M 234.515715 228.775674 
+L 228.470398 229.484172 
+L 221.969896 230.012011 
+L 215.469393 230.300577 
+L 208.968891 230.352205 
+L 202.468388 230.168936 
+L 195.967886 229.745714 
+L 189.467383 229.084726 
+L 182.96688 228.174899 
+L 176.466378 227.012091 
+L 169.965875 225.585898 
+L 164.765473 224.244484 
+L 158.264971 222.303047 
+L 153.064569 220.526404 
+L 147.73655 218.485151 
+L 142.289218 216.14497 
+L 137.390247 213.804789 
+L 132.262961 211.087229 
+L 128.362659 208.820032 
+L 123.342406 205.614156 
+L 119.261956 202.734153 
+L 115.361654 199.722922 
+L 111.286372 196.253432 
+L 107.561051 192.742175 
+L 104.201268 189.232889 
+L 101.060549 185.594702 
+L 98.429977 182.212347 
+L 95.860147 178.525714 
+L 93.783601 175.191804 
+L 91.836767 171.681533 
+L 90.127529 168.171261 
+L 88.64272 164.66099 
+L 87.375244 161.150719 
+L 86.318304 157.640447 
+L 85.459343 154.100478 
+L 84.81694 150.619904 
+L 84.364119 147.109633 
+L 84.107451 143.599362 
+L 84.046496 140.08909 
+L 84.179368 136.578819 
+L 84.509022 133.068548 
+L 85.034294 129.558276 
+L 85.758271 126.048005 
+L 86.759443 122.28851 
+L 88.059544 118.36225 
+L 89.359644 115.059372 
+L 90.732884 112.00692 
+L 92.530516 108.496648 
+L 94.56458 104.986377 
+L 97.160247 101.037083 
+L 99.760448 97.51499 
+L 102.360649 94.3297 
+L 105.406806 90.945291 
+L 108.897201 87.43502 
+L 112.764057 83.924749 
+L 117.054497 80.414477 
+L 120.562056 77.797708 
+L 125.314032 74.564025 
+L 129.66276 71.882002 
+L 134.863162 68.977615 
+L 138.763463 66.995378 
+L 143.963865 64.586781 
+L 149.164267 62.424404 
+L 154.364669 60.486855 
+L 159.565071 58.763319 
+L 165.578316 57.012668 
+L 171.265976 55.586018 
+L 177.766478 54.213112 
+L 184.266981 53.101781 
+L 190.767484 52.241708 
+L 197.267986 51.62917 
+L 203.768489 51.254049 
+L 210.268991 51.116942 
+L 216.769494 51.216062 
+L 223.269996 51.553196 
+L 229.770499 52.127747 
+L 236.271001 52.947809 
+L 242.771504 54.018048 
+L 249.272006 55.348737 
+L 254.472408 56.608905 
+L 260.116073 58.182759 
+L 266.173313 60.127052 
+L 271.373715 62.019402 
+L 276.574117 64.133799 
+L 281.774519 66.491375 
+L 286.974921 69.116024 
+L 292.175323 72.034883 
+L 296.265034 74.564025 
+L 299.975926 77.060138 
+L 304.523212 80.414477 
+L 307.776529 83.043537 
+L 311.67683 86.490291 
+L 314.277031 88.998092 
+L 314.277031 88.998092 
+" clip-path="url(#pbdc8307caa)" style="fill: none; stroke: #7fb9da; stroke-width: 1.5"/>
+<path d="M 159.048941 244.227141 
+L 153.064569 242.631797 
+L 146.564066 240.669168 
+L 139.86251 238.376688 
+L 133.563061 235.957181 
+L 127.062559 233.167961 
+L 121.862157 230.706659 
+L 116.335392 227.845874 
+L 111.461353 225.090665 
+L 106.260951 221.889088 
+L 101.060549 218.380661 
+L 96.444526 214.974879 
+L 91.959845 211.366287 
+L 88.059544 207.94939 
+L 84.159242 204.227159 
+L 80.258941 200.145652 
+L 77.65874 197.187606 
+L 74.988019 193.913251 
+L 72.355449 190.40298 
+L 69.858137 186.756393 
+L 67.064621 182.212347 
+L 64.657735 177.76736 
+L 62.866358 174.021713 
+L 60.92037 169.341352 
+L 59.457333 165.183099 
+L 58.264999 161.150719 
+L 57.409592 157.640447 
+L 56.523195 152.960085 
+L 55.924865 148.279724 
+L 55.609954 143.599362 
+L 55.578463 138.919 
+L 55.830391 134.238638 
+L 56.36574 129.558276 
+L 57.187285 124.877914 
+L 58.300032 120.197553 
+L 59.71152 115.517191 
+L 61.429548 110.836829 
+L 63.357634 106.384171 
+L 65.206008 102.646196 
+L 67.257936 98.933598 
+L 69.858137 94.72298 
+L 72.458338 90.931703 
+L 75.089821 87.43502 
+L 77.969922 83.924749 
+L 81.559041 79.928292 
+L 84.508217 76.904206 
+L 88.208245 73.393935 
+L 92.232309 69.883663 
+L 96.613584 66.373392 
+L 101.393864 62.863121 
+L 106.629665 59.352849 
+L 111.461353 56.387778 
+L 116.661755 53.455339 
+L 121.862157 50.771436 
+L 127.062559 48.310309 
+L 132.262961 46.055468 
+L 138.763463 43.505885 
+L 145.263966 41.233473 
+L 151.764468 39.219129 
+L 158.264971 37.44915 
+L 164.765473 35.909013 
+L 171.265976 34.591765 
+L 177.766478 33.486577 
+L 184.266981 32.588197 
+L 190.767484 31.891932 
+L 197.267986 31.391297 
+L 203.768489 31.086683 
+L 210.268991 30.975334 
+L 216.769494 31.055966 
+L 223.269996 31.329202 
+L 229.770499 31.798791 
+L 236.271001 32.462659 
+L 242.771504 33.329655 
+L 247.445732 34.08035 
+M 266.500341 38.286967 
+L 272.673815 40.074935 
+L 279.174318 42.200287 
+L 285.67482 44.592263 
+L 290.875222 46.710567 
+L 296.075624 49.025517 
+L 301.276026 51.552626 
+L 307.130163 54.672487 
+L 311.67683 57.318227 
+L 314.277031 58.926631 
+M 314.277031 222.551502 
+L 309.076629 225.698382 
+L 303.876227 228.577362 
+L 298.389261 231.356146 
+L 293.584281 233.587295 
+M 275.044601 240.65866 
+L 268.773514 242.557861 
+L 262.530438 244.227141 
+L 262.530438 244.227141 
+" clip-path="url(#pbdc8307caa)" style="fill: none; stroke: #3282be; stroke-width: 1.5"/>
+<path d="M 95.087691 244.227141 
+L 93.998658 243.612002 
+M 73.390312 229.979239 
+L 68.558036 226.110097 
+L 64.657735 222.750596 
+L 60.065991 218.485151 
+L 56.566605 214.974879 
+L 55.557031 213.915406 
+M 55.557031 67.562221 
+L 59.003799 64.033211 
+L 63.357634 59.899665 
+L 67.257936 56.463158 
+L 71.158237 53.24767 
+L 76.358639 49.26629 
+L 81.559041 45.592279 
+L 86.759443 42.192726 
+L 91.959845 39.039256 
+L 97.451685 35.95104 
+L 103.66075 32.735076 
+L 109.17875 30.100588 
+L 115.361654 27.381837 
+L 121.862157 24.769155 
+L 128.362659 22.392257 
+L 129.73068 21.919576 
+M 152.339871 15.460782 
+L 159.565071 13.887833 
+L 167.365674 12.440813 
+L 174.204949 11.379141 
+M 247.371824 11.379141 
+L 254.846807 12.549231 
+L 262.273011 13.940639 
+L 270.073614 15.656249 
+L 276.574117 17.29092 
+L 283.550308 19.26565 
+M 305.868355 27.236796 
+L 311.67683 29.771042 
+L 314.277031 30.974719 
+L 314.277031 30.974719 
+" clip-path="url(#pbdc8307caa)" style="fill: none; stroke: #08306b; stroke-width: 1.5"/>
+</g>
+<g id="patch_3">
+<path d="M 55.557031 244.227141 
+L 55.557031 11.379141 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_4">
+<path d="M 314.277031 244.227141 
+L 314.277031 11.379141 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_5">
+<path d="M 55.557031 244.227141 
+L 314.277031 244.227141 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_6">
+<path d="M 55.557031 11.379141 
+L 314.277031 11.379141 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_7">
+<path d="M 108.71338 90.407489 
+Q 127.998321 109.692431 145.30684 127.000949 
+" style="fill: none; stroke: #ff7f0e; stroke-width: 2.5; stroke-linecap: round"/>
+<path d="M 143.751205 122.334044 
+L 145.30684 127.000949 
+L 140.639935 125.445314 
+" style="fill: none; stroke: #ff7f0e; stroke-width: 2.5; stroke-linecap: round"/>
+</g>
+<g id="patch_8">
+<path d="M 105.889314 87.583424 
+Q 94.365332 76.059442 84.422489 66.116598 
+" style="fill: none; stroke-dasharray: 7.4,3.2; stroke-dashoffset: 0; stroke: #d62728; stroke-width: 2; stroke-linecap: round"/>
+<path d="M 85.978124 70.783503 
+L 84.422489 66.116598 
+L 89.089393 67.672233 
+" style="fill: none; stroke-dasharray: 7.4,3.2; stroke-dashoffset: 0; stroke: #d62728; stroke-width: 2; stroke-linecap: round"/>
+</g>
+<g id="PathCollection_1">
+<defs>
+<path id="mae93b9aef0" d="M 0 3 
+C 0.795609 3 1.55874 2.683901 2.12132 2.12132 
+C 2.683901 1.55874 3 0.795609 3 0 
+C 3 -0.795609 2.683901 -1.55874 2.12132 -2.12132 
+C 1.55874 -2.683901 0.795609 -3 0 -3 
+C -0.795609 -3 -1.55874 -2.683901 -2.12132 -2.12132 
+C -2.683901 -1.55874 -3 -0.795609 -3 0 
+C -3 0.795609 -2.683901 1.55874 -2.12132 2.12132 
+C -1.55874 2.683901 -0.795609 3 0 3 
+z
+" style="stroke: #ff7f0e"/>
+</defs>
+<g clip-path="url(#pbdc8307caa)">
+<use xlink:href="#mae93b9aef0" x="107.301031" y="88.995141" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+</g>
+</g>
+<g id="PathCollection_2">
+<defs>
+<path id="m4c4577100d" d="M 0 -7.071068 
+L -1.587554 -2.18508 
+L -6.724985 -2.18508 
+L -2.568716 0.834626 
+L -4.156269 5.720614 
+L -0 2.700907 
+L 4.156269 5.720614 
+L 2.568716 0.834626 
+L 6.724985 -2.18508 
+L 1.587554 -2.18508 
+z
+" style="stroke: #2ca02c"/>
+</defs>
+<g clip-path="url(#pbdc8307caa)">
+<use xlink:href="#m4c4577100d" x="210.789031" y="140.739141" style="fill: #2ca02c; stroke: #2ca02c"/>
+</g>
+</g>
+<g id="text_19">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #d62728" x="112.475431" y="70.884741" transform="rotate(-0 112.475431 70.884741)">gradient (uphill)</text>
+</g>
+<g id="text_20">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #ff7f0e" x="153.870631" y="127.803141" transform="rotate(-0 153.870631 127.803141)">minus gradient (downhill)</text>
+</g>
+<g id="text_21">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: #2ca02c" x="215.963431" y="156.262341" transform="rotate(-0 215.963431 156.262341)">minimum</text>
+</g>
+<g id="text_22">
+<g clip-path="url(#pbdc8307caa)">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #f7fbff" transform="translate(192.968533 127.876494) rotate(-12.745802)">0.25</text>
+</g>
+</g>
+<g id="text_23">
+<g clip-path="url(#pbdc8307caa)">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #ebf3fb" transform="translate(178.993141 173.469556) rotate(-345.007092)">1.00</text>
+</g>
+</g>
+<g id="text_24">
+<g clip-path="url(#pbdc8307caa)">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #dce9f6" transform="translate(167.093944 100.361108) rotate(-17.149158)">2.00</text>
+</g>
+</g>
+<g id="text_25">
+<g clip-path="url(#pbdc8307caa)">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #b8d5ea" transform="translate(249.140705 75.432242) rotate(-344.193916)">4.00</text>
+</g>
+</g>
+<g id="text_26">
+<g clip-path="url(#pbdc8307caa)">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #7fb9da" transform="translate(235.587382 230.709875) rotate(-8.465776)">6.00</text>
+</g>
+</g>
+<g id="text_27">
+<g clip-path="url(#pbdc8307caa)">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #3282be" transform="translate(247.8531 36.629713) rotate(-350.320921)">9.00</text>
+</g>
+</g>
+<g id="text_28">
+<g clip-path="url(#pbdc8307caa)">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #3282be" transform="translate(276.454603 242.020528) rotate(-16.406242)">9.00</text>
+</g>
+</g>
+<g id="text_29">
+<g clip-path="url(#pbdc8307caa)">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #08306b" transform="translate(72.329356 233.965119) rotate(-332.950819)">13.00</text>
+</g>
+</g>
+<g id="text_30">
+<g clip-path="url(#pbdc8307caa)">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #08306b" transform="translate(130.279225 23.02307) rotate(-12.444915)">13.00</text>
+</g>
+</g>
+<g id="text_31">
+<g clip-path="url(#pbdc8307caa)">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #08306b" transform="translate(283.149486 22.024964) rotate(-344.582756)">13.00</text>
+</g>
+</g>
+</g>
+</g>
+<defs>
+<clipPath id="pbdc8307caa">
+<rect x="55.557031" y="11.379141" width="258.72" height="232.848"/>
+</clipPath>
+</defs>
+</svg></div><figcaption>الأرض من فوق. السهم المنقط هو التدرّج عند نقطة البداية: يشير إلى الصعود. والسهم البرتقالي عكسه: يشير إلى النزول، نحو النجمة في القاع.</figcaption></figure><details class="setup"><summary>كود الرسم</summary><div class="dbody"><div class="code "><div class="code-head"><span class="path">contour.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">f</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">w</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">b</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+
+<span class="n">W</span><span class="p">,</span> <span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">200</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mi">200</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">4.2</span><span class="p">))</span>
+<span class="n">cs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">contour</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">f</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="n">B</span><span class="p">),</span> <span class="n">levels</span><span class="o">=</span><span class="p">[</span><span class="mf">0.25</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">13</span><span class="p">],</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;Blues&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">clabel</span><span class="p">(</span><span class="n">cs</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="mf">0.8</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.8</span><span class="p">),</span> <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+             <span class="n">arrowprops</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">arrowstyle</span><span class="o">=</span><span class="s2">&quot;-&gt;&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C1&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">2.5</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">),</span> <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+             <span class="n">arrowprops</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">arrowstyle</span><span class="o">=</span><span class="s2">&quot;-&gt;&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C3&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">([</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C1&quot;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">([</span><span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C2&quot;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.35</span><span class="p">,</span> <span class="s2">&quot;gradient (uphill)&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C3&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.9</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.75</span><span class="p">,</span> <span class="s2">&quot;minus gradient (downhill)&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C1&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">2.1</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.3</span><span class="p">,</span> <span class="s2">&quot;minimum&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C2&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;w&quot;</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;b&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></pre></div></div></details><div class="blk"><p>لاحظ أن سهم النزول لا يشير إلى النجمة بالضبط. يشير إلى أسرع نزول <b>هنا</b>.</p><p>لذلك نأخذ خطوات صغيرة، ونعيد حساب التدرّج بعد كل خطوة.</p></div><h2>بالكود</h2><h3>التدرّج بالقواعد، وبالحساب العددي</h3><div class="blk"><p>المشتقة الجزئية العددية مثل الدرس السابق، لكن نغير مدخلاً واحداً فقط:</p></div><div class="code "><div class="code-head"><span class="path">gradient.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="k">def</span><span class="w"> </span><span class="nf">f</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">w</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">b</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">grad</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>                      <span class="c1"># من القواعد</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">w</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">b</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">numeric_grad</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">):</span>
+    <span class="n">dw</span> <span class="o">=</span> <span class="p">(</span><span class="n">func</span><span class="p">(</span><span class="n">w</span> <span class="o">+</span> <span class="n">h</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="o">-</span> <span class="n">func</span><span class="p">(</span><span class="n">w</span> <span class="o">-</span> <span class="n">h</span><span class="p">,</span> <span class="n">b</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">h</span><span class="p">)</span>   <span class="c1"># نحرك w فقط</span>
+    <span class="n">db</span> <span class="o">=</span> <span class="p">(</span><span class="n">func</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">b</span> <span class="o">+</span> <span class="n">h</span><span class="p">)</span> <span class="o">-</span> <span class="n">func</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">b</span> <span class="o">-</span> <span class="n">h</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">h</span><span class="p">)</span>   <span class="c1"># نحرك b فقط</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">dw</span><span class="p">,</span> <span class="n">db</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)]:</span>
+    <span class="n">rule</span> <span class="o">=</span> <span class="n">grad</span><span class="p">(</span><span class="o">*</span><span class="n">point</span><span class="p">)</span>
+    <span class="n">num</span> <span class="o">=</span> <span class="n">numeric_grad</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="o">*</span><span class="n">point</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="s2">&quot;rule:&quot;</span><span class="p">,</span> <span class="n">rule</span><span class="p">,</span> <span class="s2">&quot; numeric:&quot;</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.0</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">num</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>(0, 0) rule: (-4, 4)  numeric: (-4.0, 4.0)
+(1, 1) rule: (-2, 8)  numeric: (-2.0, 8.0)
+(2, -1) rule: (0, 0)  numeric: (0.0, 0.0)</pre></div><h3>خطوات نزول متتالية</h3><div class="code "><div class="code-head"><span class="path">steps.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="n">w</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span>
+<span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">):</span>
+    <span class="n">gw</span><span class="p">,</span> <span class="n">gb</span> <span class="o">=</span> <span class="n">grad</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;step </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">: w = </span><span class="si">{</span><span class="n">w</span><span class="si">:</span><span class="s2">6.3f</span><span class="si">}</span><span class="s2">  b = </span><span class="si">{</span><span class="n">b</span><span class="si">:</span><span class="s2">6.3f</span><span class="si">}</span><span class="s2">  f = </span><span class="si">{</span><span class="n">f</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">w</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">w</span> <span class="o">-</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">gw</span><span class="p">,</span> <span class="n">b</span> <span class="o">-</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">gb</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>step 0: w =  0.000  b =  0.000  f = 6.0000
+step 1: w =  0.400  b = -0.400  f = 3.2800
+step 2: w =  0.720  b = -0.640  f = 1.8976
+step 3: w =  0.976  b = -0.784  f = 1.1419
+step 4: w =  1.181  b = -0.870  f = 0.7047
+step 5: w =  1.345  b = -0.922  f = 0.4416</pre></div><div class="blk"><p>الارتفاع ينزل في كل خطوة، والنقطة تقترب من القاع.</p><p>هذه الحلقة الصغيرة هي النزول بالتدرّج. الدرس 9 مخصص لها بالكامل.</p></div><div class="callout mistake"><div class="ct">خطأ شائع: نسيان أن المدخل الآخر ثابت</div><div class="blk"><p>في المشتقة الجزئية بالنسبة لـ <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>w</mi></mrow></math></bdi>، الحد <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>3</mn><mi>w</mi><mi>b</mi></mrow></math></bdi> مشتقته <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>3</mn><mi>b</mi></mrow></math></bdi>، وليست صفراً.</p><p>الحد يختفي فقط إذا لم يكن فيه <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>w</mi></mrow></math></bdi> أبداً.</p></div></div><div class="callout interview"><div class="ct">سؤال مقابلة</div><div class="blk"><p>سؤال قد تسمعه في المقابلة:</p></div><div class="en" dir="ltr"><p>What is a gradient?</p></div><div class="blk"><p>جواب قصير وجيد:</p></div><div class="en" dir="ltr"><p>It is the vector of all partial derivatives of a function. It points in the direction where the function increases fastest. In training, we compute the gradient of the loss with respect to all parameters, and move the parameters a small step in the opposite direction.</p></div></div><section class="summary"><div class="ct">الخلاصة</div><ul class="l"><li>دالة الخسارة تعتمد على كل المعاملات معاً. نتخيلها كأرض فيها وديان.</li><li>المشتقة الجزئية: غيّر مدخلاً واحداً، وثبّت الباقي كأنه رقم.</li><li>التدرّج متجه كل المشتقات الجزئية. يشير إلى أسرع صعود.</li><li>عكس التدرّج يشير إلى أسرع نزول. في القاع، التدرّج صفر.</li><li>نأخذ خطوات صغيرة، ونعيد الحساب بعد كل خطوة.</li></ul></section><section class="quiz" data-quiz="l07-q"><h2>اختبر فهمك</h2><div class="q" data-answer="0"><div class="qt"><span class="qn">1.</span>ما المشتقة الجزئية بالنسبة لـ <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>w</mi></mrow></math></bdi> للدالة <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>w</mi><mo separator="true">,</mo><mi>b</mi><mo stretchy="false">)</mo><mo>=</mo><mn>5</mn><mi>w</mi><mo>+</mo><msup><mi>b</mi><mn>2</mn></msup></mrow></math></bdi>؟</div><div class="opts"><button type="button" class="opt">5</button><button type="button" class="opt"><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>5</mn><mo>+</mo><mn>2</mn><mi>b</mi></mrow></math></bdi></button><button type="button" class="opt"><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>2</mn><mi>b</mi></mrow></math></bdi></button></div><div class="explain" hidden><span class="verdict"></span><p>نعامل <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>b</mi></mrow></math></bdi> كثابت، فحدّه يختفي. يبقى 5.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">2.</span>التدرّج عند نقطة يساوي <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>3</mn><mo separator="true">,</mo><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></math></bdi>. في أي اتجاه نتحرك لكي تنقص الدالة بأسرع ما يمكن؟</div><div class="opts"><button type="button" class="opt"><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>3</mn><mo separator="true">,</mo><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></math></bdi></button><button type="button" class="opt"><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mo>−</mo><mn>3</mn><mo separator="true">,</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></math></bdi></button><button type="button" class="opt"><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>1</mn><mo separator="true">,</mo><mn>3</mn><mo stretchy="false">)</mo></mrow></math></bdi></button></div><div class="explain" hidden><span class="verdict"></span><p>عكس التدرّج هو اتجاه أسرع نزول.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">3.</span>ماذا يعني أن التدرّج يساوي <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">)</mo></mrow></math></bdi> عند نقطة؟</div><div class="opts"><button type="button" class="opt">الدالة غير موجودة هنا</button><button type="button" class="opt">الأرض مسطحة هنا في كل اتجاه، وغالباً هذا قاع</button><button type="button" class="opt">يجب أن نأخذ خطوة كبيرة</button></div><div class="explain" hidden><span class="verdict"></span><p>لا يوجد ميل في أي اتجاه.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">4.</span>لماذا نأخذ خطوات صغيرة، بدل خطوة كبيرة واحدة في اتجاه النزول؟</div><div class="opts"><button type="button" class="opt">لأن الخطوات الكبيرة ممنوعة في بايثون</button><button type="button" class="opt">لأن اتجاه أسرع نزول صحيح هنا فقط، ويتغير عندما نتحرك</button><button type="button" class="opt">لأن التدرّج دائماً صغير</button></div><div class="explain" hidden><span class="verdict"></span><p>نعيد حساب التدرّج بعد كل خطوة، لأن الأرض تتغير.</p></div></div><div class="q" data-answer="2"><div class="qt"><span class="qn">5.</span>دالة لها ثلاثة مدخلات. كم عنصراً في تدرّجها؟</div><div class="opts"><button type="button" class="opt">واحد</button><button type="button" class="opt">اثنان</button><button type="button" class="opt">ثلاثة</button></div><div class="explain" hidden><span class="verdict"></span><p>مشتقة جزئية لكل مدخل.</p></div></div><div class="row"><span class="score"></span><button type="button" class="btn ghost quiz-reset">أعد المحاولة</button></div></section><section class="exercise"><div class="xt">تمرين: تدرّج بيدك، وخطوة واحدة</div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>w</mi><mo separator="true">,</mo><mi>b</mi><mo stretchy="false">)</mo><mo>=</mo><msup><mi>w</mi><mn>2</mn></msup><mo>+</mo><msup><mi>b</mi><mn>2</mn></msup><mo>+</mo><mi>w</mi><mi>b</mi></mrow></math></div></div><ol class="l"><li>احسب المشتقتين الجزئيتين.</li><li>احسب التدرّج عند النقطة <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>1</mn><mo separator="true">,</mo><mn>2</mn><mo stretchy="false">)</mo></mrow></math></bdi>.</li><li>خذ خطوة نزول بحجم 0.1 من هذه النقطة. ما النقطة الجديدة؟</li><li>احسب قيمة الدالة قبل الخطوة وبعدها. هل نزلت؟</li><li>تحقق من التدرّج بالكود العددي.</li></ol><details><summary>تلميح</summary><div class="dbody"><div class="blk"><p>في المشتقة بالنسبة لـ <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>w</mi></mrow></math></bdi>: مشتقة <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>w</mi><mi>b</mi></mrow></math></bdi> هي <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>b</mi></mrow></math></bdi>.</p><p>الخطوة: النقطة الجديدة تساوي النقطة القديمة ناقص 0.1 ضرب التدرّج.</p></div></div></details><details class="sol"><summary>الحل (افتحه بعد أن تحاول)</summary><div class="dbody"><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mi mathvariant="normal">∂</mi><mi>f</mi></mrow><mrow><mi mathvariant="normal">∂</mi><mi>w</mi></mrow></mfrac><mo>=</mo><mn>2</mn><mi>w</mi><mo>+</mo><mi>b</mi><mspace width="2em"/><mfrac><mrow><mi mathvariant="normal">∂</mi><mi>f</mi></mrow><mrow><mi mathvariant="normal">∂</mi><mi>b</mi></mrow></mfrac><mo>=</mo><mn>2</mn><mi>b</mi><mo>+</mo><mi>w</mi></mrow></math></div></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi mathvariant="normal">∇</mi><mi>f</mi><mo stretchy="false">(</mo><mn>1</mn><mo separator="true">,</mo><mn>2</mn><mo stretchy="false">)</mo><mo>=</mo><mo stretchy="false">(</mo><mn>2</mn><mo>+</mo><mn>2</mn><mo separator="true">,</mo><mtext>  </mtext><mn>4</mn><mo>+</mo><mn>1</mn><mo stretchy="false">)</mo><mo>=</mo><mo stretchy="false">(</mo><mn>4</mn><mo separator="true">,</mo><mn>5</mn><mo stretchy="false">)</mo></mrow></math></div></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mo stretchy="false">(</mo><mn>1</mn><mo separator="true">,</mo><mn>2</mn><mo stretchy="false">)</mo><mo>−</mo><mn>0.1</mn><mo>×</mo><mo stretchy="false">(</mo><mn>4</mn><mo separator="true">,</mo><mn>5</mn><mo stretchy="false">)</mo><mo>=</mo><mo stretchy="false">(</mo><mn>0.6</mn><mo separator="true">,</mo><mtext>  </mtext><mn>1.5</mn><mo stretchy="false">)</mo></mrow></math></div></div><div class="blk"><p>قبل الخطوة: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1</mn><mo>+</mo><mn>4</mn><mo>+</mo><mn>2</mn><mo>=</mo><mn>7</mn></mrow></math></bdi>.</p><p>بعد الخطوة: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.36</mn><mo>+</mo><mn>2.25</mn><mo>+</mo><mn>0.9</mn><mo>=</mo><mn>3.51</mn></mrow></math></bdi>. نزلت إلى النصف تقريباً.</p></div><div class="code "><div class="code-head"><span class="path"></span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="k">def</span><span class="w"> </span><span class="nf">f2</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">w</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">b</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">w</span> <span class="o">*</span> <span class="n">b</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">numeric_grad</span><span class="p">(</span><span class="n">f2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">f2</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">f2</span><span class="p">(</span><span class="mf">0.6</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">),</span> <span class="mi">4</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>(4.0, 5.0)
+7 3.51</pre></div></div></details><div class="askbox" data-kind="review" hidden><div class="al">اطلب من كلود أن يراجع حلّك</div><div class="ah">اكتب إجابتك أو الصق الكود. سيقارنه بالحل ويشرح لك بالعربي. هذا يستهلك من رصيد استخدامك.</div><textarea id="rv-l07-1" dir="auto" placeholder="اكتب إجابتك هنا"></textarea><div class="row"><button type="button" class="btn ask-go">راجع حلّي</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></div><pre hidden class="x-task">$$f(w, b) = w^2 + b^2 + wb$$
+
+1. احسب المشتقتين الجزئيتين.
+2. احسب التدرّج عند النقطة $(1, 2)$.
+3. خذ خطوة نزول بحجم 0.1 من هذه النقطة. ما النقطة الجديدة؟
+4. احسب قيمة الدالة قبل الخطوة وبعدها. هل نزلت؟
+5. تحقق من التدرّج بالكود العددي.</pre><pre hidden class="x-solution">$$\frac{\partial f}{\partial w} = 2w + b \qquad \frac{\partial f}{\partial b} = 2b + w$$
+
+$$\nabla f(1, 2) = (2 + 2,\; 4 + 1) = (4, 5)$$
+
+$$(1, 2) - 0.1 \times (4, 5) = (0.6,\; 1.5)$$
+
+قبل الخطوة: $1 + 4 + 2 = 7$.
+بعد الخطوة: $0.36 + 2.25 + 0.9 = 3.51$. نزلت إلى النصف تقريباً.
+
+```python
+def f2(w, b):
+    return w2 + b2 + w * b
+
+print(tuple(round(v, 4) for v in numeric_grad(f2, 1, 2)))
+print(f2(1, 2), round(f2(0.6, 1.5), 4))
+```</pre></section></article><section class="askbox" data-kind="ask" hidden><div class="al">عندك سؤال عن هذا الدرس؟ اسأل كلود</div><div class="ah">اكتب سؤالك بالعربي. كلود يقرأ نص الدرس ويجيبك. هذا يستهلك من رصيد استخدامك.</div><textarea id="ask-l07" dir="auto" placeholder="مثلاً: لماذا نضرب هنا في المشتقة؟"></textarea><div class="row"><button type="button" class="btn ask-go">اسأل</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></section><div class="donebox"><span class="dmsg"></span><button type="button" class="btn">أنهيت هذا الدرس</button></div><nav class="pager" aria-label="التنقل بين الدروس"><a class="prev" href="#l06"><small>الدرس السابق</small>المشتقة: سرعة التغيّر</a><a class="next" href="#l08"><small>الدرس التالي</small>قاعدة السلسلة: قلب التعلّم العميق</a></nav></div>

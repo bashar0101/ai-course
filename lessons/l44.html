@@ -1,0 +1,592 @@
+<div class="page"><article><div class="eyebrow">الجزء الخامس · الترانسفورمرز</div><h1>التضمينات: الكلمات كمتجهات</h1><div class="meta"><span>الدرس 44 من 59</span><span>المدة: حوالي 45 دقيقة</span><span class="nbdl-slot"></span></div><div class="chips" dir="ltr"><bdi class="chip">one-hot vector</bdi><bdi class="chip">embedding</bdi><bdi class="chip">embedding matrix</bdi><bdi class="chip">cosine similarity</bdi><bdi class="chip">distributional hypothesis</bdi><bdi class="chip">co-occurrence</bdi><bdi class="chip">PMI</bdi><bdi class="chip">contextual embedding</bdi></div><div class="goals"><b>بعد هذا الدرس ستعرف:</b><ul><li>تفهم لماذا لا تكفي أرقام الرموز، ولا المتجهات الأحادية</li><li>تعرف أن التضمين جدول متجهات، وأن البحث فيه ضرب مصفوفة</li><li>تقيس التشابه بين الكلمات بجيب التمام، بيدك</li><li>تبني تضمينات حقيقية من نص شكسبير، من الصفر، بالعدّ والتحليل</li><li>تعرف حدود التضمين الثابت، ولماذا نحتاج السياق</li></ul></div><h2>المشكلة: الأرقام وحدها لا تكفي</h2><div class="blk"><p>المقطّع أعطى كل رمز رقماً. لكن الرقم مجرد عنوان في قائمة.</p><p>لو كان "قط" الرقم 5، و"كلب" الرقم 6، و"سيارة" الرقم 7، فهذا لا يعني أن الكلب أقرب إلى السيارة من القط.</p><p>النموذج يجب ألا يرى في هذه الأرقام أي ترتيب أو مسافة.</p></div><h3>المتجه الأحادي</h3><div class="blk"><p>فكرة أولى: كل رمز متجه طوله عدد المفردات، كله أصفار إلا واحداً في مكان الرمز.</p></div><div class="blk"><div class="term" dir="ltr"><code>one-hot vector</code></div></div><div class="blk"><p>هكذا لا يوجد ترتيب مزيف. لكن مشكلتان:</p></div><ul class="l"><li><b>ضخم:</b> مع خمسين ألف رمز، كل متجه فيه خمسون ألف رقم.</li><li><b>كل الكلمات متساوية البعد:</b> الضرب النقطي بين أي متجهين أحاديين مختلفين صفر. "قط" بعيدة عن "كلب" بقدر بعدها عن "سيارة".</li></ul><h2>التضمين: متجه كثيف يُتعلَّم</h2><div class="blk"><p>الحل: نعطي كل رمز متجهاً قصيراً من أرقام حقيقية، مثلاً 768 رقماً. ونضعها كلها في جدول: صف لكل رمز.</p><p>الأرقام لا نكتبها بيدنا. هي <b>معاملات</b> يتعلّمها النموذج أثناء التدريب، مثل أي وزن آخر.</p><p>وبعد التدريب، الرموز المتشابهة في الاستخدام يصبح لها متجهات متقاربة.</p></div><div class="blk"><div class="term" dir="ltr"><code>embedding · embedding matrix</code></div></div><div class="key">التضمين مجرد جدول بحث: رقم الرمز يختار صفاً من المصفوفة. وهذا يساوي ضرب المتجه الأحادي في المصفوفة.</div><section class="hand"><div class="hand-h"><span class="hand-tag">مثال محلول باليد</span><div class="hand-t">جدول تضمين صغير</div></div><div class="hand-body"><div class="step">المصفوفة</div><div class="blk"><p>ثلاث كلمات، وتضمين ببعدين فقط، لكي نحسب بيدنا:</p></div><div class="tablewrap"><table><thead><tr><th>الرقم</th><th>الكلمة</th><th>المتجه</th></tr></thead><tbody><tr><td>0</td><td>قط</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>0.6</mn><mo separator="true">,</mo><mtext> </mtext><mn>0.8</mn><mo stretchy="false">)</mo></mrow></math></bdi></td></tr><tr><td>1</td><td>كلب</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>0.8</mn><mo separator="true">,</mo><mtext> </mtext><mn>0.6</mn><mo stretchy="false">)</mo></mrow></math></bdi></td></tr><tr><td>2</td><td>سيارة</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mo>−</mo><mn>0.6</mn><mo separator="true">,</mo><mtext> </mtext><mn>0.8</mn><mo stretchy="false">)</mo></mrow></math></bdi></td></tr></tbody></table></div><div class="step">البحث عن متجه "كلب"</div><div class="blk"><p>الطريقة الأولى: نأخذ الصف رقم 1 مباشرة: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>0.8</mn><mo separator="true">,</mo><mn>0.6</mn><mo stretchy="false">)</mo></mrow></math></bdi>.</p><p>الطريقة الثانية: نضرب المتجه الأحادي في المصفوفة:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mn>1</mn><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">)</mo><mrow><mo fence="true">(</mo><mtable rowspacing="0.16em" columnalign="center center" columnspacing="1em"><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0.6</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0.8</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0.8</mn></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0.6</mn></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="false"><mrow><mo>−</mo><mn>0.6</mn></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="false"><mn>0.8</mn></mstyle></mtd></mtr></mtable><mo fence="true">)</mo></mrow><mo>=</mo><mo stretchy="false">(</mo><mn>0.8</mn><mo separator="true">,</mo><mtext> </mtext><mn>0.6</mn><mo stretchy="false">)</mo></mrow></math></div></div><div class="blk"><p>نفس النتيجة. الصفر يلغي كل الصفوف، إلا صف الواحد.</p></div><div class="step">التشابه بجيب التمام</div><div class="blk"><p>من الدرس 4: الضرب النقطي مقسوماً على الطولين. هنا كل المتجهات طولها 1، فجيب التمام هو الضرب النقطي نفسه:</p></div><div class="tablewrap"><table><thead><tr><th>الزوج</th><th>الحساب</th><th>التشابه</th></tr></thead><tbody><tr><td>قط وكلب</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.6</mn><mo>×</mo><mn>0.8</mn><mo>+</mo><mn>0.8</mn><mo>×</mo><mn>0.6</mn></mrow></math></bdi></td><td>0.96</td></tr><tr><td>قط وسيارة</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.6</mn><mo>×</mo><mo stretchy="false">(</mo><mo>−</mo><mn>0.6</mn><mo stretchy="false">)</mo><mo>+</mo><mn>0.8</mn><mo>×</mo><mn>0.8</mn></mrow></math></bdi></td><td>0.28</td></tr><tr><td>كلب وسيارة</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.8</mn><mo>×</mo><mo stretchy="false">(</mo><mo>−</mo><mn>0.6</mn><mo stretchy="false">)</mo><mo>+</mo><mn>0.6</mn><mo>×</mo><mn>0.8</mn></mrow></math></bdi></td><td>0</td></tr></tbody></table></div><div class="blk"><p>القط والكلب متقاربان جداً. والكلب والسيارة متعامدان: لا تشابه.</p></div></div></section><h2>من أين يأتي المعنى؟</h2><div class="blk"><p>فكرة من علم اللغة، عمرها أكثر من ستين عاماً: <b>تعرف الكلمة من رفاقها.</b></p><p>الكلمات التي تظهر في سياقات متشابهة لها معانٍ متشابهة.</p></div><div class="blk"><div class="term" dir="ltr"><code>distributional hypothesis</code></div></div><div class="blk"><p>"شربت ... ساخنة في الصباح". ما الكلمة الناقصة؟ قهوة، أو شاي. الكلمتان تظهران في نفس السياقات، فهما متشابهتان.</p></div><div class="blk"><p>طريقتان لتحويل هذه الفكرة إلى متجهات:</p></div><ol class="l"><li><b>بالتنبؤ:</b> درّب شبكة تتوقع الكلمات المجاورة من الكلمة. التضمينات التي تتعلّمها تحمل المعنى. هذه فكرة نموذج مشهور من 2013.</li><li><b>بالعدّ:</b> عدّ كم مرة تظهر كل كلمتين متجاورتين، ثم اضغط الجدول الضخم إلى متجهات قصيرة.</li></ol><div class="blk"><div class="term" dir="ltr"><code>word2vec · count-based embeddings</code></div></div><div class="blk"><p>وفي النماذج اللغوية، التضمين جزء من النموذج نفسه: يتعلّم مع كل الأوزان الأخرى، وهو يتوقع الرمز التالي. نرى هذا في الدرسين 45 و 49.</p></div><h3>العدّ بذكاء: المعلومات المتبادلة</h3><div class="blk"><p>العدّ الخام يخدع: كلمات مثل "في" و"من" تجاور كل شيء.</p><p>المهم ليس كم مرة ظهرت كلمتان معاً، بل كم مرة <b>أكثر مما نتوقع</b> لو كانتا مستقلتين:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mrow><mi mathvariant="normal">P</mi><mi mathvariant="normal">M</mi><mi mathvariant="normal">I</mi></mrow><mo stretchy="false">(</mo><mi>a</mi><mo separator="true">,</mo><mi>b</mi><mo stretchy="false">)</mo><mo>=</mo><mi>ln</mi><mo>⁡</mo><mfrac><mrow><mi>P</mi><mo stretchy="false">(</mo><mi>a</mi><mo separator="true">,</mo><mi>b</mi><mo stretchy="false">)</mo></mrow><mrow><mi>P</mi><mo stretchy="false">(</mo><mi>a</mi><mo stretchy="false">)</mo><mtext> </mtext><mi>P</mi><mo stretchy="false">(</mo><mi>b</mi><mo stretchy="false">)</mo></mrow></mfrac></mrow></math></div></div><div class="blk"><p>إذا ظهرت كلمتان معاً أربعة أضعاف ما نتوقعه بالصدفة: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>ln</mi><mo>⁡</mo><mn>4</mn><mo>≈</mo><mn>1.386</mn></mrow></math></bdi>، علاقة قوية.</p><p>وإذا ظهرتا معاً كما نتوقع بالصدفة: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>ln</mi><mo>⁡</mo><mn>1</mn><mo>=</mo><mn>0</mn></mrow></math></bdi>، لا علاقة.</p><p>نضع صفراً مكان القيم السالبة، لأنها غير موثوقة مع البيانات القليلة.</p></div><div class="blk"><p>ثم نضغط الجدول بتحليل القيم المنفردة: قريب جداً من تحليل المكوّنات الرئيسية في الدرس 24. نحتفظ بأهم 64 اتجاهاً.</p></div><div class="blk"><div class="term" dir="ltr"><code>PPMI · SVD</code></div></div><h2>حدود التضمين الثابت</h2><div class="blk"><p>في كل ما سبق، للكلمة متجه واحد. لكن كلمة "عين" قد تعني عين الإنسان، أو عين الماء، أو الجاسوس!</p><p>متجه واحد يخلط كل المعاني.</p></div><div class="blk"><p>الترانسفورمرز تحل هذا: تبدأ بالتضمين الثابت، ثم تعدّله طبقة بعد طبقة حسب الكلمات المحيطة. فيصبح لكلمة "عين" في "شربت من العين" متجه مختلف عنه في "أغمض عينه".</p></div><div class="blk"><div class="term" dir="ltr"><code>static embedding → contextual embedding</code></div></div><div class="blk"><p>هذا بالضبط ما تفعله آلية الانتباه في الدرس 46.</p></div><h2>بالكود</h2><h3>جدول البحث، بيدنا وبباي تورش</h3><div class="code "><div class="code-head"><span class="path">lookup.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">nn</span>
+
+<span class="n">words</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;قط&quot;</span><span class="p">,</span> <span class="s2">&quot;كلب&quot;</span><span class="p">,</span> <span class="s2">&quot;سيارة&quot;</span><span class="p">]</span>
+<span class="n">E</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">]])</span>
+
+<span class="n">one_hot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;one-hot @ E:&quot;</span><span class="p">,</span> <span class="n">one_hot</span> <span class="o">@</span> <span class="n">E</span><span class="p">,</span> <span class="s2">&quot;  row 1:&quot;</span><span class="p">,</span> <span class="n">E</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">cosine</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">u</span> <span class="o">@</span> <span class="n">v</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">u</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">words</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">words</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="nb">round</span><span class="p">(</span><span class="n">cosine</span><span class="p">(</span><span class="n">E</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">E</span><span class="p">[</span><span class="n">j</span><span class="p">]),</span> <span class="mi">2</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>one-hot @ E: [0.8 0.6]   row 1: [0.8 0.6]
+قط كلب 0.96
+قط سيارة 0.28
+كلب سيارة 0.0</pre></div><div class="blk"><p>الطبقة الجاهزة في باي تورش تحفظ الجدول كمعاملات متعلّمة، وتبحث بالأرقام مباشرة:</p></div><div class="code "><div class="code-head"><span class="path">nn_embedding.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="n">emb</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Embedding</span><span class="p">(</span><span class="n">num_embeddings</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">embedding_dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+    <span class="n">emb</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">copy_</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">E</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">))</span>
+
+<span class="n">ids</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>                  <span class="c1"># a &quot;sentence&quot; of token ids</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">emb</span><span class="p">(</span><span class="n">ids</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;requires grad:&quot;</span><span class="p">,</span> <span class="n">emb</span><span class="o">.</span><span class="n">weight</span><span class="o">.</span><span class="n">requires_grad</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;GPT-2 embedding parameters:&quot;</span><span class="p">,</span> <span class="mi">50257</span> <span class="o">*</span> <span class="mi">768</span><span class="p">)</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>tensor([[ 0.8000,  0.6000],
+        [ 0.6000,  0.8000],
+        [-0.6000,  0.8000],
+        [ 0.8000,  0.6000]], grad_fn=&lt;EmbeddingBackward0&gt;)
+requires grad: True
+GPT-2 embedding parameters: 38597376</pre></div><div class="blk"><p>جدول تضمين جي بي تي 2 وحده فيه أكثر من 38 مليون معامل.</p></div><h3>تضمينات حقيقية من نص شكسبير</h3><div class="blk"><p>نحسبها من الصفر، بالعدّ فقط، في ثوانٍ:</p></div><div class="code "><div class="code-head"><span class="path">shakespeare_embeddings.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">urllib.request</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">Counter</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.decomposition</span><span class="w"> </span><span class="kn">import</span> <span class="n">TruncatedSVD</span>
+
+<span class="n">URL</span> <span class="o">=</span> <span class="s2">&quot;https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt&quot;</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;tinyshakespeare.txt&quot;</span><span class="p">):</span>
+    <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlretrieve</span><span class="p">(</span><span class="n">URL</span><span class="p">,</span> <span class="s2">&quot;tinyshakespeare.txt&quot;</span><span class="p">)</span>
+<span class="n">tokens</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;[a-z&#39;]+&quot;</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;tinyshakespeare.txt&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+
+<span class="n">V</span> <span class="o">=</span> <span class="mi">3000</span>                                              <span class="c1"># keep the 3000 most frequent words</span>
+<span class="n">vocab</span> <span class="o">=</span> <span class="p">[</span><span class="n">w</span> <span class="k">for</span> <span class="n">w</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">Counter</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span><span class="o">.</span><span class="n">most_common</span><span class="p">(</span><span class="n">V</span><span class="p">)]</span>
+<span class="n">index</span> <span class="o">=</span> <span class="p">{</span><span class="n">w</span><span class="p">:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">w</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">vocab</span><span class="p">)}</span>
+<span class="n">ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">index</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">tokens</span><span class="p">])</span>     <span class="c1"># -1: rare word, ignored</span>
+
+<span class="c1"># 1. co-occurrence counts: neighbours up to 2 words away</span>
+<span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">V</span><span class="p">,</span> <span class="n">V</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">offset</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+    <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">ids</span><span class="p">[:</span><span class="o">-</span><span class="n">offset</span><span class="p">],</span> <span class="n">ids</span><span class="p">[</span><span class="n">offset</span><span class="p">:]</span>
+    <span class="n">keep</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">b</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="n">keep</span><span class="p">],</span> <span class="n">b</span><span class="p">[</span><span class="n">keep</span><span class="p">]),</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="n">keep</span><span class="p">],</span> <span class="n">a</span><span class="p">[</span><span class="n">keep</span><span class="p">]),</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># 2. positive PMI: how much more often together than chance</span>
+<span class="n">total</span> <span class="o">=</span> <span class="n">C</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="n">expected</span> <span class="o">=</span> <span class="n">C</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">*</span> <span class="n">C</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">/</span> <span class="n">total</span>
+<span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">divide</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">invalid</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">):</span>
+    <span class="n">ppmi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">C</span> <span class="o">/</span> <span class="n">expected</span><span class="p">),</span> <span class="mi">0</span><span class="p">))</span>
+
+<span class="c1"># 3. compress 3000 columns into 64 dimensions, then normalize each vector</span>
+<span class="n">vectors</span> <span class="o">=</span> <span class="n">TruncatedSVD</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">ppmi</span><span class="p">)</span>
+<span class="n">vectors</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">vectors</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;embedding matrix:&quot;</span><span class="p">,</span> <span class="n">vectors</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>embedding matrix: (3000, 64)</pre></div><h3>أقرب الجيران</h3><div class="blk"><p>كل المتجهات طولها 1، فجيب التمام ضرب نقطي. نحسبه مع كل الكلمات دفعة واحدة:</p></div><div class="code "><div class="code-head"><span class="path">neighbours.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="k">def</span><span class="w"> </span><span class="nf">neighbours</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">6</span><span class="p">):</span>
+    <span class="n">sims</span> <span class="o">=</span> <span class="n">vectors</span> <span class="o">@</span> <span class="n">vectors</span><span class="p">[</span><span class="n">index</span><span class="p">[</span><span class="n">word</span><span class="p">]]</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">vocab</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="o">-</span><span class="n">sims</span><span class="p">)[</span><span class="mi">1</span><span class="p">:</span><span class="n">k</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]]</span>     <span class="c1"># skip the word itself</span>
+
+<span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;king&quot;</span><span class="p">,</span> <span class="s2">&quot;father&quot;</span><span class="p">,</span> <span class="s2">&quot;three&quot;</span><span class="p">,</span> <span class="s2">&quot;eyes&quot;</span><span class="p">,</span> <span class="s2">&quot;night&quot;</span><span class="p">,</span> <span class="s2">&quot;sword&quot;</span><span class="p">]:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">w</span><span class="si">:</span><span class="s2">7</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">neighbours</span><span class="p">(</span><span class="n">w</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>king    -&gt; ['richard', 'edward', 'henry', 'york', 'iii', 'gloucester']
+father  -&gt; ['son', 'prince', 'brother', 'daughter', 'wife', 'kinsman']
+three   -&gt; ['years', 'four', 'five', 'months', 'pound', 'days']
+eyes    -&gt; ['tears', 'blood', 'contempt', 'hands', 'ear', 'eye']
+night   -&gt; ['morrow', 'day', 'romeo', 'sleep', 'last', 'sanctuary']
+sword   -&gt; ['traitor', 'tutor', 'treason', 'despite', 'knife', 'clothes']</pre></div><div class="blk"><p>لم نخبر الخوارزمية بأي معنى. فقط: من يجاور من. ومع ذلك:</p></div><ul class="l"><li>الملك بجانب أسماء ملوك.</li><li>الأب بجانب الابن، والأخ، والابنة، والزوجة.</li><li>ثلاثة بجانب أربعة وخمسة، وكلمات تُعدّ مثل السنين والأيام.</li><li>العيون بجانب الدموع، واليدين، والأذن.</li></ul><div class="blk"><p>وبعض الجيران غريبة، مثل جيران السيف. النص صغير، مليون حرف فقط. النماذج الحقيقية تتعلّم من مليارات الكلمات.</p></div><h3>رسم الكلمات</h3><div class="blk"><p>نسقط المتجهات من 64 بعداً إلى بعدين، بتحليل المكوّنات الرئيسية:</p></div><figure class="plot"><div class="svgwrap"><svg xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 489.16196 309.245938" xmlns="http://www.w3.org/2000/svg" version="1.1">
+<defs>
+</defs>
+<g id="figure_1">
+<g id="patch_1">
+<path d="M 0 309.245938 
+L 489.16196 309.245938 
+L 489.16196 0 
+L 0 0 
+L 0 309.245938 
+z
+" style="fill: none"/>
+</g>
+<g id="axes_1">
+<g id="patch_2">
+<path d="M 40.911094 284.4 
+L 459.411094 284.4 
+L 459.411094 7.2 
+L 40.911094 7.2 
+L 40.911094 284.4 
+z
+" style="fill: none"/>
+</g>
+<g id="PathCollection_1">
+<defs>
+<path id="m6e9285706d" d="M 0 2.738613 
+C 0.726289 2.738613 1.422928 2.450055 1.936492 1.936492 
+C 2.450055 1.422928 2.738613 0.726289 2.738613 0 
+C 2.738613 -0.726289 2.450055 -1.422928 1.936492 -1.936492 
+C 1.422928 -2.450055 0.726289 -2.738613 0 -2.738613 
+C -0.726289 -2.738613 -1.422928 -2.450055 -1.936492 -1.936492 
+C -2.450055 -1.422928 -2.738613 -0.726289 -2.738613 0 
+C -2.738613 0.726289 -2.450055 1.422928 -1.936492 1.936492 
+C -1.422928 2.450055 -0.726289 2.738613 0 2.738613 
+z
+" style="stroke: #1f77b4"/>
+</defs>
+<g clip-path="url(#p28b4a6e159)">
+<use xlink:href="#m6e9285706d" x="78.33231" y="253.203669" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m6e9285706d" x="72.093491" y="220.22252" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m6e9285706d" x="68.470787" y="243.968571" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m6e9285706d" x="59.933821" y="255.022125" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m6e9285706d" x="87.579355" y="263.40386" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m6e9285706d" x="111.728994" y="271.8" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m6e9285706d" x="77.572586" y="243.739688" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m6e9285706d" x="60.874371" y="200.506924" style="fill: #1f77b4; stroke: #1f77b4"/>
+</g>
+</g>
+<g id="PathCollection_2">
+<defs>
+<path id="mef8a4ddbf9" d="M 0 2.738613 
+C 0.726289 2.738613 1.422928 2.450055 1.936492 1.936492 
+C 2.450055 1.422928 2.738613 0.726289 2.738613 0 
+C 2.738613 -0.726289 2.450055 -1.422928 1.936492 -1.936492 
+C 1.422928 -2.450055 0.726289 -2.738613 0 -2.738613 
+C -0.726289 -2.738613 -1.422928 -2.450055 -1.936492 -1.936492 
+C -2.450055 -1.422928 -2.738613 -0.726289 -2.738613 0 
+C -2.738613 0.726289 -2.450055 1.422928 -1.936492 1.936492 
+C -1.422928 2.450055 -0.726289 2.738613 0 2.738613 
+z
+" style="stroke: #ff7f0e"/>
+</defs>
+<g clip-path="url(#p28b4a6e159)">
+<use xlink:href="#mef8a4ddbf9" x="366.088757" y="190.424268" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mef8a4ddbf9" x="407.31896" y="191.858333" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mef8a4ddbf9" x="418.418423" y="178.593298" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mef8a4ddbf9" x="438.189196" y="172.617854" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mef8a4ddbf9" x="408.140899" y="156.514903" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mef8a4ddbf9" x="401.110833" y="109.28527" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mef8a4ddbf9" x="440.388366" y="194.810999" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#mef8a4ddbf9" x="397.021784" y="150.424819" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+</g>
+</g>
+<g id="PathCollection_3">
+<defs>
+<path id="m20746d873b" d="M 0 2.738613 
+C 0.726289 2.738613 1.422928 2.450055 1.936492 1.936492 
+C 2.450055 1.422928 2.738613 0.726289 2.738613 0 
+C 2.738613 -0.726289 2.450055 -1.422928 1.936492 -1.936492 
+C 1.422928 -2.450055 0.726289 -2.738613 0 -2.738613 
+C -0.726289 -2.738613 -1.422928 -2.450055 -1.936492 -1.936492 
+C -2.450055 -1.422928 -2.738613 -0.726289 -2.738613 0 
+C -2.738613 0.726289 -2.450055 1.422928 -1.936492 1.936492 
+C -1.422928 2.450055 -0.726289 2.738613 0 2.738613 
+z
+" style="stroke: #2ca02c"/>
+</defs>
+<g clip-path="url(#p28b4a6e159)">
+<use xlink:href="#m20746d873b" x="143.348407" y="22.166544" style="fill: #2ca02c; stroke: #2ca02c"/>
+<use xlink:href="#m20746d873b" x="71.0937" y="104.687558" style="fill: #2ca02c; stroke: #2ca02c"/>
+<use xlink:href="#m20746d873b" x="97.402439" y="82.989" style="fill: #2ca02c; stroke: #2ca02c"/>
+<use xlink:href="#m20746d873b" x="104.695838" y="127.218705" style="fill: #2ca02c; stroke: #2ca02c"/>
+<use xlink:href="#m20746d873b" x="62.363881" y="118.854774" style="fill: #2ca02c; stroke: #2ca02c"/>
+<use xlink:href="#m20746d873b" x="60.021558" y="125.29878" style="fill: #2ca02c; stroke: #2ca02c"/>
+<use xlink:href="#m20746d873b" x="75.870516" y="64.652188" style="fill: #2ca02c; stroke: #2ca02c"/>
+<use xlink:href="#m20746d873b" x="130.066587" y="19.8" style="fill: #2ca02c; stroke: #2ca02c"/>
+</g>
+</g>
+<g id="PathCollection_4">
+<defs>
+<path id="m8352dac3a2" d="M 0 2.738613 
+C 0.726289 2.738613 1.422928 2.450055 1.936492 1.936492 
+C 2.450055 1.422928 2.738613 0.726289 2.738613 0 
+C 2.738613 -0.726289 2.450055 -1.422928 1.936492 -1.936492 
+C 1.422928 -2.450055 0.726289 -2.738613 0 -2.738613 
+C -0.726289 -2.738613 -1.422928 -2.450055 -1.936492 -1.936492 
+C -2.450055 -1.422928 -2.738613 -0.726289 -2.738613 0 
+C -2.738613 0.726289 -2.450055 1.422928 -1.936492 1.936492 
+C -1.422928 2.450055 -0.726289 2.738613 0 2.738613 
+z
+" style="stroke: #d62728"/>
+</defs>
+<g clip-path="url(#p28b4a6e159)">
+<use xlink:href="#m8352dac3a2" x="171.163067" y="81.916274" style="fill: #d62728; stroke: #d62728"/>
+<use xlink:href="#m8352dac3a2" x="149.662059" y="90.805268" style="fill: #d62728; stroke: #d62728"/>
+<use xlink:href="#m8352dac3a2" x="234.425923" y="52.047818" style="fill: #d62728; stroke: #d62728"/>
+<use xlink:href="#m8352dac3a2" x="210.917339" y="103.417466" style="fill: #d62728; stroke: #d62728"/>
+<use xlink:href="#m8352dac3a2" x="318.826682" y="153.695129" style="fill: #d62728; stroke: #d62728"/>
+<use xlink:href="#m8352dac3a2" x="383.938074" y="153.834055" style="fill: #d62728; stroke: #d62728"/>
+<use xlink:href="#m8352dac3a2" x="366.704232" y="167.229372" style="fill: #d62728; stroke: #d62728"/>
+<use xlink:href="#m8352dac3a2" x="417.437881" y="183.038114" style="fill: #d62728; stroke: #d62728"/>
+</g>
+</g>
+<g id="matplotlib.axis_1">
+<g id="xtick_1">
+<g id="line2d_1">
+<path d="M 73.556683 284.4 
+L 73.556683 7.2 
+" clip-path="url(#p28b4a6e159)" style="fill: none; stroke: currentColor; stroke-opacity: 0.3; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_2">
+<defs>
+<path id="m6be520747b" d="M 0 0 
+L 0 3.5 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#m6be520747b" x="73.556683" y="284.4" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_1">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="73.556683" y="299.758281" transform="rotate(-0 73.556683 299.758281)">−0.4</text>
+</g>
+</g>
+<g id="xtick_2">
+<g id="line2d_3">
+<path d="M 144.453359 284.4 
+L 144.453359 7.2 
+" clip-path="url(#p28b4a6e159)" style="fill: none; stroke: currentColor; stroke-opacity: 0.3; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_4">
+<g>
+<use xlink:href="#m6be520747b" x="144.453359" y="284.4" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_2">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="144.453359" y="299.758281" transform="rotate(-0 144.453359 299.758281)">−0.2</text>
+</g>
+</g>
+<g id="xtick_3">
+<g id="line2d_5">
+<path d="M 215.350035 284.4 
+L 215.350035 7.2 
+" clip-path="url(#p28b4a6e159)" style="fill: none; stroke: currentColor; stroke-opacity: 0.3; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_6">
+<g>
+<use xlink:href="#m6be520747b" x="215.350035" y="284.4" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_3">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="215.350035" y="299.758281" transform="rotate(-0 215.350035 299.758281)">0.0</text>
+</g>
+</g>
+<g id="xtick_4">
+<g id="line2d_7">
+<path d="M 286.246711 284.4 
+L 286.246711 7.2 
+" clip-path="url(#p28b4a6e159)" style="fill: none; stroke: currentColor; stroke-opacity: 0.3; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_8">
+<g>
+<use xlink:href="#m6be520747b" x="286.246711" y="284.4" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_4">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="286.246711" y="299.758281" transform="rotate(-0 286.246711 299.758281)">0.2</text>
+</g>
+</g>
+<g id="xtick_5">
+<g id="line2d_9">
+<path d="M 357.143387 284.4 
+L 357.143387 7.2 
+" clip-path="url(#p28b4a6e159)" style="fill: none; stroke: currentColor; stroke-opacity: 0.3; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_10">
+<g>
+<use xlink:href="#m6be520747b" x="357.143387" y="284.4" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_5">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="357.143387" y="299.758281" transform="rotate(-0 357.143387 299.758281)">0.4</text>
+</g>
+</g>
+<g id="xtick_6">
+<g id="line2d_11">
+<path d="M 428.040063 284.4 
+L 428.040063 7.2 
+" clip-path="url(#p28b4a6e159)" style="fill: none; stroke: currentColor; stroke-opacity: 0.3; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_12">
+<g>
+<use xlink:href="#m6be520747b" x="428.040063" y="284.4" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_6">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="428.040063" y="299.758281" transform="rotate(-0 428.040063 299.758281)">0.6</text>
+</g>
+</g>
+</g>
+<g id="matplotlib.axis_2">
+<g id="ytick_1">
+<g id="line2d_13">
+<path d="M 40.911094 266.872838 
+L 459.411094 266.872838 
+" clip-path="url(#p28b4a6e159)" style="fill: none; stroke: currentColor; stroke-opacity: 0.3; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_14">
+<defs>
+<path id="m5c1181c8dd" d="M 0 0 
+L -3.5 0 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#m5c1181c8dd" x="40.911094" y="266.872838" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_7">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="33.911094" y="271.051979" transform="rotate(-0 33.911094 271.051979)">−0.4</text>
+</g>
+</g>
+<g id="ytick_2">
+<g id="line2d_15">
+<path d="M 40.911094 210.749672 
+L 459.411094 210.749672 
+" clip-path="url(#p28b4a6e159)" style="fill: none; stroke: currentColor; stroke-opacity: 0.3; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_16">
+<g>
+<use xlink:href="#m5c1181c8dd" x="40.911094" y="210.749672" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_8">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="33.911094" y="214.928812" transform="rotate(-0 33.911094 214.928812)">−0.2</text>
+</g>
+</g>
+<g id="ytick_3">
+<g id="line2d_17">
+<path d="M 40.911094 154.626505 
+L 459.411094 154.626505 
+" clip-path="url(#p28b4a6e159)" style="fill: none; stroke: currentColor; stroke-opacity: 0.3; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_18">
+<g>
+<use xlink:href="#m5c1181c8dd" x="40.911094" y="154.626505" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_9">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="33.911094" y="158.805645" transform="rotate(-0 33.911094 158.805645)">0.0</text>
+</g>
+</g>
+<g id="ytick_4">
+<g id="line2d_19">
+<path d="M 40.911094 98.503338 
+L 459.411094 98.503338 
+" clip-path="url(#p28b4a6e159)" style="fill: none; stroke: currentColor; stroke-opacity: 0.3; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_20">
+<g>
+<use xlink:href="#m5c1181c8dd" x="40.911094" y="98.503338" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_10">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="33.911094" y="102.682478" transform="rotate(-0 33.911094 102.682478)">0.2</text>
+</g>
+</g>
+<g id="ytick_5">
+<g id="line2d_21">
+<path d="M 40.911094 42.380171 
+L 459.411094 42.380171 
+" clip-path="url(#p28b4a6e159)" style="fill: none; stroke: currentColor; stroke-opacity: 0.3; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_22">
+<g>
+<use xlink:href="#m5c1181c8dd" x="40.911094" y="42.380171" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_11">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="33.911094" y="46.559312" transform="rotate(-0 33.911094 46.559312)">0.4</text>
+</g>
+</g>
+</g>
+<g id="patch_3">
+<path d="M 40.911094 284.4 
+L 40.911094 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_4">
+<path d="M 459.411094 284.4 
+L 459.411094 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_5">
+<path d="M 40.911094 284.4 
+L 459.411094 284.4 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_6">
+<path d="M 40.911094 7.2 
+L 459.411094 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="text_12">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="82.33231" y="250.203669" transform="rotate(-0 82.33231 250.203669)">father</text>
+</g>
+<g id="text_13">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="76.093491" y="217.22252" transform="rotate(-0 76.093491 217.22252)">mother</text>
+</g>
+<g id="text_14">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="72.470787" y="240.968571" transform="rotate(-0 72.470787 240.968571)">son</text>
+</g>
+<g id="text_15">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="63.933821" y="252.022125" transform="rotate(-0 63.933821 252.022125)">daughter</text>
+</g>
+<g id="text_16">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="91.579355" y="260.40386" transform="rotate(-0 91.579355 260.40386)">brother</text>
+</g>
+<g id="text_17">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="115.728994" y="268.8" transform="rotate(-0 115.728994 268.8)">sister</text>
+</g>
+<g id="text_18">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="81.572586" y="240.739688" transform="rotate(-0 81.572586 240.739688)">wife</text>
+</g>
+<g id="text_19">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="64.874371" y="197.506924" transform="rotate(-0 64.874371 197.506924)">husband</text>
+</g>
+<g id="text_20">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="370.088757" y="187.424268" transform="rotate(-0 370.088757 187.424268)">two</text>
+</g>
+<g id="text_21">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="411.31896" y="188.858333" transform="rotate(-0 411.31896 188.858333)">three</text>
+</g>
+<g id="text_22">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="422.418423" y="175.593298" transform="rotate(-0 422.418423 175.593298)">four</text>
+</g>
+<g id="text_23">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="442.189196" y="169.617854" transform="rotate(-0 442.189196 169.617854)">five</text>
+</g>
+<g id="text_24">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="412.140899" y="153.514903" transform="rotate(-0 412.140899 153.514903)">six</text>
+</g>
+<g id="text_25">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="405.110833" y="106.28527" transform="rotate(-0 405.110833 106.28527)">ten</text>
+</g>
+<g id="text_26">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="444.388366" y="191.810999" transform="rotate(-0 444.388366 191.810999)">hundred</text>
+</g>
+<g id="text_27">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="401.021784" y="147.424819" transform="rotate(-0 401.021784 147.424819)">thousand</text>
+</g>
+<g id="text_28">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="147.348407" y="19.166544" transform="rotate(-0 147.348407 19.166544)">eyes</text>
+</g>
+<g id="text_29">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="75.0937" y="101.687558" transform="rotate(-0 75.0937 101.687558)">hand</text>
+</g>
+<g id="text_30">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="101.402439" y="79.989" transform="rotate(-0 101.402439 79.989)">heart</text>
+</g>
+<g id="text_31">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="108.695838" y="124.218705" transform="rotate(-0 108.695838 124.218705)">head</text>
+</g>
+<g id="text_32">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="66.363881" y="115.854774" transform="rotate(-0 66.363881 115.854774)">tongue</text>
+</g>
+<g id="text_33">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="64.021558" y="122.29878" transform="rotate(-0 64.021558 122.29878)">face</text>
+</g>
+<g id="text_34">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="79.870516" y="61.652188" transform="rotate(-0 79.870516 61.652188)">blood</text>
+</g>
+<g id="text_35">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="134.066587" y="16.8" transform="rotate(-0 134.066587 16.8)">tears</text>
+</g>
+<g id="text_36">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="175.163067" y="78.916274" transform="rotate(-0 175.163067 78.916274)">night</text>
+</g>
+<g id="text_37">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="153.662059" y="87.805268" transform="rotate(-0 153.662059 87.805268)">day</text>
+</g>
+<g id="text_38">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="238.425923" y="49.047818" transform="rotate(-0 238.425923 49.047818)">morning</text>
+</g>
+<g id="text_39">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="214.917339" y="100.417466" transform="rotate(-0 214.917339 100.417466)">hour</text>
+</g>
+<g id="text_40">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="322.826682" y="150.695129" transform="rotate(-0 322.826682 150.695129)">year</text>
+</g>
+<g id="text_41">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="387.938074" y="150.834055" transform="rotate(-0 387.938074 150.834055)">days</text>
+</g>
+<g id="text_42">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="370.704232" y="164.229372" transform="rotate(-0 370.704232 164.229372)">hours</text>
+</g>
+<g id="text_43">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="421.437881" y="180.038114" transform="rotate(-0 421.437881 180.038114)">years</text>
+</g>
+<g id="legend_1">
+<g id="patch_7">
+<path d="M 384.497344 67.24125 
+L 453.111094 67.24125 
+Q 454.911094 67.24125 454.911094 65.44125 
+L 454.911094 13.5 
+Q 454.911094 11.7 453.111094 11.7 
+L 384.497344 11.7 
+Q 382.697344 11.7 382.697344 13.5 
+L 382.697344 65.44125 
+Q 382.697344 67.24125 384.497344 67.24125 
+L 384.497344 67.24125 
+z
+" style="fill: none; opacity: 0.35; stroke: currentColor; stroke-linejoin: miter"/>
+</g>
+<g id="PathCollection_5">
+<g>
+<use xlink:href="#m6e9285706d" x="395.297344" y="19.776094" style="fill: #1f77b4; stroke: #1f77b4"/>
+</g>
+</g>
+<g id="text_44">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="411.497344" y="22.138594" transform="rotate(-0 411.497344 22.138594)">family</text>
+</g>
+<g id="PathCollection_6">
+<g>
+<use xlink:href="#mef8a4ddbf9" x="395.297344" y="32.986406" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+</g>
+</g>
+<g id="text_45">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="411.497344" y="35.348906" transform="rotate(-0 411.497344 35.348906)">numbers</text>
+</g>
+<g id="PathCollection_7">
+<g>
+<use xlink:href="#m20746d873b" x="395.297344" y="46.196719" style="fill: #2ca02c; stroke: #2ca02c"/>
+</g>
+</g>
+<g id="text_46">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="411.497344" y="48.559219" transform="rotate(-0 411.497344 48.559219)">body</text>
+</g>
+<g id="PathCollection_8">
+<g>
+<use xlink:href="#m8352dac3a2" x="395.297344" y="59.407031" style="fill: #d62728; stroke: #d62728"/>
+</g>
+</g>
+<g id="text_47">
+<text style="font-size: 9px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="411.497344" y="61.769531" transform="rotate(-0 411.497344 61.769531)">time</text>
+</g>
+</g>
+</g>
+</g>
+<defs>
+<clipPath id="p28b4a6e159">
+<rect x="40.911094" y="7.2" width="418.5" height="277.2"/>
+</clipPath>
+</defs>
+</svg></div><figcaption>أربع مجموعات من الكلمات، مسقطة على بعدين. العائلة، والأرقام، وأجزاء الجسم: كل مجموعة في منطقتها. ولاحظ كلمات الوقت بالجمع، مثل السنين والساعات: اقتربت من الأرقام، لأنها تأتي بعدها دائماً، مثل ثلاث سنين. الجيران تعكس الاستخدام، لا التعريف.</figcaption></figure><details class="setup"><summary>كود الرسم</summary><div class="dbody"><div class="code "><div class="code-head"><span class="path">embeddings_plot.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.decomposition</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCA</span>
+<span class="n">groups</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;family&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;father&quot;</span><span class="p">,</span> <span class="s2">&quot;mother&quot;</span><span class="p">,</span> <span class="s2">&quot;son&quot;</span><span class="p">,</span> <span class="s2">&quot;daughter&quot;</span><span class="p">,</span> <span class="s2">&quot;brother&quot;</span><span class="p">,</span> <span class="s2">&quot;sister&quot;</span><span class="p">,</span> <span class="s2">&quot;wife&quot;</span><span class="p">,</span> <span class="s2">&quot;husband&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;numbers&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;two&quot;</span><span class="p">,</span> <span class="s2">&quot;three&quot;</span><span class="p">,</span> <span class="s2">&quot;four&quot;</span><span class="p">,</span> <span class="s2">&quot;five&quot;</span><span class="p">,</span> <span class="s2">&quot;six&quot;</span><span class="p">,</span> <span class="s2">&quot;ten&quot;</span><span class="p">,</span> <span class="s2">&quot;hundred&quot;</span><span class="p">,</span> <span class="s2">&quot;thousand&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;body&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;eyes&quot;</span><span class="p">,</span> <span class="s2">&quot;hand&quot;</span><span class="p">,</span> <span class="s2">&quot;heart&quot;</span><span class="p">,</span> <span class="s2">&quot;head&quot;</span><span class="p">,</span> <span class="s2">&quot;tongue&quot;</span><span class="p">,</span> <span class="s2">&quot;face&quot;</span><span class="p">,</span> <span class="s2">&quot;blood&quot;</span><span class="p">,</span> <span class="s2">&quot;tears&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;night&quot;</span><span class="p">,</span> <span class="s2">&quot;day&quot;</span><span class="p">,</span> <span class="s2">&quot;morning&quot;</span><span class="p">,</span> <span class="s2">&quot;hour&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;days&quot;</span><span class="p">,</span> <span class="s2">&quot;hours&quot;</span><span class="p">,</span> <span class="s2">&quot;years&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+<span class="n">chosen</span> <span class="o">=</span> <span class="p">[</span><span class="n">w</span> <span class="k">for</span> <span class="n">ws</span> <span class="ow">in</span> <span class="n">groups</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">ws</span><span class="p">]</span>
+<span class="n">xy</span> <span class="o">=</span> <span class="n">PCA</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">vectors</span><span class="p">[[</span><span class="n">index</span><span class="p">[</span><span class="n">w</span><span class="p">]</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">chosen</span><span class="p">]])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">7.5</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+<span class="n">k</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">for</span> <span class="n">g</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">ws</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">groups</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+    <span class="n">pts</span> <span class="o">=</span> <span class="n">xy</span><span class="p">[</span><span class="n">k</span><span class="p">:</span><span class="n">k</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">ws</span><span class="p">)];</span> <span class="n">k</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ws</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">pts</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">pts</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;C</span><span class="si">{</span><span class="n">g</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="n">w</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">pts</span><span class="p">,</span> <span class="n">ws</span><span class="p">):</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="n">textcoords</span><span class="o">=</span><span class="s2">&quot;offset points&quot;</span><span class="p">,</span> <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">9</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">9</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></pre></div></div></details><h3>ماذا عن الحساب بالكلمات؟</h3><div class="blk"><p>المثال المشهور: الملك، ناقص الرجل، زائد المرأة، يعطي الملكة. نجرّبه:</p></div><div class="code "><div class="code-head"><span class="path">analogy.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="k">def</span><span class="w"> </span><span class="nf">analogy</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;a is to b as c is to ?&quot;&quot;&quot;</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">vectors</span><span class="p">[</span><span class="n">index</span><span class="p">[</span><span class="n">b</span><span class="p">]]</span> <span class="o">-</span> <span class="n">vectors</span><span class="p">[</span><span class="n">index</span><span class="p">[</span><span class="n">a</span><span class="p">]]</span> <span class="o">+</span> <span class="n">vectors</span><span class="p">[</span><span class="n">index</span><span class="p">[</span><span class="n">c</span><span class="p">]]</span>
+    <span class="n">sims</span> <span class="o">=</span> <span class="n">vectors</span> <span class="o">@</span> <span class="p">(</span><span class="n">v</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">vocab</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="o">-</span><span class="n">sims</span><span class="p">)</span> <span class="k">if</span> <span class="n">vocab</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">)][:</span><span class="n">k</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;man : king  ::  woman : ?&quot;</span><span class="p">,</span> <span class="n">analogy</span><span class="p">(</span><span class="s2">&quot;man&quot;</span><span class="p">,</span> <span class="s2">&quot;king&quot;</span><span class="p">,</span> <span class="s2">&quot;woman&quot;</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;he  : his   ::  she   : ?&quot;</span><span class="p">,</span> <span class="n">analogy</span><span class="p">(</span><span class="s2">&quot;he&quot;</span><span class="p">,</span> <span class="s2">&quot;his&quot;</span><span class="p">,</span> <span class="s2">&quot;she&quot;</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>man : king  ::  woman : ? ['edward', 'richard', 'iii', 'rescue']
+he  : his   ::  she   : ? ['my', 'her', 'thy', 'your']</pre></div><div class="blk"><p>الأول فشل على نصنا الصغير. والثاني قريب: الضمير المطلوب في المرتبة الثانية.</p><p>الحساب بالكلمات يعمل أحياناً مع بيانات ضخمة، لكنه أقل موثوقية مما توحي به الأمثلة المشهورة.</p></div><div class="callout mistake"><div class="ct">مقارنة متجهات من نموذجين مختلفين</div><div class="blk"><p>متجه كلمة من نموذج، ومتجه كلمة من نموذج آخر: لا معنى لمقارنتهما. كل نموذج بنى محاوره الخاصة.</p><p>حتى نفس النموذج بعد إعادة التدريب قد يعطي محاور مختلفة تماماً. قارن دائماً متجهات من نفس المصدر.</p></div></div><div class="callout interview"><div class="ct">سؤال مقابلة</div><div class="blk"><p>سؤال قد تسمعه في المقابلة:</p></div><div class="en" dir="ltr"><p>What is an embedding layer and how does it relate to one-hot encoding?</p></div><div class="blk"><p>جواب قصير وجيد:</p></div><div class="en" dir="ltr"><p>An embedding layer is a learnable matrix with one row per token. Looking up a token's row is mathematically the same as multiplying its one-hot vector by the matrix, but done as an index lookup for efficiency. The rows are trained by backpropagation together with the rest of the model, so tokens used in similar contexts end up with similar vectors.</p></div><div class="blk"><p>سؤال قد تسمعه في المقابلة:</p></div><div class="en" dir="ltr"><p>Why is cosine similarity preferred over Euclidean distance for embeddings?</p></div><div class="blk"><p>جواب قصير وجيد:</p></div><div class="en" dir="ltr"><p>Cosine similarity compares directions and ignores vector length. Embedding lengths often reflect things like word frequency rather than meaning, so the angle is a more reliable measure of semantic similarity.</p></div><div class="blk"><p>سؤال قد تسمعه في المقابلة:</p></div><div class="en" dir="ltr"><p>What is the difference between static and contextual embeddings?</p></div><div class="blk"><p>جواب قصير وجيد:</p></div><div class="en" dir="ltr"><p>A static embedding gives each word one vector regardless of context, so ambiguous words mix their meanings. Contextual embeddings, produced by models like transformers, give a different vector for each occurrence depending on the surrounding words.</p></div></div><section class="summary"><div class="ct">الخلاصة</div><ul class="l"><li>رقم الرمز عنوان فقط. والمتجه الأحادي ضخم، وكل الكلمات فيه متساوية البعد.</li><li>التضمين: جدول متجهات كثيفة، صف لكل رمز. والبحث فيه يساوي ضرب المتجه الأحادي في الجدول.</li><li>المتجهات تُتعلَّم. والكلمات المتشابهة في الاستخدام تصبح متقاربة.</li><li>تعرف الكلمة من رفاقها: العدّ مع المعلومات المتبادلة، ثم الضغط، يعطي تضمينات مفيدة.</li><li>التشابه بجيب التمام: الاتجاه، لا الطول.</li><li>التضمين الثابت متجه واحد لكل كلمة. الترانسفورمرز تجعله سياقياً.</li></ul></section><section class="quiz" data-quiz="l44-q"><h2>اختبر فهمك</h2><div class="q" data-answer="1"><div class="qt"><span class="qn">1.</span>مفردات من 10,000 رمز، وتضمين ببعد 256. كم معاملاً في جدول التضمين؟</div><div class="opts"><button type="button" class="opt">10,256</button><button type="button" class="opt">2,560,000</button><button type="button" class="opt">256</button></div><div class="explain" hidden><span class="verdict"></span><p>صف من 256 رقماً لكل رمز من 10,000.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">2.</span>ما حاصل ضرب المتجه الأحادي <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mn>0</mn><mo separator="true">,</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></math></bdi> في مصفوفة تضمين من ثلاثة صفوف؟</div><div class="opts"><button type="button" class="opt">مجموع الصفوف</button><button type="button" class="opt">الصف الثالث</button><button type="button" class="opt">صفر</button></div><div class="explain" hidden><span class="verdict"></span><p>الأصفار تلغي كل الصفوف إلا صف الواحد.</p></div></div><div class="q" data-answer="0"><div class="qt"><span class="qn">3.</span>المتجهان <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>1</mn><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">)</mo></mrow></math></bdi> و <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mn>3</mn><mo stretchy="false">)</mo></mrow></math></bdi>. ما تشابه جيب التمام بينهما؟</div><div class="opts"><button type="button" class="opt">0</button><button type="button" class="opt">3</button><button type="button" class="opt">1</button></div><div class="explain" hidden><span class="verdict"></span><p>الضرب النقطي صفر: متعامدان.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">4.</span>كلمتان ظهرتا معاً بقدر ما نتوقعه تماماً لو كانتا مستقلتين. ما قيمة المعلومات المتبادلة؟</div><div class="opts"><button type="button" class="opt">1</button><button type="button" class="opt">0</button><button type="button" class="opt">سالب واحد</button></div><div class="explain" hidden><span class="verdict"></span><p>لوغاريتم الواحد صفر.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">5.</span>لماذا لا يكفي تضمين ثابت لكلمة مثل "عين"؟</div><div class="opts"><button type="button" class="opt">لأن متجهها قصير جداً</button><button type="button" class="opt">لأن لها معاني مختلفة حسب السياق، والمتجه الثابت يخلطها كلها</button><button type="button" class="opt">لأنها كلمة نادرة</button></div><div class="explain" hidden><span class="verdict"></span><p>الحل: تضمين سياقي يتغير مع الجملة.</p></div></div><div class="row"><span class="score"></span><button type="button" class="btn ghost quiz-reset">أعد المحاولة</button></div></section><section class="exercise"><div class="xt">تمرين: جيب التمام، ثم جيرانك</div><ol class="l"><li>احسب بيدك تشابه جيب التمام بين المتجهات: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>a</mi><mo>=</mo><mo stretchy="false">(</mo><mn>1</mn><mo separator="true">,</mo><mn>2</mn><mo separator="true">,</mo><mn>2</mn><mo stretchy="false">)</mo></mrow></math></bdi>، و <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>b</mi><mo>=</mo><mo stretchy="false">(</mo><mn>2</mn><mo separator="true">,</mo><mn>1</mn><mo separator="true">,</mo><mn>2</mn><mo stretchy="false">)</mo></mrow></math></bdi>، و <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>c</mi><mo>=</mo><mo stretchy="false">(</mo><mn>2</mn><mo separator="true">,</mo><mo>−</mo><mn>2</mn><mo separator="true">,</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></math></bdi>.</li><li>اختر ثلاث كلمات إنجليزية تظنها شائعة عند شكسبير، واطبع جيرانها. هل يبدو الجيران منطقيين؟</li></ol><details><summary>تلميح</summary><div class="dbody"><div class="blk"><p>طول <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>a</mi></mrow></math></bdi>: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msqrt><mrow><mn>1</mn><mo>+</mo><mn>4</mn><mo>+</mo><mn>4</mn></mrow></msqrt><mo>=</mo><mn>3</mn></mrow></math></bdi>. وكذلك طولا <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>b</mi></mrow></math></bdi> و <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>c</mi></mrow></math></bdi>.</p></div></div></details><details class="sol"><summary>الحل (افتحه بعد أن تحاول)</summary><div class="dbody"><ol class="l"><li>كل المتجهات طولها 3.</li></ol><ul class="l"><li><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>a</mi><mo>⋅</mo><mi>b</mi><mo>=</mo><mn>2</mn><mo>+</mo><mn>2</mn><mo>+</mo><mn>4</mn><mo>=</mo><mn>8</mn></mrow></math></bdi>، فالتشابه <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>8</mn><mi mathvariant="normal">/</mi><mn>9</mn><mo>≈</mo><mn>0.889</mn></mrow></math></bdi>.</li><li><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>a</mi><mo>⋅</mo><mi>c</mi><mo>=</mo><mn>2</mn><mo>−</mo><mn>4</mn><mo>+</mo><mn>2</mn><mo>=</mo><mn>0</mn></mrow></math></bdi>: متعامدان.</li><li><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>b</mi><mo>⋅</mo><mi>c</mi><mo>=</mo><mn>4</mn><mo>−</mo><mn>2</mn><mo>+</mo><mn>2</mn><mo>=</mo><mn>4</mn></mrow></math></bdi>، فالتشابه <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>4</mn><mi mathvariant="normal">/</mi><mn>9</mn><mo>≈</mo><mn>0.444</mn></mrow></math></bdi>.</li></ul><div class="code "><div class="code-head"><span class="path"></span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">cosine</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">),</span> <span class="mi">3</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">cosine</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">c</span><span class="p">),</span> <span class="mi">3</span><span class="p">),</span> <span class="nb">round</span><span class="p">(</span><span class="n">cosine</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">),</span> <span class="mi">3</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;heaven&quot;</span><span class="p">,</span> <span class="s2">&quot;fair&quot;</span><span class="p">,</span> <span class="s2">&quot;horse&quot;</span><span class="p">]:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">w</span><span class="si">:</span><span class="s2">7</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">neighbours</span><span class="p">(</span><span class="n">w</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>0.889 0.0 0.444
+heaven  -&gt; ['god', 'fortune', 'stars', 'soul', 'lips', 'defend']
+fair    -&gt; ['now', 'daughter', 'kiss', 'sister', 'see', 'happy']
+horse   -&gt; ['foot', 'grumio', 'spur', 'early', 'priest', 'saddle']</pre></div><div class="blk"><p>الجيران ليست مثالية، لأن النص صغير. لاحظ أن الكلمة تحتاج أن تكون ضمن أشهر 3000 كلمة، وإلا فلا متجه لها.</p></div></div></details><div class="askbox" data-kind="review" hidden><div class="al">اطلب من كلود أن يراجع حلّك</div><div class="ah">اكتب إجابتك أو الصق الكود. سيقارنه بالحل ويشرح لك بالعربي. هذا يستهلك من رصيد استخدامك.</div><textarea id="rv-l44-1" dir="auto" placeholder="اكتب إجابتك هنا"></textarea><div class="row"><button type="button" class="btn ask-go">راجع حلّي</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></div><pre hidden class="x-task">1. احسب بيدك تشابه جيب التمام بين المتجهات: $a = (1, 2, 2)$، و $b = (2, 1, 2)$، و $c = (2, -2, 1)$.
+2. اختر ثلاث كلمات إنجليزية تظنها شائعة عند شكسبير، واطبع جيرانها. هل يبدو الجيران منطقيين؟</pre><pre hidden class="x-solution">1. كل المتجهات طولها 3.
+- $a \cdot b = 2 + 2 + 4 = 8$، فالتشابه $8/9 \approx 0.889$.
+- $a \cdot c = 2 - 4 + 2 = 0$: متعامدان.
+- $b \cdot c = 4 - 2 + 2 = 4$، فالتشابه $4/9 \approx 0.444$.
+
+```python
+a, b, c = np.array([1, 2, 2]), np.array([2, 1, 2]), np.array([2, -2, 1])
+print(round(cosine(a, b), 3), round(cosine(a, c), 3), round(cosine(b, c), 3))
+for w in ["heaven", "fair", "horse"]:
+    print(f"{w:7} -&gt; {neighbours(w)}")
+```
+
+الجيران ليست مثالية، لأن النص صغير. لاحظ أن الكلمة تحتاج أن تكون ضمن أشهر 3000 كلمة، وإلا فلا متجه لها.</pre></section></article><section class="askbox" data-kind="ask" hidden><div class="al">عندك سؤال عن هذا الدرس؟ اسأل كلود</div><div class="ah">اكتب سؤالك بالعربي. كلود يقرأ نص الدرس ويجيبك. هذا يستهلك من رصيد استخدامك.</div><textarea id="ask-l44" dir="auto" placeholder="مثلاً: لماذا نضرب هنا في المشتقة؟"></textarea><div class="row"><button type="button" class="btn ask-go">اسأل</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></section><div class="donebox"><span class="dmsg"></span><button type="button" class="btn">أنهيت هذا الدرس</button></div><nav class="pager" aria-label="التنقل بين الدروس"><a class="prev" href="#l43"><small>الدرس السابق</small>من النص إلى أرقام: التقطيع</a><a class="next" href="#l45"><small>الدرس التالي</small>نمذجة اللغة: توقّع الرمز التالي</a></nav></div>

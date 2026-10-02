@@ -1,0 +1,556 @@
+<div class="page"><article><div class="eyebrow">الجزء الأول · الرياضيات والإحصاء</div><h1>من معادلة الخط إلى النموذج</h1><div class="meta"><span>الدرس 3 من 59</span><span>المدة: حوالي 40 دقيقة</span><span class="nbdl-slot"></span></div><div class="chips" dir="ltr"><bdi class="chip">function</bdi><bdi class="chip">input</bdi><bdi class="chip">output</bdi><bdi class="chip">parameter</bdi><bdi class="chip">weight</bdi><bdi class="chip">bias</bdi><bdi class="chip">prediction</bdi><bdi class="chip">error</bdi><bdi class="chip">MSE</bdi></div><div class="goals"><b>بعد هذا الدرس ستعرف:</b><ul><li>تتذكر معادلة الخط، ومعنى الميل والإزاحة</li><li>تفهم الدالة كآلة: مدخل، ثم قاعدة، ثم مخرج</li><li>تفهم أن النموذج دالة فيها أرقام قابلة للتعديل، وأن التعلّم هو البحث عن أفضلها</li><li>تحسب خطأ نموذج بيدك، وتقارن بين نموذجين</li></ul></div><h2>نبدأ مما تتذكره: معادلة الخط</h2><div class="blk"><p>تتذكر من المدرسة هذه المعادلة:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>y</mi><mo>=</mo><mi>m</mi><mi>x</mi><mo>+</mo><mi>b</mi></mrow></math></div></div><div class="blk"><p>في التعلّم الآلي نكتبها بحرف مختلف فقط:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>y</mi><mo>=</mo><mi>w</mi><mi>x</mi><mo>+</mo><mi>b</mi></mrow></math></div></div><div class="blk"><p>الحرف <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>w</mi></mrow></math></bdi> اسمه <b>الميل</b>.</p><p>والحرف <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>b</mi></mrow></math></bdi> اسمه <b>الإزاحة</b>.</p></div><h3>مثال: أجرة سيارة الأجرة</h3><div class="blk"><p>تخيل سيارة أجرة تأخذ 10 ليرات عندما تركب.</p><p>ثم تأخذ 3 ليرات عن كل كيلومتر.</p></div><div class="blk"><p>إذا ركبت مسافة <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>x</mi></mrow></math></bdi> كيلومتر، فالأجرة:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>y</mi><mo>=</mo><mn>3</mn><mi>x</mi><mo>+</mo><mn>10</mn></mrow></math></div></div><div class="blk"><p>الميل هنا 3: كل كيلومتر إضافي يزيد الأجرة 3 ليرات.</p><p>والإزاحة 10: هذه الأجرة عندما تكون المسافة صفراً.</p></div><figure><div class="svgwrap"><svg viewBox="0 0 470 310" width="470" role="img" aria-label="خط الأجرة y = 3x + 10 مع مثلث الميل ونقطة الإزاحة" fill="none">
+  <defs><marker id="l03-ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L8,4 L0,8 z" fill="currentColor"/></marker></defs>
+  <g stroke="currentColor" stroke-opacity=".12">
+    <line x1="115" y1="20" x2="115" y2="260"/><line x1="180" y1="20" x2="180" y2="260"/><line x1="245" y1="20" x2="245" y2="260"/><line x1="310" y1="20" x2="310" y2="260"/><line x1="375" y1="20" x2="375" y2="260"/><line x1="440" y1="20" x2="440" y2="260"/>
+    <line x1="50" y1="220" x2="440" y2="220"/><line x1="50" y1="180" x2="440" y2="180"/><line x1="50" y1="140" x2="440" y2="140"/><line x1="50" y1="100" x2="440" y2="100"/><line x1="50" y1="60" x2="440" y2="60"/><line x1="50" y1="20" x2="440" y2="20"/>
+  </g>
+  <line x1="50" y1="260" x2="450" y2="260" stroke="currentColor" stroke-width="1.4" marker-end="url(#l03-ar)"/>
+  <line x1="50" y1="260" x2="50" y2="12" stroke="currentColor" stroke-width="1.4" marker-end="url(#l03-ar)"/>
+  <g fill="currentColor" font-size="11.5" class="mono" text-anchor="middle">
+    <text x="50" y="277">0</text><text x="115" y="277">1</text><text x="180" y="277">2</text><text x="245" y="277">3</text><text x="310" y="277">4</text><text x="375" y="277">5</text><text x="440" y="277">6</text>
+  </g>
+  <g fill="currentColor" font-size="11.5" class="mono" text-anchor="end">
+    <text x="42" y="224">5</text><text x="42" y="184">10</text><text x="42" y="144">15</text><text x="42" y="104">20</text><text x="42" y="64">25</text><text x="42" y="24">30</text>
+  </g>
+  <text x="445" y="300" fill="currentColor" font-size="13" text-anchor="end">المسافة بالكيلومتر</text>
+  <text x="58" y="16" fill="currentColor" font-size="13" text-anchor="start">الأجرة بالليرة</text>
+  <line x1="50" y1="180" x2="440" y2="36" class="s-accent" stroke-width="3"/>
+  <path d="M180,132 L245,132 L245,108" class="s-orange" stroke-width="2.4"/>
+  <text x="212" y="150" fill="currentColor" font-size="12.5" text-anchor="middle" class="mono">+1 km</text>
+  <text x="253" y="125" fill="currentColor" font-size="12.5" text-anchor="start" class="mono">+3</text>
+  <text x="300" y="175" fill="currentColor" font-size="13.5" text-anchor="middle">الميل: كل كيلومتر يضيف 3 ليرات</text>
+  <circle cx="50" cy="180" r="6" class="f-orange"/>
+  <text x="62" y="205" fill="currentColor" font-size="13.5">الإزاحة: 10 ليرات قبل أي مسافة</text>
+</svg></div><figcaption>خط الأجرة. الميل هو الزيادة في السعر عندما تزيد المسافة كيلومتراً واحداً. والإزاحة هي النقطة التي يقطع فيها الخط المحور العمودي.</figcaption></figure><h2>الدالة: آلة لها مدخل ومخرج</h2><div class="blk"><p>الدالة قاعدة بسيطة.</p><p>تعطيها رقماً، فتعطيك رقماً آخر.</p></div><div class="blk"><p>نكتب اسم الدالة بحرف، مثل <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>f</mi></mrow></math></bdi>.</p><p>ونكتب المدخل بين قوسين:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><mn>3</mn><mi>x</mi><mo>+</mo><mn>10</mn></mrow></math></div></div><div class="blk"><p>إذا كان المدخل 2 كيلومتر:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>f</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo><mo>=</mo><mn>3</mn><mo>×</mo><mn>2</mn><mo>+</mo><mn>10</mn><mo>=</mo><mn>16</mn></mrow></math></div></div><div class="blk"><p>الأجرة 16 ليرة.</p></div><figure><div class="svgwrap"><svg viewBox="0 0 520 130" width="520" role="img" aria-label="المدخل 2 يدخل الآلة f، والمخرج 16 يخرج منها" fill="none">
+  <defs><marker id="l03-ar2" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L8,4 L0,8 z" fill="currentColor"/></marker></defs>
+  <rect x="10" y="40" width="110" height="50" rx="10" stroke="currentColor" stroke-opacity=".5"/>
+  <text x="65" y="31" text-anchor="middle" fill="currentColor" font-size="13">المدخل</text>
+  <text x="65" y="71" text-anchor="middle" fill="currentColor" font-size="16" class="mono">x = 2</text>
+  <line x1="122" y1="65" x2="178" y2="65" stroke="currentColor" stroke-width="1.6" marker-end="url(#l03-ar2)"/>
+  <rect x="182" y="25" width="156" height="80" rx="12" class="s-accent f-accent" stroke-width="2" fill-opacity=".10"/>
+  <text x="260" y="55" text-anchor="middle" fill="currentColor" font-size="13">القاعدة</text>
+  <text x="260" y="82" text-anchor="middle" fill="currentColor" font-size="15" class="mono">3x + 10</text>
+  <line x1="340" y1="65" x2="396" y2="65" stroke="currentColor" stroke-width="1.6" marker-end="url(#l03-ar2)"/>
+  <rect x="400" y="40" width="110" height="50" rx="10" stroke="currentColor" stroke-opacity=".5"/>
+  <text x="455" y="31" text-anchor="middle" fill="currentColor" font-size="13">المخرج</text>
+  <text x="455" y="71" text-anchor="middle" fill="currentColor" font-size="16" class="mono">16</text>
+</svg></div><figcaption>الدالة مثل آلة: يدخل رقم من جهة، وتطبق عليه القاعدة، ويخرج رقم من الجهة الأخرى.</figcaption></figure><h2>دالة لها أكثر من مدخل</h2><div class="blk"><p>في الحياة الحقيقية، النتيجة تعتمد غالباً على أشياء كثيرة.</p></div><div class="blk"><p>مثلاً سعر شقة يعتمد على المساحة، وعدد الغرف، وعمر البناء.</p><p>هذه ثلاثة مدخلات.</p></div><div class="blk"><p>نسميها <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>x</mi><mn>1</mn></msub></mrow></math></bdi> و <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>x</mi><mn>2</mn></msub></mrow></math></bdi> و <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>x</mi><mn>3</mn></msub></mrow></math></bdi>.</p><p>ولكل مدخل رقم خاص به يُضرب فيه:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mover accent="true"><mi>y</mi><mo>^</mo></mover><mo>=</mo><msub><mi>w</mi><mn>1</mn></msub><msub><mi>x</mi><mn>1</mn></msub><mo>+</mo><msub><mi>w</mi><mn>2</mn></msub><msub><mi>x</mi><mn>2</mn></msub><mo>+</mo><msub><mi>w</mi><mn>3</mn></msub><msub><mi>x</mi><mn>3</mn></msub><mo>+</mo><mi>b</mi></mrow></math></div></div><div class="blk"><p>الأرقام <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>w</mi><mn>1</mn></msub></mrow></math></bdi> و <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>w</mi><mn>2</mn></msub></mrow></math></bdi> و <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>w</mi><mn>3</mn></msub></mrow></math></bdi> اسمها <b>الأوزان</b>.</p></div><div class="blk"><p>كل وزن يقول شيئين:</p></div><ul class="l"><li><b>كم هو مهم</b> هذا المدخل. الوزن الكبير يعني تأثيراً كبيراً.</li><li><b>في أي اتجاه</b> يؤثر. عمر البناء له غالباً وزن سالب: كلما زاد العمر، نقص السعر.</li></ul><div class="blk"><p>والرمز الذي فوقه قبعة يعني <b>التوقّع</b>، أي الرقم الذي يعطيه النموذج:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mover accent="true"><mi>y</mi><mo>^</mo></mover></mrow></math></div></div><div class="blk"><p>يُقرأ هكذا:</p></div><div class="blk"><div class="term" dir="ltr"><code>y hat</code></div></div><div class="callout note"><div class="ct">لماذا نكتب القبعة؟</div><div class="blk"><p>الحرف <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>y</mi></mrow></math></bdi> وحده هو <b>القيمة الصحيحة</b>، التي نعرفها من البيانات.</p><p>والحرف مع القبعة هو <b>ما توقعه النموذج</b>.</p><p>الفرق بينهما هو الخطأ. وسنستخدم هذا الفرق كثيراً جداً في الدورة.</p></div></div><h2>النموذج: دالة نتعلّم أرقامها من البيانات</h2><div class="blk"><p>في مثال الأجرة، كنا نعرف القاعدة: 3 ليرات لكل كيلومتر.</p></div><div class="blk"><p>لكن في أغلب المشاكل الحقيقية لا نعرف القاعدة.</p><p>ما عندنا هو <b>أمثلة</b>: مدخلات، ومعها الجواب الصحيح.</p></div><div class="blk"><p>مثلاً: عندنا مئة شقة. نعرف مساحة كل شقة، ونعرف سعرها الحقيقي.</p><p>لكن لا نعرف الأوزان.</p></div><div class="blk"><p>هنا تأتي الفكرة الأهم في هذه الدورة كلها:</p></div><div class="key">النموذج دالة فيها أرقام قابلة للتعديل. والتعلّم هو البحث عن الأرقام التي تجعل توقعاته قريبة من الأجوبة الصحيحة.</div><div class="blk"><p>هذه الأرقام القابلة للتعديل اسمها:</p></div><div class="blk"><div class="term" dir="ltr"><code>parameters</code></div></div><div class="blk"><p>أي <b>المعاملات</b>. في الخط عندنا معاملان فقط: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>w</mi></mrow></math></bdi> و <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>b</mi></mrow></math></bdi>.</p><p>في النماذج اللغوية الكبيرة عندنا مليارات المعاملات. لكن الفكرة نفسها تماماً.</p></div><figure><div class="svgwrap"><svg viewBox="0 0 560 250" width="560" role="img" aria-label="المدخل يدخل النموذج، النموذج يعطي توقعاً، نقارنه بالجواب الصحيح فنحصل على الخطأ، ثم نعدل المعاملات" fill="none">
+  <defs><marker id="l03-ar3" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L8,4 L0,8 z" fill="currentColor"/></marker></defs>
+  <rect x="10" y="60" width="96" height="56" rx="10" stroke="currentColor" stroke-opacity=".5"/>
+  <text x="58" y="84" text-anchor="middle" fill="currentColor" font-size="13">المدخل</text>
+  <text x="58" y="104" text-anchor="middle" fill="currentColor" font-size="14" class="mono">x</text>
+  <line x1="108" y1="88" x2="150" y2="88" stroke="currentColor" stroke-width="1.6" marker-end="url(#l03-ar3)"/>
+  <rect x="154" y="48" width="150" height="80" rx="12" class="s-accent f-accent" stroke-width="2" fill-opacity=".10"/>
+  <text x="229" y="78" text-anchor="middle" fill="currentColor" font-size="13.5" font-weight="600">النموذج</text>
+  <text x="229" y="106" text-anchor="middle" fill="currentColor" font-size="14" class="mono">ŷ = w·x + b</text>
+  <line x1="306" y1="88" x2="348" y2="88" stroke="currentColor" stroke-width="1.6" marker-end="url(#l03-ar3)"/>
+  <rect x="352" y="60" width="86" height="56" rx="10" stroke="currentColor" stroke-opacity=".5"/>
+  <text x="395" y="84" text-anchor="middle" fill="currentColor" font-size="13">التوقّع</text>
+  <text x="395" y="104" text-anchor="middle" fill="currentColor" font-size="14" class="mono">ŷ</text>
+  <rect x="352" y="160" width="86" height="56" rx="10" stroke="currentColor" stroke-opacity=".5"/>
+  <text x="395" y="184" text-anchor="middle" fill="currentColor" font-size="13">الصحيح</text>
+  <text x="395" y="204" text-anchor="middle" fill="currentColor" font-size="14" class="mono">y</text>
+  <line x1="440" y1="88" x2="478" y2="118" stroke="currentColor" stroke-width="1.6" marker-end="url(#l03-ar3)"/>
+  <line x1="440" y1="188" x2="478" y2="158" stroke="currentColor" stroke-width="1.6" marker-end="url(#l03-ar3)"/>
+  <rect x="470" y="110" width="84" height="56" rx="10" class="s-orange f-orange" stroke-width="2" fill-opacity=".12"/>
+  <text x="512" y="134" text-anchor="middle" fill="currentColor" font-size="13">الخطأ</text>
+  <text x="512" y="154" text-anchor="middle" fill="currentColor" font-size="13" class="mono">ŷ − y</text>
+  <path d="M512,168 C512,236 229,246 229,132" class="s-orange" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#l03-ar3)"/>
+  <text x="330" y="236" text-anchor="middle" fill="currentColor" font-size="13">نعدّل المعاملات لكي يصغر الخطأ</text>
+</svg></div><figcaption>حلقة التعلّم. النموذج يتوقع، نقارن التوقع بالجواب الصحيح، ثم نعدّل المعاملات لكي يصغر الخطأ. سنكرر هذه الحلقة في كل الدورة.</figcaption></figure><h2>كيف نقيس أن النموذج جيد؟ الخطأ</h2><div class="blk"><p>لكل مثال نحسب الفرق بين التوقع والجواب الصحيح:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>e</mi><mo>=</mo><mover accent="true"><mi>y</mi><mo>^</mo></mover><mo>−</mo><mi>y</mi></mrow></math></div></div><div class="blk"><p>الخطأ قد يكون موجباً أو سالباً.</p><p>إذا توقع النموذج أكثر من الصحيح، فالخطأ موجب. وإذا توقع أقل، فالخطأ سالب.</p></div><h3>لماذا نربّع الخطأ؟</h3><div class="blk"><p>لو جمعنا الأخطاء كما هي، قد يلغي بعضها بعضاً.</p><p>خطأ مقداره 2 زائد خطأ مقداره 2 سالب يساوي صفراً. وهذا كذب: النموذج أخطأ مرتين.</p></div><div class="blk"><p>لذلك نربّع كل خطأ أولاً. المربع دائماً موجب.</p><p>وفائدة ثانية: المربع يعاقب الخطأ الكبير أكثر بكثير. خطأ 3 يصبح 9، وخطأ 1 يبقى 1.</p></div><div class="blk"><p>ثم نأخذ المتوسط على كل الأمثلة. هذا اسمه <b>متوسط مربعات الأخطاء</b>:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>MSE</mtext><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mo stretchy="false">(</mo><msub><mover accent="true"><mi>y</mi><mo>^</mo></mover><mi>i</mi></msub><mo>−</mo><msub><mi>y</mi><mi>i</mi></msub><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow></math></div></div><div class="blk"><p>لا تخف من الرمز الكبير. معناه فقط: اجمع.</p><p>والحرف <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>n</mi></mrow></math></bdi> هو عدد الأمثلة.</p></div><section class="hand"><div class="hand-h"><span class="hand-tag">مثال محلول باليد</span><div class="hand-t">نقارن بين خطين على ثلاث نقاط</div></div><div class="hand-body"><div class="blk"><p>عندنا ثلاثة أمثلة فقط:</p></div><div class="tablewrap"><table><thead><tr><th>المثال</th><th>المدخل <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>x</mi></mrow></math></bdi></th><th>الجواب الصحيح <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>y</mi></mrow></math></bdi></th></tr></thead><tbody><tr><td>1</td><td>1</td><td>2</td></tr><tr><td>2</td><td>2</td><td>4</td></tr><tr><td>3</td><td>3</td><td>5</td></tr></tbody></table></div><div class="blk"><p>ونريد أن نقارن بين نموذجين:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>A:</mtext><mtext>  </mtext><mtext>  </mtext><mover accent="true"><mi>y</mi><mo>^</mo></mover><mo>=</mo><mn>2</mn><mi>x</mi><mspace width="2em"/><mspace width="2em"/><mtext>B:</mtext><mtext>  </mtext><mtext>  </mtext><mover accent="true"><mi>y</mi><mo>^</mo></mover><mo>=</mo><mn>1.5</mn><mi>x</mi><mo>+</mo><mn>1</mn></mrow></math></div></div><div class="step">نحسب توقعات النموذج الأول، وأخطاءه</div><div class="tablewrap"><table><thead><tr><th><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>x</mi></mrow></math></bdi></th><th><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>y</mi></mrow></math></bdi></th><th>التوقّع <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mover accent="true"><mi>y</mi><mo>^</mo></mover><mo>=</mo><mn>2</mn><mi>x</mi></mrow></math></bdi></th><th>الخطأ <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mover accent="true"><mi>y</mi><mo>^</mo></mover><mo>−</mo><mi>y</mi></mrow></math></bdi></th><th>مربع الخطأ</th></tr></thead><tbody><tr><td>1</td><td>2</td><td>2</td><td>0</td><td>0</td></tr><tr><td>2</td><td>4</td><td>4</td><td>0</td><td>0</td></tr><tr><td>3</td><td>5</td><td>6</td><td>1</td><td>1</td></tr></tbody></table></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mtext>SSE</mtext><mi>A</mi></msub><mo>=</mo><mn>0</mn><mo>+</mo><mn>0</mn><mo>+</mo><mn>1</mn><mo>=</mo><mn>1</mn></mrow></math></div><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mtext>MSE</mtext><mi>A</mi></msub><mo>=</mo><mfrac><mn>1</mn><mn>3</mn></mfrac><mo>≈</mo><mn>0.333</mn></mrow></math></div></div><div class="step">نحسب توقعات النموذج الثاني، وأخطاءه</div><div class="tablewrap"><table><thead><tr><th><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>x</mi></mrow></math></bdi></th><th><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>y</mi></mrow></math></bdi></th><th>التوقّع <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mover accent="true"><mi>y</mi><mo>^</mo></mover><mo>=</mo><mn>1.5</mn><mi>x</mi><mo>+</mo><mn>1</mn></mrow></math></bdi></th><th>الخطأ <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mover accent="true"><mi>y</mi><mo>^</mo></mover><mo>−</mo><mi>y</mi></mrow></math></bdi></th><th>مربع الخطأ</th></tr></thead><tbody><tr><td>1</td><td>2</td><td>2.5</td><td>0.5</td><td>0.25</td></tr><tr><td>2</td><td>4</td><td>4</td><td>0</td><td>0</td></tr><tr><td>3</td><td>5</td><td>5.5</td><td>0.5</td><td>0.25</td></tr></tbody></table></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mtext>SSE</mtext><mi>B</mi></msub><mo>=</mo><mn>0.25</mn><mo>+</mo><mn>0</mn><mo>+</mo><mn>0.25</mn><mo>=</mo><mn>0.5</mn></mrow></math></div><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mtext>MSE</mtext><mi>B</mi></msub><mo>=</mo><mfrac><mn>0.5</mn><mn>3</mn></mfrac><mo>≈</mo><mn>0.167</mn></mrow></math></div></div><div class="step">نقارن</div><div class="blk"><p>متوسط الخطأ للنموذج الثاني أصغر. إذن النموذج الثاني أفضل على هذه البيانات.</p></div><div class="blk"><p>لاحظ شيئاً مهماً: النموذج الأول أصاب مثالين بالضبط، وأخطأ في الثالث بمقدار 1.</p><p>والثاني أخطأ قليلاً في مثالين. لكن مجموع مربعات أخطائه أصغر.</p><p>المربع يعاقب الخطأ الكبير الواحد أكثر من خطأين صغيرين.</p></div></div></section><h2>جرّب بنفسك: ابحث عن خط أفضل</h2><div class="blk"><p>حرّك الميل والإزاحة، وحاول أن تجعل متوسط الخطأ أصغر من 0.167.</p></div><div class="widget" data-widget="line" data-args="{&quot;points&quot;: &quot;1,2;2,4;3,5&quot;, &quot;w&quot;: &quot;2&quot;, &quot;b&quot;: &quot;0&quot;}"><div class="w-fallback">هنا أداة تفاعلية. إذا لم تظهر، حدّث الصفحة.</div></div><div class="blk"><p>هل وجدت خطاً أفضل؟</p><p>أفضل خط ممكن لهذه النقاط الثلاث هو تقريباً:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mover accent="true"><mi>y</mi><mo>^</mo></mover><mo>=</mo><mn>1.5</mn><mi>x</mi><mo>+</mo><mn>0.67</mn></mrow></math></div></div><div class="blk"><p>ومتوسط خطئه حوالي 0.056.</p><p>لاحظ أنك بحثت عنه بالتجربة: تحرّك رقماً، وتنظر هل صغر الخطأ.</p><p>هذا بالضبط ما يفعله التعلّم الآلي، لكن بطريقة ذكية وسريعة. سنراها في الدرس 9.</p></div><h2>بالكود</h2><div class="blk"><p>أولاً بايثون عادي، بدون أي مكتبة، لكي ترى كل خطوة:</p></div><div class="code "><div class="code-head"><span class="path">mse_plain.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="n">xs</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>   <span class="c1"># المدخلات</span>
+<span class="n">ys</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>   <span class="c1"># الأجوبة الصحيحة</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">predict</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">w</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="n">b</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">mse</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">):</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="o">-</span> <span class="n">y</span>
+        <span class="n">total</span> <span class="o">+=</span> <span class="n">error</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="k">return</span> <span class="n">total</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">xs</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;model A:&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">mse</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="mi">3</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;model B:&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">mse</span><span class="p">(</span><span class="mf">1.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">3</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>model A: 0.333
+model B: 0.167</pre></div><div class="blk"><p>الآن الشيء نفسه بمكتبة نمباي. سنستخدمها في كل الدورة، وشرحناها في الدرس الثاني.</p><p>لاحظ أنه لا توجد حلقة تكرار: العملية تُطبق على كل المصفوفة مرة واحدة.</p></div><div class="code "><div class="code-head"><span class="path">mse_numpy.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">mse</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="n">y_hat</span> <span class="o">=</span> <span class="n">w</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="n">b</span>              <span class="c1"># كل التوقعات دفعة واحدة</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">y_hat</span> <span class="o">-</span> <span class="n">y</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;predictions of B:&quot;</span><span class="p">,</span> <span class="mf">1.5</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;MSE of B:&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">mse</span><span class="p">(</span><span class="mf">1.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">4</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>predictions of B: [2.5 4.  5.5]
+MSE of B: 0.1667</pre></div><h3>التعلّم كبحث: نجرب آلاف الخطوط</h3><div class="blk"><p>أبسط طريقة لإيجاد أفضل خط: نجرب قيماً كثيرة للميل والإزاحة، ونحتفظ بالأفضل.</p></div><div class="code "><div class="code-head"><span class="path">search.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="n">best</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">3.01</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mf">3.01</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">):</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">mse</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">best</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">loss</span> <span class="o">&lt;</span> <span class="n">best</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">best</span> <span class="o">=</span> <span class="p">(</span><span class="n">loss</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+
+<span class="n">loss</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">best</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;best w = </span><span class="si">{</span><span class="n">w</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">, best b = </span><span class="si">{</span><span class="n">b</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">, MSE = </span><span class="si">{</span><span class="n">loss</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>best w = 1.50, best b = 0.65, MSE = 0.0558</pre></div><div class="blk"><p>وجد البحث خطاً قريباً جداً من أفضل خط.</p><p>لكن انتبه: جربنا أكثر من ستة آلاف خط، لمعاملين فقط.</p></div><div class="code "><div class="code-head"><span class="path">count.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="n">ws</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">3.01</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">)</span>
+<span class="n">bs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mf">3.01</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;tries in our search:&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">ws</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">bs</span><span class="p">))</span>
+
+<span class="c1"># لو جربنا 100 قيمة لكل معامل:</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;2 parameters :&quot;</span><span class="p">,</span> <span class="mi">100</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;tries&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;10 parameters:&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="mi">100</span><span class="w"> </span><span class="o">**</span><span class="w"> </span><span class="mi">10</span><span class="si">:</span><span class="s2">.0e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;tries&quot;</span><span class="p">)</span>
+
+<span class="n">seconds</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">**</span> <span class="mi">10</span> <span class="o">/</span> <span class="mf">1e8</span>        <span class="c1"># جهاز يجرب مئة مليون خط في الثانية</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;years:&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">seconds</span> <span class="o">/</span> <span class="p">(</span><span class="mi">3600</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">365</span><span class="p">)))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>tries in our search: 6161
+2 parameters : 10000 tries
+10 parameters: 1e+20 tries
+years: 31710</pre></div><div class="blk"><p>مع عشرة معاملات فقط، يحتاج البحث آلاف السنين، حتى لو كان الجهاز سريعاً جداً.</p><p>والنماذج الحقيقية فيها ملايين المعاملات.</p><p>لذلك نحتاج طريقة أذكى، تعرف <b>في أي اتجاه</b> نغيّر كل معامل.</p><p>هذه الطريقة تحتاج المشتقة، وهي موضوع الدرس 6.</p></div><h3>نرسم النقاط والخط الأفضل</h3><div class="code "><div class="code-head"><span class="path">plot_line.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">3.6</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C1&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">xx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">w</span> <span class="o">*</span> <span class="n">xx</span> <span class="o">+</span> <span class="n">b</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C0&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;y_hat = </span><span class="si">{</span><span class="n">w</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">x + </span><span class="si">{</span><span class="n">b</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></pre></div><figure class="plot"><div class="svgwrap"><svg xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 377.844688 246.275875" xmlns="http://www.w3.org/2000/svg" version="1.1">
+<defs>
+</defs>
+<g id="figure_1">
+<g id="patch_1">
+<path d="M 0 246.275875 
+L 377.844688 246.275875 
+L 377.844688 0 
+L 0 0 
+L 0 246.275875 
+z
+" style="fill: none"/>
+</g>
+<g id="axes_1">
+<g id="patch_2">
+<path d="M 35.844688 206.784 
+L 370.644688 206.784 
+L 370.644688 7.2 
+L 35.844688 7.2 
+L 35.844688 206.784 
+z
+" style="fill: none"/>
+</g>
+<g id="matplotlib.axis_1">
+<g id="xtick_1">
+<g id="line2d_1">
+<path d="M 51.062869 206.784 
+L 51.062869 7.2 
+" clip-path="url(#pa149e4ba1e)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_2">
+<defs>
+<path id="m4e7b7ed4ab" d="M 0 0 
+L 0 3.5 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#m4e7b7ed4ab" x="51.062869" y="206.784" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_1">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="51.062869" y="222.142281" transform="rotate(-0 51.062869 222.142281)">0.0</text>
+</g>
+</g>
+<g id="xtick_2">
+<g id="line2d_3">
+<path d="M 89.108324 206.784 
+L 89.108324 7.2 
+" clip-path="url(#pa149e4ba1e)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_4">
+<g>
+<use xlink:href="#m4e7b7ed4ab" x="89.108324" y="206.784" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_2">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="89.108324" y="222.142281" transform="rotate(-0 89.108324 222.142281)">0.5</text>
+</g>
+</g>
+<g id="xtick_3">
+<g id="line2d_5">
+<path d="M 127.153778 206.784 
+L 127.153778 7.2 
+" clip-path="url(#pa149e4ba1e)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_6">
+<g>
+<use xlink:href="#m4e7b7ed4ab" x="127.153778" y="206.784" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_3">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="127.153778" y="222.142281" transform="rotate(-0 127.153778 222.142281)">1.0</text>
+</g>
+</g>
+<g id="xtick_4">
+<g id="line2d_7">
+<path d="M 165.199233 206.784 
+L 165.199233 7.2 
+" clip-path="url(#pa149e4ba1e)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_8">
+<g>
+<use xlink:href="#m4e7b7ed4ab" x="165.199233" y="206.784" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_4">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="165.199233" y="222.142281" transform="rotate(-0 165.199233 222.142281)">1.5</text>
+</g>
+</g>
+<g id="xtick_5">
+<g id="line2d_9">
+<path d="M 203.244687 206.784 
+L 203.244687 7.2 
+" clip-path="url(#pa149e4ba1e)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_10">
+<g>
+<use xlink:href="#m4e7b7ed4ab" x="203.244687" y="206.784" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_5">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="203.244687" y="222.142281" transform="rotate(-0 203.244687 222.142281)">2.0</text>
+</g>
+</g>
+<g id="xtick_6">
+<g id="line2d_11">
+<path d="M 241.290142 206.784 
+L 241.290142 7.2 
+" clip-path="url(#pa149e4ba1e)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_12">
+<g>
+<use xlink:href="#m4e7b7ed4ab" x="241.290142" y="206.784" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_6">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="241.290142" y="222.142281" transform="rotate(-0 241.290142 222.142281)">2.5</text>
+</g>
+</g>
+<g id="xtick_7">
+<g id="line2d_13">
+<path d="M 279.335597 206.784 
+L 279.335597 7.2 
+" clip-path="url(#pa149e4ba1e)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_14">
+<g>
+<use xlink:href="#m4e7b7ed4ab" x="279.335597" y="206.784" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_7">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="279.335597" y="222.142281" transform="rotate(-0 279.335597 222.142281)">3.0</text>
+</g>
+</g>
+<g id="xtick_8">
+<g id="line2d_15">
+<path d="M 317.381051 206.784 
+L 317.381051 7.2 
+" clip-path="url(#pa149e4ba1e)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_16">
+<g>
+<use xlink:href="#m4e7b7ed4ab" x="317.381051" y="206.784" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_8">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="317.381051" y="222.142281" transform="rotate(-0 317.381051 222.142281)">3.5</text>
+</g>
+</g>
+<g id="xtick_9">
+<g id="line2d_17">
+<path d="M 355.426506 206.784 
+L 355.426506 7.2 
+" clip-path="url(#pa149e4ba1e)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_18">
+<g>
+<use xlink:href="#m4e7b7ed4ab" x="355.426506" y="206.784" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_9">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="355.426506" y="222.142281" transform="rotate(-0 355.426506 222.142281)">4.0</text>
+</g>
+</g>
+<g id="text_10">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="203.244687" y="236.788219" transform="rotate(-0 203.244687 236.788219)">x</text>
+</g>
+</g>
+<g id="matplotlib.axis_2">
+<g id="ytick_1">
+<g id="line2d_19">
+<path d="M 35.844688 187.128 
+L 370.644688 187.128 
+" clip-path="url(#pa149e4ba1e)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_20">
+<defs>
+<path id="m9b365e39e1" d="M 0 0 
+L -3.5 0 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#m9b365e39e1" x="35.844688" y="187.128" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_11">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="28.844688" y="191.307141" transform="rotate(-0 28.844688 191.307141)">1</text>
+</g>
+</g>
+<g id="ytick_2">
+<g id="line2d_21">
+<path d="M 35.844688 156.888 
+L 370.644688 156.888 
+" clip-path="url(#pa149e4ba1e)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_22">
+<g>
+<use xlink:href="#m9b365e39e1" x="35.844688" y="156.888" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_12">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="28.844688" y="161.067141" transform="rotate(-0 28.844688 161.067141)">2</text>
+</g>
+</g>
+<g id="ytick_3">
+<g id="line2d_23">
+<path d="M 35.844688 126.648 
+L 370.644688 126.648 
+" clip-path="url(#pa149e4ba1e)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_24">
+<g>
+<use xlink:href="#m9b365e39e1" x="35.844688" y="126.648" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_13">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="28.844688" y="130.827141" transform="rotate(-0 28.844688 130.827141)">3</text>
+</g>
+</g>
+<g id="ytick_4">
+<g id="line2d_25">
+<path d="M 35.844688 96.408 
+L 370.644688 96.408 
+" clip-path="url(#pa149e4ba1e)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_26">
+<g>
+<use xlink:href="#m9b365e39e1" x="35.844688" y="96.408" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_14">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="28.844688" y="100.587141" transform="rotate(-0 28.844688 100.587141)">4</text>
+</g>
+</g>
+<g id="ytick_5">
+<g id="line2d_27">
+<path d="M 35.844688 66.168 
+L 370.644688 66.168 
+" clip-path="url(#pa149e4ba1e)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_28">
+<g>
+<use xlink:href="#m9b365e39e1" x="35.844688" y="66.168" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_15">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="28.844688" y="70.347141" transform="rotate(-0 28.844688 70.347141)">5</text>
+</g>
+</g>
+<g id="ytick_6">
+<g id="line2d_29">
+<path d="M 35.844688 35.928 
+L 370.644688 35.928 
+" clip-path="url(#pa149e4ba1e)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_30">
+<g>
+<use xlink:href="#m9b365e39e1" x="35.844688" y="35.928" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_16">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="28.844688" y="40.107141" transform="rotate(-0 28.844688 40.107141)">6</text>
+</g>
+</g>
+<g id="text_17">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="15.558281" y="106.992" transform="rotate(-90 15.558281 106.992)">y</text>
+</g>
+</g>
+<g id="line2d_31">
+<path d="M 51.062869 197.712 
+L 57.274372 194.009143 
+L 63.485875 190.306286 
+L 69.697378 186.603429 
+L 75.90888 182.900571 
+L 82.120383 179.197714 
+L 88.331886 175.494857 
+L 94.543389 171.792 
+L 100.754892 168.089143 
+L 106.966394 164.386286 
+L 113.177897 160.683429 
+L 119.3894 156.980571 
+L 125.600903 153.277714 
+L 131.812405 149.574857 
+L 138.023908 145.872 
+L 144.235411 142.169143 
+L 150.446914 138.466286 
+L 156.658417 134.763429 
+L 162.869919 131.060571 
+L 169.081422 127.357714 
+L 175.292925 123.654857 
+L 181.504428 119.952 
+L 187.715931 116.249143 
+L 193.927433 112.546286 
+L 200.138936 108.843429 
+L 206.350439 105.140571 
+L 212.561942 101.437714 
+L 218.773444 97.734857 
+L 224.984947 94.032 
+L 231.19645 90.329143 
+L 237.407953 86.626286 
+L 243.619456 82.923429 
+L 249.830958 79.220571 
+L 256.042461 75.517714 
+L 262.253964 71.814857 
+L 268.465467 68.112 
+L 274.67697 64.409143 
+L 280.888472 60.706286 
+L 287.099975 57.003429 
+L 293.311478 53.300571 
+L 299.522981 49.597714 
+L 305.734483 45.894857 
+L 311.945986 42.192 
+L 318.157489 38.489143 
+L 324.368992 34.786286 
+L 330.580495 31.083429 
+L 336.791997 27.380571 
+L 343.0035 23.677714 
+L 349.215003 19.974857 
+L 355.426506 16.272 
+" clip-path="url(#pa149e4ba1e)" style="fill: none; stroke: #1f77b4; stroke-width: 2.5; stroke-linecap: square"/>
+</g>
+<g id="patch_3">
+<path d="M 35.844688 206.784 
+L 35.844688 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_4">
+<path d="M 370.644688 206.784 
+L 370.644688 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_5">
+<path d="M 35.844688 206.784 
+L 370.644688 206.784 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_6">
+<path d="M 35.844688 7.2 
+L 370.644688 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="PathCollection_1">
+<defs>
+<path id="m2fd214b18b" d="M 0 3.872983 
+C 1.027127 3.872983 2.012324 3.464901 2.738613 2.738613 
+C 3.464901 2.012324 3.872983 1.027127 3.872983 0 
+C 3.872983 -1.027127 3.464901 -2.012324 2.738613 -2.738613 
+C 2.012324 -3.464901 1.027127 -3.872983 0 -3.872983 
+C -1.027127 -3.872983 -2.012324 -3.464901 -2.738613 -2.738613 
+C -3.464901 -2.012324 -3.872983 -1.027127 -3.872983 0 
+C -3.872983 1.027127 -3.464901 2.012324 -2.738613 2.738613 
+C -2.012324 3.464901 -1.027127 3.872983 0 3.872983 
+z
+" style="stroke: #ff7f0e"/>
+</defs>
+<g clip-path="url(#pa149e4ba1e)">
+<use xlink:href="#m2fd214b18b" x="127.153778" y="156.888" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m2fd214b18b" x="203.244687" y="96.408" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m2fd214b18b" x="279.335597" y="66.168" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+</g>
+</g>
+<g id="legend_1">
+<g id="patch_7">
+<path d="M 43.544688 48.597813 
+L 196.693906 48.597813 
+Q 198.893906 48.597813 198.893906 46.397813 
+L 198.893906 14.9 
+Q 198.893906 12.7 196.693906 12.7 
+L 43.544688 12.7 
+Q 41.344688 12.7 41.344688 14.9 
+L 41.344688 46.397813 
+Q 41.344688 48.597813 43.544688 48.597813 
+L 43.544688 48.597813 
+z
+" style="fill: none; opacity: 0.35; stroke: currentColor; stroke-linejoin: miter"/>
+</g>
+<g id="PathCollection_2">
+<g>
+<use xlink:href="#m2fd214b18b" x="56.744688" y="22.570781" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+</g>
+</g>
+<g id="text_18">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="76.544688" y="25.458281" transform="rotate(-0 76.544688 25.458281)">data</text>
+</g>
+<g id="line2d_32">
+<path d="M 45.744688 37.754219 
+L 56.744688 37.754219 
+L 67.744687 37.754219 
+" style="fill: none; stroke: #1f77b4; stroke-width: 2.5; stroke-linecap: square"/>
+</g>
+<g id="text_19">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="76.544688" y="41.604219" transform="rotate(-0 76.544688 41.604219)">y_hat = 1.50x + 0.65</text>
+</g>
+</g>
+</g>
+</g>
+<defs>
+<clipPath id="pa149e4ba1e">
+<rect x="35.844688" y="7.2" width="334.8" height="199.584"/>
+</clipPath>
+</defs>
+</svg></div><figcaption>الرسم الذي يظهر عندما تشغّل الكود.</figcaption></figure><div class="callout mistake"><div class="ct">خطأ شائع: الخلط بين المدخل والمعامل</div><div class="blk"><p>المدخل <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>x</mi></mrow></math></bdi> يأتي من البيانات. لا نغيّره، ولا نتعلّمه.</p><p>المعاملات <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>w</mi></mrow></math></bdi> و <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>b</mi></mrow></math></bdi> هي التي نبحث عنها.</p><p>عندما نقول إن النموذج يتعلّم، نقصد أن <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>w</mi></mrow></math></bdi> و <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>b</mi></mrow></math></bdi> يتغيّران. البيانات ثابتة.</p></div></div><div class="callout interview"><div class="ct">سؤال مقابلة</div><div class="blk"><p>سؤال قد تسمعه في المقابلة:</p></div><div class="en" dir="ltr"><p>What does it mean to "train" a model?</p></div><div class="blk"><p>جواب قصير وجيد:</p></div><div class="en" dir="ltr"><p>It means finding the values of the model's parameters that make its predictions close to the true answers on the training data. We measure "close" with a loss function, like the mean squared error, and we change the parameters to make the loss small.</p></div></div><section class="summary"><div class="ct">الخلاصة</div><ul class="l"><li>معادلة الخط <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>y</mi><mo>=</mo><mi>w</mi><mi>x</mi><mo>+</mo><mi>b</mi></mrow></math></bdi>: الميل <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>w</mi></mrow></math></bdi> والإزاحة <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>b</mi></mrow></math></bdi>.</li><li>الدالة آلة: مدخل، ثم قاعدة، ثم مخرج.</li><li>النموذج دالة فيها معاملات قابلة للتعديل. التعلّم هو البحث عن أفضلها.</li><li>نقيس جودة النموذج بالخطأ. نربّع الأخطاء ثم نأخذ المتوسط.</li><li>البحث بالتجربة لا ينفع مع معاملات كثيرة. نحتاج المشتقة.</li></ul></section><section class="quiz" data-quiz="l03-q"><h2>اختبر فهمك</h2><div class="q" data-answer="1"><div class="qt"><span class="qn">1.</span>في النموذج <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mover accent="true"><mi>y</mi><mo>^</mo></mover><mo>=</mo><mi>w</mi><mi>x</mi><mo>+</mo><mi>b</mi></mrow></math></bdi>، ما الذي يتغيّر أثناء التعلّم؟</div><div class="opts"><button type="button" class="opt">المدخل <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>x</mi></mrow></math></bdi></button><button type="button" class="opt">الميل <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>w</mi></mrow></math></bdi> والإزاحة <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>b</mi></mrow></math></bdi></button><button type="button" class="opt">الجواب الصحيح <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>y</mi></mrow></math></bdi></button></div><div class="explain" hidden><span class="verdict"></span><p>البيانات ثابتة. التعلّم يغيّر المعاملات فقط، حتى يصغر الخطأ.</p></div></div><div class="q" data-answer="2"><div class="qt"><span class="qn">2.</span>النموذج توقع 7، والجواب الصحيح 10. ما هو مربع الخطأ؟</div><div class="opts"><button type="button" class="opt">3</button><button type="button" class="opt">−3</button><button type="button" class="opt">9</button></div><div class="explain" hidden><span class="verdict"></span><p>الخطأ هو 7 ناقص 10، أي سالب 3. ومربعه 9.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">3.</span>لماذا نربّع الأخطاء قبل أن نجمعها؟</div><div class="opts"><button type="button" class="opt">لكي تصبح الأرقام أكبر فقط</button><button type="button" class="opt">لكي لا يلغي الخطأ الموجب الخطأ السالب، ولكي نعاقب الأخطاء الكبيرة أكثر</button><button type="button" class="opt">لأن المربع أسهل في الحساب</button></div><div class="explain" hidden><span class="verdict"></span><p>بدون التربيع، خطأ موجب وخطأ سالب قد يجمعان إلى صفر، مع أن النموذج أخطأ مرتين.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">4.</span>في نموذج سعر الشقة، وزن عمر البناء سالب. ماذا يعني ذلك؟</div><div class="opts"><button type="button" class="opt">عمر البناء لا يؤثر في السعر</button><button type="button" class="opt">كلما زاد عمر البناء، قلّ السعر المتوقع</button><button type="button" class="opt">كلما زاد عمر البناء، زاد السعر المتوقع</button></div><div class="explain" hidden><span class="verdict"></span><p>الوزن السالب يعني أن زيادة المدخل تنقص المخرج.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">5.</span>لماذا لا نبحث عن المعاملات بتجربة كل القيم الممكنة؟</div><div class="opts"><button type="button" class="opt">لأن النتيجة تكون خاطئة</button><button type="button" class="opt">لأن عدد التجارب يكبر بسرعة هائلة مع عدد المعاملات</button><button type="button" class="opt">لأن بايثون لا تسمح بحلقتين متداخلتين</button></div><div class="explain" hidden><span class="verdict"></span><p>مع 100 قيمة لكل معامل، عشرة معاملات تحتاج <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msup><mn>10</mn><mn>20</mn></msup></mrow></math></bdi> تجربة. هذا آلاف السنين من الحساب.</p></div></div><div class="row"><span class="score"></span><button type="button" class="btn ghost quiz-reset">أعد المحاولة</button></div></section><section class="exercise"><div class="xt">تمرين: احسب الخطأ، ثم ابحث بالكود</div><div class="blk"><p>عندك ثلاثة أمثلة: النقطة الأولى <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>1</mn><mo separator="true">,</mo><mn>3</mn><mo stretchy="false">)</mo></mrow></math></bdi>، والثانية <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>2</mn><mo separator="true">,</mo><mn>5</mn><mo stretchy="false">)</mo></mrow></math></bdi>، والثالثة <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>4</mn><mo separator="true">,</mo><mn>9</mn><mo stretchy="false">)</mo></mrow></math></bdi>.</p></div><div class="blk"><p>الجزء الأول، على الورق:</p><p>احسب متوسط مربعات الأخطاء للنموذج <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mover accent="true"><mi>y</mi><mo>^</mo></mover><mo>=</mo><mn>2</mn><mi>x</mi><mo>+</mo><mn>1</mn></mrow></math></bdi>.</p><p>ثم احسبه للنموذج <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mover accent="true"><mi>y</mi><mo>^</mo></mover><mo>=</mo><mn>3</mn><mi>x</mi></mrow></math></bdi>.</p></div><div class="blk"><p>الجزء الثاني، بالكود:</p><p>اكتب دالة تحسب متوسط الخطأ لنموذج بدون إزاحة: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mover accent="true"><mi>y</mi><mo>^</mo></mover><mo>=</mo><mi>w</mi><mi>x</mi></mrow></math></bdi>.</p><p>جرّب قيم <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>w</mi></mrow></math></bdi> من 0 إلى 5 بخطوة 0.1، واطبع أفضل قيمة.</p></div><details><summary>تلميح</summary><div class="dbody"><div class="blk"><p>في النموذج الأول، احسب التوقعات: 3 و 5 و 9. ماذا تلاحظ؟</p><p>في الجزء الثاني، يمكنك استخدام نفس فكرة البحث في الدرس، لكن بحلقة واحدة فقط.</p></div></div></details><details class="sol"><summary>الحل (افتحه بعد أن تحاول)</summary><div class="dbody"><div class="blk"><p>النموذج الأول يعطي 3 و 5 و 9. كلها صحيحة تماماً، فالخطأ صفر.</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>MSE</mtext><mo>=</mo><mfrac><mrow><msup><mn>0</mn><mn>2</mn></msup><mo>+</mo><msup><mn>0</mn><mn>2</mn></msup><mo>+</mo><msup><mn>0</mn><mn>2</mn></msup></mrow><mn>3</mn></mfrac><mo>=</mo><mn>0</mn></mrow></math></div></div><div class="blk"><p>النموذج الثاني يعطي 3 و 6 و 12. الأخطاء 0 و 1 و 3.</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>MSE</mtext><mo>=</mo><mfrac><mrow><mn>0</mn><mo>+</mo><mn>1</mn><mo>+</mo><mn>9</mn></mrow><mn>3</mn></mfrac><mo>=</mo><mfrac><mn>10</mn><mn>3</mn></mfrac><mo>≈</mo><mn>3.333</mn></mrow></math></div></div><div class="blk"><p>والكود:</p></div><div class="code "><div class="code-head"><span class="path"></span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">])</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">9</span><span class="p">])</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">mse_no_bias</span><span class="p">(</span><span class="n">w</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">w</span> <span class="o">*</span> <span class="n">x</span> <span class="o">-</span> <span class="n">y</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="n">best_w</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">5.01</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="n">mse_no_bias</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;best w = </span><span class="si">{</span><span class="n">best_w</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">, MSE = </span><span class="si">{</span><span class="n">mse_no_bias</span><span class="p">(</span><span class="n">best_w</span><span class="p">)</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>best w = 2.3, MSE = 0.2300</pre></div><div class="blk"><p>أفضل ميل بدون إزاحة هو 2.3 تقريباً، ولا يصل الخطأ إلى صفر.</p><p>لأن هذه النقاط تحتاج إزاحة 1. بدون إزاحة، يجب أن يمر الخط من الصفر، فلا يستطيع أن يمر بها كلها.</p></div></div></details><div class="askbox" data-kind="review" hidden><div class="al">اطلب من كلود أن يراجع حلّك</div><div class="ah">اكتب إجابتك أو الصق الكود. سيقارنه بالحل ويشرح لك بالعربي. هذا يستهلك من رصيد استخدامك.</div><textarea id="rv-l03-1" dir="auto" placeholder="اكتب إجابتك هنا"></textarea><div class="row"><button type="button" class="btn ask-go">راجع حلّي</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></div><pre hidden class="x-task">عندك ثلاثة أمثلة: النقطة الأولى $(1, 3)$، والثانية $(2, 5)$، والثالثة $(4, 9)$.
+
+الجزء الأول، على الورق:
+احسب متوسط مربعات الأخطاء للنموذج $\hat{y} = 2x + 1$.
+ثم احسبه للنموذج $\hat{y} = 3x$.
+
+الجزء الثاني، بالكود:
+اكتب دالة تحسب متوسط الخطأ لنموذج بدون إزاحة: $\hat{y} = wx$.
+جرّب قيم $w$ من 0 إلى 5 بخطوة 0.1، واطبع أفضل قيمة.</pre><pre hidden class="x-solution">النموذج الأول يعطي 3 و 5 و 9. كلها صحيحة تماماً، فالخطأ صفر.
+
+$$\text{MSE} = \frac{0^2 + 0^2 + 0^2}{3} = 0$$
+
+النموذج الثاني يعطي 3 و 6 و 12. الأخطاء 0 و 1 و 3.
+
+$$\text{MSE} = \frac{0 + 1 + 9}{3} = \frac{10}{3} \approx 3.333$$
+
+والكود:
+
+```python
+import numpy as np
+
+x = np.array([1, 2, 4])
+y = np.array([3, 5, 9])
+
+def mse_no_bias(w):
+    return np.mean((w * x - y) ** 2)
+
+best_w = min(np.arange(0, 5.01, 0.1), key=mse_no_bias)
+print(f"best w = {best_w:.1f}, MSE = {mse_no_bias(best_w):.4f}")
+```
+
+أفضل ميل بدون إزاحة هو 2.3 تقريباً، ولا يصل الخطأ إلى صفر.
+لأن هذه النقاط تحتاج إزاحة 1. بدون إزاحة، يجب أن يمر الخط من الصفر، فلا يستطيع أن يمر بها كلها.</pre></section></article><section class="askbox" data-kind="ask" hidden><div class="al">عندك سؤال عن هذا الدرس؟ اسأل كلود</div><div class="ah">اكتب سؤالك بالعربي. كلود يقرأ نص الدرس ويجيبك. هذا يستهلك من رصيد استخدامك.</div><textarea id="ask-l03" dir="auto" placeholder="مثلاً: لماذا نضرب هنا في المشتقة؟"></textarea><div class="row"><button type="button" class="btn ask-go">اسأل</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></section><div class="donebox"><span class="dmsg"></span><button type="button" class="btn">أنهيت هذا الدرس</button></div><nav class="pager" aria-label="التنقل بين الدروس"><a class="prev" href="#l02"><small>الدرس السابق</small>تجهيز بيئة العمل، وأول خطوات مع نمباي</a><a class="next" href="#l04"><small>الدرس التالي</small>المتجهات: قائمة أرقام تصف شيئاً</a></nav></div>

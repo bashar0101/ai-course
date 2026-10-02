@@ -1,0 +1,407 @@
+<div class="page"><article><div class="eyebrow">الجزء الأول · الرياضيات والإحصاء</div><h1>من الدرجات إلى الاحتمالات: الأسّ واللوغاريتم</h1><div class="meta"><span>الدرس 13 من 59</span><span>المدة: حوالي 45 دقيقة</span><span class="nbdl-slot"></span></div><div class="chips" dir="ltr"><bdi class="chip">exponential</bdi><bdi class="chip">natural logarithm</bdi><bdi class="chip">logit</bdi><bdi class="chip">sigmoid</bdi><bdi class="chip">softmax</bdi><bdi class="chip">temperature</bdi><bdi class="chip">numerical stability</bdi><bdi class="chip">underflow</bdi><bdi class="chip">overflow</bdi></div><div class="goals"><b>بعد هذا الدرس ستعرف:</b><ul><li>تفهم الدالة الأسية، ولماذا مخرجها موجب دائماً</li><li>تفهم اللوغاريتم، وكيف يحوّل الضرب إلى جمع</li><li>تحوّل درجة واحدة إلى احتمال بدالة السيغمويد</li><li>تحوّل قائمة درجات إلى توزيع احتمالي بدالة سوفتماكس</li><li>تفهم الحرارة، وتكتب سوفتماكس بطريقة لا تنفجر عددياً</li></ul></div><h2>المشكلة: درجات، ونريد احتمالات</h2><div class="blk"><p>النموذج الخطي يعطي أي رقم: 3، أو سالب 7، أو 250.</p><p>لكن في التصنيف نريد احتمالاً:</p></div><ul class="l"><li>لسؤال نعم أو لا: رقم بين صفر وواحد.</li><li>لعدة فئات: أرقام موجبة، مجموعها واحد.</li></ul><div class="blk"><p>الرقم الخام الذي يخرج من النموذج قبل التحويل اسمه <b>الدرجة الخام</b>:</p></div><div class="blk"><div class="term" dir="ltr"><code>logit</code></div></div><div class="blk"><p>نحتاج دالتين تحوّلان الدرجات إلى احتمالات. وكلتاهما مبنية على الدالة الأسية.</p></div><h2>الدالة الأسية</h2><div class="blk"><p>الرقم <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>e</mi></mrow></math></bdi> ثابت رياضي، مثل <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>π</mi></mrow></math></bdi>:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>e</mi><mo>≈</mo><mn>2.718</mn></mrow></math></div></div><div class="blk"><p>والدالة الأسية ترفعه إلى أس المدخل:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><msup><mi>e</mi><mi>x</mi></msup></mrow></math></div></div><div class="tablewrap"><table><thead><tr><th><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>x</mi></mrow></math></bdi></th><th>−2</th><th>−1</th><th>0</th><th>1</th><th>2</th><th>5</th></tr></thead><tbody><tr><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msup><mi>e</mi><mi>x</mi></msup></mrow></math></bdi></td><td>0.135</td><td>0.368</td><td>1</td><td>2.718</td><td>7.389</td><td>148.4</td></tr></tbody></table></div><div class="blk"><p>ثلاث صفات مهمة:</p></div><ul class="l"><li><b>دائماً موجبة.</b> حتى مع مدخل سالب جداً، الناتج رقم موجب صغير. هذا ما نحتاجه للاحتمالات.</li><li><b>تحافظ على الترتيب.</b> المدخل الأكبر يعطي مخرجاً أكبر.</li><li><b>تكبر بسرعة هائلة.</b> كل زيادة بواحد تضرب الناتج في 2.718 تقريباً.</li></ul><h2>اللوغاريتم: عكس الأسّية</h2><div class="blk"><p>اللوغاريتم الطبيعي يجيب عن سؤال: ما الأس الذي يعطي هذا الرقم؟</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>ln</mi><mo>⁡</mo><mo stretchy="false">(</mo><msup><mi>e</mi><mi>x</mi></msup><mo stretchy="false">)</mo><mo>=</mo><mi>x</mi><mspace width="2em"/><mi>ln</mi><mo>⁡</mo><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo><mo>=</mo><mn>0</mn></mrow></math></div></div><div class="blk"><p>لرقم أقل من واحد، اللوغاريتم سالب. والاحتمالات كلها أقل من واحد:</p></div><div class="tablewrap"><table><thead><tr><th>الاحتمال <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>p</mi></mrow></math></bdi></th><th>1</th><th>0.5</th><th>0.1</th><th>0.01</th></tr></thead><tbody><tr><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>ln</mi><mo>⁡</mo><mi>p</mi></mrow></math></bdi></td><td>0</td><td>−0.693</td><td>−2.303</td><td>−4.605</td></tr></tbody></table></div><h3>القاعدة الذهبية: الضرب يصبح جمعاً</h3><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>ln</mi><mo>⁡</mo><mo stretchy="false">(</mo><mi>a</mi><mo>×</mo><mi>b</mi><mo stretchy="false">)</mo><mo>=</mo><mi>ln</mi><mo>⁡</mo><mi>a</mi><mo>+</mo><mi>ln</mi><mo>⁡</mo><mi>b</mi></mrow></math></div></div><div class="blk"><p>لماذا يهمنا هذا؟ لأننا سنضرب احتمالات كثيرة جداً في الدرس القادم.</p><p>احتمال جملة من ألف كلمة يساوي حاصل ضرب ألف احتمال صغير.</p><p>حاصل ضرب كهذا صغير جداً، لدرجة أن الجهاز يحفظه صفراً. هذه المشكلة اسمها:</p></div><div class="blk"><div class="term" dir="ltr"><code>underflow</code></div></div><div class="blk"><p>أما مجموع اللوغاريتمات فرقم عادي. لذلك نعمل مع لوغاريتم الاحتمالات دائماً تقريباً.</p></div><h2>السيغمويد: درجة واحدة إلى احتمال</h2><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>σ</mi><mo stretchy="false">(</mo><mi>z</mi><mo stretchy="false">)</mo><mo>=</mo><mfrac><mn>1</mn><mrow><mn>1</mn><mo>+</mo><msup><mi>e</mi><mrow><mo>−</mo><mi>z</mi></mrow></msup></mrow></mfrac></mrow></math></div></div><ul class="l"><li>إذا كانت الدرجة كبيرة وموجبة: الأسّ في المقام صغير جداً، والناتج قريب من 1.</li><li>إذا كانت كبيرة وسالبة: المقام كبير جداً، والناتج قريب من 0.</li><li>إذا كانت صفراً: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1</mn><mi mathvariant="normal">/</mi><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><mn>1</mn><mo stretchy="false">)</mo><mo>=</mo><mn>0.5</mn></mrow></math></bdi> بالضبط.</li></ul><figure class="plot"><div class="svgwrap"><svg xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 388.339375 224.099875" xmlns="http://www.w3.org/2000/svg" version="1.1">
+<defs>
+</defs>
+<g id="figure_1">
+<g id="patch_1">
+<path d="M 0 224.099875 
+L 388.339375 224.099875 
+L 388.339375 0 
+L 0 0 
+L 0 224.099875 
+z
+" style="fill: none"/>
+</g>
+<g id="axes_1">
+<g id="patch_2">
+<path d="M 46.339375 184.608 
+L 381.139375 184.608 
+L 381.139375 7.2 
+L 46.339375 7.2 
+L 46.339375 184.608 
+z
+" style="fill: none"/>
+</g>
+<g id="matplotlib.axis_1">
+<g id="xtick_1">
+<g id="line2d_1">
+<path d="M 83.297817 184.608 
+L 83.297817 7.2 
+" clip-path="url(#pf1524e7816)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_2">
+<defs>
+<path id="m58fccc6fc8" d="M 0 0 
+L 0 3.5 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#m58fccc6fc8" x="83.297817" y="184.608" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_1">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="83.297817" y="199.966281" transform="rotate(-0 83.297817 199.966281)">−6</text>
+</g>
+</g>
+<g id="xtick_2">
+<g id="line2d_3">
+<path d="M 126.778336 184.608 
+L 126.778336 7.2 
+" clip-path="url(#pf1524e7816)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_4">
+<g>
+<use xlink:href="#m58fccc6fc8" x="126.778336" y="184.608" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_2">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="126.778336" y="199.966281" transform="rotate(-0 126.778336 199.966281)">−4</text>
+</g>
+</g>
+<g id="xtick_3">
+<g id="line2d_5">
+<path d="M 170.258856 184.608 
+L 170.258856 7.2 
+" clip-path="url(#pf1524e7816)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_6">
+<g>
+<use xlink:href="#m58fccc6fc8" x="170.258856" y="184.608" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_3">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="170.258856" y="199.966281" transform="rotate(-0 170.258856 199.966281)">−2</text>
+</g>
+</g>
+<g id="xtick_4">
+<g id="line2d_7">
+<path d="M 213.739375 184.608 
+L 213.739375 7.2 
+" clip-path="url(#pf1524e7816)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_8">
+<g>
+<use xlink:href="#m58fccc6fc8" x="213.739375" y="184.608" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_4">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="213.739375" y="199.966281" transform="rotate(-0 213.739375 199.966281)">0</text>
+</g>
+</g>
+<g id="xtick_5">
+<g id="line2d_9">
+<path d="M 257.219894 184.608 
+L 257.219894 7.2 
+" clip-path="url(#pf1524e7816)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_10">
+<g>
+<use xlink:href="#m58fccc6fc8" x="257.219894" y="184.608" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_5">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="257.219894" y="199.966281" transform="rotate(-0 257.219894 199.966281)">2</text>
+</g>
+</g>
+<g id="xtick_6">
+<g id="line2d_11">
+<path d="M 300.700414 184.608 
+L 300.700414 7.2 
+" clip-path="url(#pf1524e7816)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_12">
+<g>
+<use xlink:href="#m58fccc6fc8" x="300.700414" y="184.608" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_6">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="300.700414" y="199.966281" transform="rotate(-0 300.700414 199.966281)">4</text>
+</g>
+</g>
+<g id="xtick_7">
+<g id="line2d_13">
+<path d="M 344.180933 184.608 
+L 344.180933 7.2 
+" clip-path="url(#pf1524e7816)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_14">
+<g>
+<use xlink:href="#m58fccc6fc8" x="344.180933" y="184.608" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_7">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="344.180933" y="199.966281" transform="rotate(-0 344.180933 199.966281)">6</text>
+</g>
+</g>
+<g id="text_8">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="213.739375" y="214.612219" transform="rotate(-0 213.739375 214.612219)">z (logit)</text>
+</g>
+</g>
+<g id="matplotlib.axis_2">
+<g id="ytick_1">
+<g id="line2d_15">
+<path d="M 46.339375 176.691203 
+L 381.139375 176.691203 
+" clip-path="url(#pf1524e7816)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_16">
+<defs>
+<path id="md89e57790f" d="M 0 0 
+L -3.5 0 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#md89e57790f" x="46.339375" y="176.691203" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_9">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="39.339375" y="180.870343" transform="rotate(-0 39.339375 180.870343)">0.0</text>
+</g>
+</g>
+<g id="ytick_2">
+<g id="line2d_17">
+<path d="M 46.339375 144.376322 
+L 381.139375 144.376322 
+" clip-path="url(#pf1524e7816)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_18">
+<g>
+<use xlink:href="#md89e57790f" x="46.339375" y="144.376322" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_10">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="39.339375" y="148.555462" transform="rotate(-0 39.339375 148.555462)">0.2</text>
+</g>
+</g>
+<g id="ytick_3">
+<g id="line2d_19">
+<path d="M 46.339375 112.061441 
+L 381.139375 112.061441 
+" clip-path="url(#pf1524e7816)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_20">
+<g>
+<use xlink:href="#md89e57790f" x="46.339375" y="112.061441" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_11">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="39.339375" y="116.240581" transform="rotate(-0 39.339375 116.240581)">0.4</text>
+</g>
+</g>
+<g id="ytick_4">
+<g id="line2d_21">
+<path d="M 46.339375 79.746559 
+L 381.139375 79.746559 
+" clip-path="url(#pf1524e7816)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_22">
+<g>
+<use xlink:href="#md89e57790f" x="46.339375" y="79.746559" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_12">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="39.339375" y="83.9257" transform="rotate(-0 39.339375 83.9257)">0.6</text>
+</g>
+</g>
+<g id="ytick_5">
+<g id="line2d_23">
+<path d="M 46.339375 47.431678 
+L 381.139375 47.431678 
+" clip-path="url(#pf1524e7816)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_24">
+<g>
+<use xlink:href="#md89e57790f" x="46.339375" y="47.431678" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_13">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="39.339375" y="51.610819" transform="rotate(-0 39.339375 51.610819)">0.8</text>
+</g>
+</g>
+<g id="ytick_6">
+<g id="line2d_25">
+<path d="M 46.339375 15.116797 
+L 381.139375 15.116797 
+" clip-path="url(#pf1524e7816)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_26">
+<g>
+<use xlink:href="#md89e57790f" x="46.339375" y="15.116797" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_14">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="39.339375" y="19.295938" transform="rotate(-0 39.339375 19.295938)">1.0</text>
+</g>
+</g>
+<g id="text_15">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="15.558281" y="95.904" transform="rotate(-90 15.558281 95.904)">sigmoid(z)</text>
+</g>
+</g>
+<g id="line2d_27">
+<path d="M 61.557557 176.544 
+L 83.952206 176.279513 
+L 98.203346 175.900097 
+L 108.382732 175.431363 
+L 116.52624 174.865382 
+L 123.65181 174.168287 
+L 129.759442 173.366768 
+L 134.849135 172.512501 
+L 139.938828 171.445993 
+L 145.028521 170.118652 
+L 149.100275 168.830712 
+L 153.172029 167.305672 
+L 157.243784 165.506284 
+L 160.297599 163.95245 
+L 163.351415 162.203549 
+L 166.405231 160.241079 
+L 169.459047 158.046474 
+L 172.512862 155.601635 
+L 175.566678 152.889596 
+L 178.620494 149.89532 
+L 181.67431 146.606614 
+L 184.728125 143.015132 
+L 187.781941 139.117417 
+L 190.835757 134.915926 
+L 194.907511 128.858506 
+L 198.979266 122.321381 
+L 203.05102 115.37249 
+L 208.140713 106.249255 
+L 225.445669 74.664324 
+L 229.517423 67.810654 
+L 233.589177 61.388064 
+L 237.660932 55.458248 
+L 240.714747 51.357339 
+L 243.768563 47.56174 
+L 246.822379 44.07183 
+L 249.876195 40.882407 
+L 252.93001 37.983725 
+L 255.983826 35.362536 
+L 259.037642 33.003064 
+L 262.091458 30.887884 
+L 265.145273 28.998674 
+L 268.199089 27.316834 
+L 272.270844 25.365267 
+L 276.342598 23.707925 
+L 280.414352 22.305869 
+L 284.486107 21.123642 
+L 289.575799 19.907016 
+L 294.665492 18.930764 
+L 300.773124 18.013379 
+L 306.880755 17.313584 
+L 314.006325 16.705699 
+L 323.167773 16.162852 
+L 334.365097 15.743417 
+L 348.616237 15.442729 
+L 365.921193 15.264 
+L 365.921193 15.264 
+" clip-path="url(#pf1524e7816)" style="fill: none; stroke: #1f77b4; stroke-width: 2.5; stroke-linecap: square"/>
+</g>
+<g id="line2d_28">
+<path d="M 46.339375 95.904 
+L 381.139375 95.904 
+" clip-path="url(#pf1524e7816)" style="fill: none; stroke-dasharray: 1,1.65; stroke-dashoffset: 0; stroke: #808080"/>
+</g>
+<g id="line2d_29">
+<path d="M 213.739375 184.608 
+L 213.739375 7.2 
+" clip-path="url(#pf1524e7816)" style="fill: none; stroke-dasharray: 1,1.65; stroke-dashoffset: 0; stroke: #808080"/>
+</g>
+<g id="patch_3">
+<path d="M 46.339375 184.608 
+L 46.339375 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_4">
+<path d="M 381.139375 184.608 
+L 381.139375 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_5">
+<path d="M 46.339375 184.608 
+L 381.139375 184.608 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_6">
+<path d="M 46.339375 7.2 
+L 381.139375 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+</g>
+</g>
+<defs>
+<clipPath id="pf1524e7816">
+<rect x="46.339375" y="7.2" width="334.8" height="177.408"/>
+</clipPath>
+</defs>
+</svg></div><figcaption>السيغمويد: منحنى على شكل حرف مائل. يأخذ أي رقم، ويعطي رقماً بين صفر وواحد. وعند الصفر يعطي النصف.</figcaption></figure><details class="setup"><summary>كود الرسم</summary><div class="dbody"><div class="code "><div class="code-head"><span class="path">sigmoid_plot.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">7</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">300</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">3.2</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">z</span><span class="p">)),</span> <span class="n">lw</span><span class="o">=</span><span class="mf">2.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;gray&quot;</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;:&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;z (logit)&quot;</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;sigmoid(z)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></pre></div></div></details><div class="blk"><p>سنستخدمها في الانحدار اللوجستي في الدرس 18: نموذج خطي، ثم سيغمويد، فيصبح مصنّفاً لفئتين.</p></div><h2>سوفتماكس: قائمة درجات إلى توزيع</h2><div class="blk"><p>لعدة فئات، عندنا درجة لكل فئة. سوفتماكس تعمل خطوتين:</p></div><ol class="l"><li>ترفع <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>e</mi></mrow></math></bdi> إلى أس كل درجة: كل شيء يصبح موجباً.</li><li>تقسم كل ناتج على المجموع: المجموع يصبح واحداً.</li></ol><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>p</mi><mi>i</mi></msub><mo>=</mo><mfrac><msup><mi>e</mi><msub><mi>z</mi><mi>i</mi></msub></msup><mrow><munder><mo>∑</mo><mi>j</mi></munder><msup><mi>e</mi><msub><mi>z</mi><mi>j</mi></msub></msup></mrow></mfrac></mrow></math></div></div><div class="blk"><p>الدرجة الأكبر تأخذ الاحتمال الأكبر، والترتيب لا يتغير.</p><p>لكن الفرق يُضخَّم: بسبب الأسّ، الفرق بين درجتين يصبح نسبة بين احتمالين.</p></div><div class="callout note"><div class="ct">سوفتماكس في آخر كل مصنّف</div><div class="blk"><p>كل مصنّف لعدة فئات تقريباً ينتهي بسوفتماكس. وكذلك النموذج اللغوي الكبير:</p><p>آخر طبقة تعطي درجة لكل كلمة في القاموس، ثم سوفتماكس، فيصبح عندنا احتمال لكل كلمة تالية.</p></div></div><h2>الحرارة</h2><div class="blk"><p>قبل سوفتماكس، نستطيع أن نقسم كل الدرجات على رقم <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>T</mi></mrow></math></bdi> اسمه <b>الحرارة</b>:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mi>p</mi><mi>i</mi></msub><mo>=</mo><mfrac><msup><mi>e</mi><mrow><msub><mi>z</mi><mi>i</mi></msub><mi mathvariant="normal">/</mi><mi>T</mi></mrow></msup><mrow><munder><mo>∑</mo><mi>j</mi></munder><msup><mi>e</mi><mrow><msub><mi>z</mi><mi>j</mi></msub><mi mathvariant="normal">/</mi><mi>T</mi></mrow></msup></mrow></mfrac></mrow></math></div></div><ul class="l"><li>حرارة صغيرة، أقل من 1: الفروق تكبر. الفئة الأعلى تأخذ تقريباً كل شيء.</li><li>حرارة 1: سوفتماكس العادية.</li><li>حرارة كبيرة: الفروق تصغر. الاحتمالات تتقارب.</li></ul><div class="blk"><p>عندما تغيّر إعداد الحرارة في نموذج لغوي، هذا بالضبط ما يحدث. سنعود إليه في الدرس 50.</p></div><div class="widget" data-widget="softmax" data-args="{&quot;names&quot;: &quot;cat,dog,bird&quot;, &quot;logits&quot;: &quot;2,1,0.1&quot;}"><div class="w-fallback">هنا أداة تفاعلية. إذا لم تظهر، حدّث الصفحة.</div></div><section class="hand"><div class="hand-h"><span class="hand-tag">مثال محلول باليد</span><div class="hand-t">من الدرجات إلى الاحتمالات</div></div><div class="hand-body"><div class="blk"><p>نموذج صنّف صورة، وأعطى ثلاث درجات: قطة 2، وكلب 1، وطائر 0.1.</p></div><div class="step">الخطوة الأولى: الأسّ لكل درجة</div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msup><mi>e</mi><mn>2</mn></msup><mo>=</mo><mn>7.389</mn><mspace width="2em"/><msup><mi>e</mi><mn>1</mn></msup><mo>=</mo><mn>2.718</mn><mspace width="2em"/><msup><mi>e</mi><mn>0.1</mn></msup><mo>=</mo><mn>1.105</mn></mrow></math></div></div><div class="step">الخطوة الثانية: المجموع</div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mn>7.389</mn><mo>+</mo><mn>2.718</mn><mo>+</mo><mn>1.105</mn><mo>=</mo><mn>11.212</mn></mrow></math></div></div><div class="step">الخطوة الثالثة: نقسم</div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>p</mi><mo>=</mo><mrow><mo fence="true">(</mo><mfrac><mn>7.389</mn><mn>11.212</mn></mfrac><mo separator="true">,</mo><mtext>  </mtext><mfrac><mn>2.718</mn><mn>11.212</mn></mfrac><mo separator="true">,</mo><mtext>  </mtext><mfrac><mn>1.105</mn><mn>11.212</mn></mfrac><mo fence="true">)</mo></mrow><mo>=</mo><mo stretchy="false">(</mo><mn>0.659</mn><mo separator="true">,</mo><mtext>  </mtext><mn>0.242</mn><mo separator="true">,</mo><mtext>  </mtext><mn>0.099</mn><mo stretchy="false">)</mo></mrow></math></div></div><div class="blk"><p>كلها موجبة، ومجموعها واحد، والقطة ما زالت الأعلى.</p></div><div class="step">نفس الدرجات بحرارة 0.5</div><div class="blk"><p>نقسم على 0.5 أولاً، فتصبح الدرجات 4 و 2 و 0.2:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msup><mi>e</mi><mn>4</mn></msup><mo>=</mo><mn>54.598</mn><mspace width="2em"/><msup><mi>e</mi><mn>2</mn></msup><mo>=</mo><mn>7.389</mn><mspace width="2em"/><msup><mi>e</mi><mn>0.2</mn></msup><mo>=</mo><mn>1.221</mn><mspace width="2em"/><mtext>sum</mtext><mo>=</mo><mn>63.208</mn></mrow></math></div></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>p</mi><mo>=</mo><mo stretchy="false">(</mo><mn>0.864</mn><mo separator="true">,</mo><mtext>  </mtext><mn>0.117</mn><mo separator="true">,</mo><mtext>  </mtext><mn>0.019</mn><mo stretchy="false">)</mo></mrow></math></div></div><div class="blk"><p>القطة صارت شبه مؤكدة.</p></div><div class="step">وبحرارة 2</div><div class="blk"><p>الدرجات تصبح 1 و 0.5 و 0.05:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>p</mi><mo>=</mo><mo stretchy="false">(</mo><mn>0.502</mn><mo separator="true">,</mo><mtext>  </mtext><mn>0.304</mn><mo separator="true">,</mo><mtext>  </mtext><mn>0.194</mn><mo stretchy="false">)</mo></mrow></math></div></div><div class="blk"><p>الاحتمالات تقاربت.</p></div><div class="step">السيغمويد لدرجتين</div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>σ</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo><mo>=</mo><mfrac><mn>1</mn><mrow><mn>1</mn><mo>+</mo><msup><mi>e</mi><mrow><mo>−</mo><mn>2</mn></mrow></msup></mrow></mfrac><mo>=</mo><mfrac><mn>1</mn><mrow><mn>1</mn><mo>+</mo><mn>0.135</mn></mrow></mfrac><mo>=</mo><mn>0.881</mn><mspace width="2em"/><mi>σ</mi><mo stretchy="false">(</mo><mo>−</mo><mn>2</mn><mo stretchy="false">)</mo><mo>=</mo><mn>0.119</mn></mrow></math></div></div><div class="blk"><p>لاحظ أن مجموعهما واحد. هذا ليس صدفة: السيغمويد متناظرة حول النصف.</p></div></div></section><h2>الاستقرار العددي: لا تدع الأرقام تنفجر</h2><div class="blk"><p>الدالة الأسية تكبر بسرعة هائلة.</p><p>أكبر أس يستطيع الجهاز حسابه بالأرقام العادية حوالي 709. بعده يصبح الناتج لانهاية.</p><p>ودرجات مثل 1000 تحدث فعلاً في النماذج الكبيرة.</p></div><div class="blk"><p>الحل حيلة بسيطة: <b>اطرح أكبر درجة من كل الدرجات</b> قبل الأسّ.</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><msup><mi>e</mi><mrow><msub><mi>z</mi><mi>i</mi></msub><mo>−</mo><mi>m</mi></mrow></msup><mrow><munder><mo>∑</mo><mi>j</mi></munder><msup><mi>e</mi><mrow><msub><mi>z</mi><mi>j</mi></msub><mo>−</mo><mi>m</mi></mrow></msup></mrow></mfrac><mo>=</mo><mfrac><mrow><msup><mi>e</mi><msub><mi>z</mi><mi>i</mi></msub></msup><mtext> </mtext><msup><mi>e</mi><mrow><mo>−</mo><mi>m</mi></mrow></msup></mrow><mrow><munder><mo>∑</mo><mi>j</mi></munder><msup><mi>e</mi><msub><mi>z</mi><mi>j</mi></msub></msup><mtext> </mtext><msup><mi>e</mi><mrow><mo>−</mo><mi>m</mi></mrow></msup></mrow></mfrac><mo>=</mo><mfrac><msup><mi>e</mi><msub><mi>z</mi><mi>i</mi></msub></msup><mrow><munder><mo>∑</mo><mi>j</mi></munder><msup><mi>e</mi><msub><mi>z</mi><mi>j</mi></msub></msup></mrow></mfrac></mrow></math></div></div><div class="blk"><p>الرقم <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msup><mi>e</mi><mrow><mo>−</mo><mi>m</mi></mrow></msup></mrow></math></bdi> يظهر فوق وتحت، فيختفي. النتيجة نفسها تماماً.</p><p>لكن الآن أكبر درجة صفر، وأكبر أسّ يساوي 1. لا انفجار أبداً.</p></div><h2>بالكود</h2><div class="code "><div class="code-head"><span class="path">softmax.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">sigmoid</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">z</span><span class="p">))</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">softmax_naive</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+    <span class="n">e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">e</span> <span class="o">/</span> <span class="n">e</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">softmax</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mf">1.0</span><span class="p">):</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span> <span class="o">/</span> <span class="n">T</span>
+    <span class="n">e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">z</span> <span class="o">-</span> <span class="n">z</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>           <span class="c1"># الحيلة: اطرح الأكبر</span>
+    <span class="k">return</span> <span class="n">e</span> <span class="o">/</span> <span class="n">e</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;sigmoid:&quot;</span><span class="p">,</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]))</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;softmax:&quot;</span><span class="p">,</span> <span class="n">softmax</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">])</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;T = 0.5:&quot;</span><span class="p">,</span> <span class="n">softmax</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span> <span class="n">T</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;T = 2  :&quot;</span><span class="p">,</span> <span class="n">softmax</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span> <span class="n">T</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>sigmoid: [0.119 0.5   0.881]
+softmax: [0.659 0.242 0.099]
+T = 0.5: [0.864 0.117 0.019]
+T = 2  : [0.502 0.304 0.194]</pre></div><h3>الانفجار، بعينك</h3><div class="code "><div class="code-head"><span class="path">overflow.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="n">big</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1000.0</span><span class="p">,</span> <span class="mf">999.0</span><span class="p">])</span>
+<span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">over</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">invalid</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;naive :&quot;</span><span class="p">,</span> <span class="n">softmax_naive</span><span class="p">(</span><span class="n">big</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;stable:&quot;</span><span class="p">,</span> <span class="n">softmax</span><span class="p">(</span><span class="n">big</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>naive : [nan nan]
+stable: [0.7311 0.2689]</pre></div><div class="blk"><p>الطريقة الساذجة أعطت قيماً غير رقمية، لأن لانهاية على لانهاية غير معرّفة.</p><p>والطريقة المستقرة أعطت الجواب الصحيح. الفرق بين الدرجتين 1، مثل درجتي القطة والكلب قبل قليل.</p></div><h3>التلاشي: لماذا نجمع اللوغاريتمات</h3><div class="code "><div class="code-head"><span class="path">underflow.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="n">probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>          <span class="c1"># ألف احتمال، كل واحد 0.1</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;product      :&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">probs</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;sum of logs  :&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">probs</span><span class="p">)),</span> <span class="mi">2</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>product      : 0.0
+sum of logs  : -2302.59</pre></div><div class="blk"><p>حاصل الضرب صار صفراً في الجهاز، مع أن قيمته الحقيقية ليست صفراً.</p><p>مجموع اللوغاريتمات رقم عادي تماماً. لذلك تعمل النماذج دائماً مع لوغاريتم الاحتمال.</p></div><details class="more"><summary>مشتقة السيغمويد: شكل جميل سنحتاجه</summary><div class="dbody"><div class="blk"><p>مشتقة السيغمويد تُكتب بالسيغمويد نفسها:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msup><mi>σ</mi><mo mathvariant="normal" lspace="0em" rspace="0em">′</mo></msup><mo stretchy="false">(</mo><mi>z</mi><mo stretchy="false">)</mo><mo>=</mo><mi>σ</mi><mo stretchy="false">(</mo><mi>z</mi><mo stretchy="false">)</mo><mtext> </mtext><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">(</mo><mn>1</mn><mo>−</mo><mi>σ</mi><mo stretchy="false">(</mo><mi>z</mi><mo stretchy="false">)</mo><mo fence="false" stretchy="true" minsize="1.2em" maxsize="1.2em">)</mo></mrow></math></div></div><div class="blk"><p>عند الصفر: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.5</mn><mo>×</mo><mn>0.5</mn><mo>=</mo><mn>0.25</mn></mrow></math></bdi>. وهذه أكبر قيمة ممكنة للمشتقة.</p><p>وبعيداً عن الصفر تقترب من الصفر. تذكّر هذا: في الدرس 42 سنرى كيف يسبب مشكلة في الشبكات العميقة.</p></div><div class="code "><div class="code-head"><span class="path"></span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="k">def</span><span class="w"> </span><span class="nf">numeric_derivative</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">z</span> <span class="o">+</span> <span class="n">h</span><span class="p">)</span> <span class="o">-</span> <span class="n">f</span><span class="p">(</span><span class="n">z</span> <span class="o">-</span> <span class="n">h</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">h</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">z</span> <span class="ow">in</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">]:</span>
+    <span class="n">rule</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">sigmoid</span><span class="p">(</span><span class="n">z</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;z = </span><span class="si">{</span><span class="n">z</span><span class="si">}</span><span class="s2">: rule = </span><span class="si">{</span><span class="n">rule</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2">, numeric = </span><span class="si">{</span><span class="n">numeric_derivative</span><span class="p">(</span><span class="n">sigmoid</span><span class="p">,</span><span class="w"> </span><span class="n">z</span><span class="p">)</span><span class="si">:</span><span class="s2">.5f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>z = 0.0: rule = 0.25000, numeric = 0.25000
+z = 2.0: rule = 0.10499, numeric = 0.10499
+z = 5.0: rule = 0.00665, numeric = 0.00665</pre></div></div></details><div class="callout mistake"><div class="ct">خطأ شائع: تطبيق سوفتماكس مرتين</div><div class="blk"><p>بعض الدوال في المكتبات تنتظر الدرجات الخام، وتطبق سوفتماكس في داخلها.</p><p>إذا أعطيتها احتمالات بعد سوفتماكس، فأنت تطبقها مرتين، ويتعلّم النموذج بشكل أسوأ بصمت. سنرى هذا في باي تورش في الدرس 38.</p></div></div><div class="callout interview"><div class="ct">سؤال مقابلة</div><div class="blk"><p>سؤال قد تسمعه في المقابلة:</p></div><div class="en" dir="ltr"><p>What does softmax do, and why do we subtract the maximum before computing it?</p></div><div class="blk"><p>جواب قصير وجيد:</p></div><div class="en" dir="ltr"><p>Softmax turns a vector of raw scores into probabilities: it takes the exponential of each score and divides by the sum, so all values are positive and add up to one. We subtract the maximum score first because exponentials of large numbers overflow. Subtracting a constant does not change the result, since it cancels in the numerator and denominator.</p></div></div><section class="summary"><div class="ct">الخلاصة</div><ul class="l"><li>الدالة الأسية موجبة دائماً، وتحافظ على الترتيب، وتكبر بسرعة.</li><li>اللوغاريتم عكسها. لوغاريتم الاحتمال سالب، ويحوّل الضرب إلى جمع.</li><li>السيغمويد تحوّل درجة واحدة إلى احتمال بين صفر وواحد.</li><li>سوفتماكس تحوّل قائمة درجات إلى توزيع: أسّ، ثم قسمة على المجموع.</li><li>الحرارة الصغيرة تحدّ التوزيع، والكبيرة تسطّحه.</li><li>اطرح أكبر درجة قبل سوفتماكس. واجمع اللوغاريتمات بدل ضرب الاحتمالات.</li></ul></section><section class="quiz" data-quiz="l13-q"><h2>اختبر فهمك</h2><div class="q" data-answer="1"><div class="qt"><span class="qn">1.</span>ما قيمة السيغمويد عند الصفر؟</div><div class="opts"><button type="button" class="opt">صفر</button><button type="button" class="opt">0.5</button><button type="button" class="opt">1</button></div><div class="explain" hidden><span class="verdict"></span><p>واحد على واحد زائد واحد.</p></div></div><div class="q" data-answer="0"><div class="qt"><span class="qn">2.</span>سوفتماكس للدرجات <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>3</mn><mo separator="true">,</mo><mn>3</mn><mo stretchy="false">)</mo></mrow></math></bdi>. ما الاحتمالات؟</div><div class="opts"><button type="button" class="opt"><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>0.5</mn><mo separator="true">,</mo><mn>0.5</mn><mo stretchy="false">)</mo></mrow></math></bdi></button><button type="button" class="opt"><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>3</mn><mo separator="true">,</mo><mn>3</mn><mo stretchy="false">)</mo></mrow></math></bdi></button><button type="button" class="opt"><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>1</mn><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">)</mo></mrow></math></bdi></button></div><div class="explain" hidden><span class="verdict"></span><p>درجتان متساويتان تعطيان احتمالين متساويين.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">3.</span>ماذا يحدث لمخرج سوفتماكس إذا أضفنا 100 إلى كل الدرجات؟</div><div class="opts"><button type="button" class="opt">كل الاحتمالات تكبر</button><button type="button" class="opt">لا شيء: النتيجة نفسها</button><button type="button" class="opt">تصبح كلها متساوية</button></div><div class="explain" hidden><span class="verdict"></span><p>إضافة رقم ثابت لكل الدرجات تختفي بالقسمة. لهذا حيلة طرح الأكبر صحيحة.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">4.</span>لماذا نجمع لوغاريتمات الاحتمالات بدل ضرب الاحتمالات نفسها؟</div><div class="opts"><button type="button" class="opt">لأن الجمع أدق رياضياً</button><button type="button" class="opt">لأن حاصل ضرب احتمالات كثيرة يصبح صفراً في الجهاز</button><button type="button" class="opt">لأن اللوغاريتم يجعل الاحتمالات موجبة</button></div><div class="explain" hidden><span class="verdict"></span><p>هذه مشكلة التلاشي. مجموع اللوغاريتمات رقم عادي.</p></div></div><div class="q" data-answer="0"><div class="qt"><span class="qn">5.</span>في نموذج لغوي، خفضت الحرارة إلى 0.2. ماذا تتوقع؟</div><div class="opts"><button type="button" class="opt">النموذج يختار الكلمة الأعلى احتمالاً في أغلب الأحيان، والنص أقل تنوعاً</button><button type="button" class="opt">النص يصبح عشوائياً جداً</button><button type="button" class="opt">لا تغيير</button></div><div class="explain" hidden><span class="verdict"></span><p>الحرارة الصغيرة تجعل التوزيع حاداً.</p></div></div><div class="row"><span class="score"></span><button type="button" class="btn ghost quiz-reset">أعد المحاولة</button></div></section><section class="exercise"><div class="xt">تمرين: سوفتماكس بيدك وبالكود</div><div class="blk"><p>درجات نموذج لأربع فئات:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>z</mi><mo>=</mo><mo stretchy="false">(</mo><mn>1</mn><mo separator="true">,</mo><mn>0</mn><mo separator="true">,</mo><mn>0</mn><mo separator="true">,</mo><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></math></div></div><ol class="l"><li>احسب سوفتماكس بيدك. استخدم هذه القيم: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msup><mi>e</mi><mn>1</mn></msup><mo>=</mo><mn>2.718</mn></mrow></math></bdi> و <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msup><mi>e</mi><mrow><mo>−</mo><mn>1</mn></mrow></msup><mo>=</mo><mn>0.368</mn></mrow></math></bdi>.</li><li>احسب السيغمويد للدرجة 1.</li><li>بالكود: طبق سوفتماكس على الدرجات <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>500</mn><mo separator="true">,</mo><mn>499</mn><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">)</mo></mrow></math></bdi> بالطريقة الساذجة والمستقرة. ماذا تلاحظ؟</li></ol><details><summary>تلميح</summary><div class="dbody"><div class="blk"><p>الأسّ للدرجة صفر يساوي 1. المجموع: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>2.718</mn><mo>+</mo><mn>1</mn><mo>+</mo><mn>1</mn><mo>+</mo><mn>0.368</mn></mrow></math></bdi>.</p></div></div></details><details class="sol"><summary>الحل (افتحه بعد أن تحاول)</summary><div class="dbody"><div class="blk"><p>المجموع <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>5.086</mn></mrow></math></bdi>. الاحتمالات:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>p</mi><mo>=</mo><mrow><mo fence="true">(</mo><mfrac><mn>2.718</mn><mn>5.086</mn></mfrac><mo separator="true">,</mo><mtext>  </mtext><mfrac><mn>1</mn><mn>5.086</mn></mfrac><mo separator="true">,</mo><mtext>  </mtext><mfrac><mn>1</mn><mn>5.086</mn></mfrac><mo separator="true">,</mo><mtext>  </mtext><mfrac><mn>0.368</mn><mn>5.086</mn></mfrac><mo fence="true">)</mo></mrow><mo>≈</mo><mo stretchy="false">(</mo><mn>0.534</mn><mo separator="true">,</mo><mtext>  </mtext><mn>0.197</mn><mo separator="true">,</mo><mtext>  </mtext><mn>0.197</mn><mo separator="true">,</mo><mtext>  </mtext><mn>0.072</mn><mo stretchy="false">)</mo></mrow></math></div></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>σ</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo><mo>=</mo><mfrac><mn>1</mn><mrow><mn>1</mn><mo>+</mo><mn>0.368</mn></mrow></mfrac><mo>≈</mo><mn>0.731</mn></mrow></math></div></div><div class="code "><div class="code-head"><span class="path"></span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="nb">print</span><span class="p">(</span><span class="n">softmax</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">sigmoid</span><span class="p">(</span><span class="mf">1.0</span><span class="p">),</span> <span class="mi">3</span><span class="p">))</span>
+<span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">over</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">invalid</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;naive :&quot;</span><span class="p">,</span> <span class="n">softmax_naive</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">500.0</span><span class="p">,</span> <span class="mf">499.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;stable:&quot;</span><span class="p">,</span> <span class="n">softmax</span><span class="p">([</span><span class="mi">500</span><span class="p">,</span> <span class="mi">499</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>[0.534 0.197 0.197 0.072]
+0.731
+naive : [7.31058579e-001 2.68941421e-001 5.20848270e-218]
+stable: [0.7311 0.2689 0.    ]</pre></div><div class="blk"><p>الأسّ لخمسمئة ما زال أقل من الحد، فالطريقة الساذجة نجحت هنا. لكن الأرقام قريبة من حد الانفجار.</p><p>جرّب 800 بدل 500، وسترى القيم غير الرقمية. الطريقة المستقرة تعمل دائماً.</p></div></div></details><div class="askbox" data-kind="review" hidden><div class="al">اطلب من كلود أن يراجع حلّك</div><div class="ah">اكتب إجابتك أو الصق الكود. سيقارنه بالحل ويشرح لك بالعربي. هذا يستهلك من رصيد استخدامك.</div><textarea id="rv-l13-1" dir="auto" placeholder="اكتب إجابتك هنا"></textarea><div class="row"><button type="button" class="btn ask-go">راجع حلّي</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></div><pre hidden class="x-task">درجات نموذج لأربع فئات:
+
+$$z = (1, 0, 0, -1)$$
+
+1. احسب سوفتماكس بيدك. استخدم هذه القيم: $e^{1} = 2.718$ و $e^{-1} = 0.368$.
+2. احسب السيغمويد للدرجة 1.
+3. بالكود: طبق سوفتماكس على الدرجات $(500, 499, 0)$ بالطريقة الساذجة والمستقرة. ماذا تلاحظ؟</pre><pre hidden class="x-solution">المجموع $5.086$. الاحتمالات:
+
+$$p = \left(\frac{2.718}{5.086},\; \frac{1}{5.086},\; \frac{1}{5.086},\; \frac{0.368}{5.086}\right) \approx (0.534,\; 0.197,\; 0.197,\; 0.072)$$
+
+$$\sigma(1) = \frac{1}{1 + 0.368} \approx 0.731$$
+
+```python
+print(softmax([1, 0, 0, -1]).round(3))
+print(round(sigmoid(1.0), 3))
+with np.errstate(over="ignore", invalid="ignore"):
+    print("naive :", softmax_naive(np.array([500.0, 499.0, 0.0])))
+print("stable:", softmax([500, 499, 0]).round(4))
+```
+
+الأسّ لخمسمئة ما زال أقل من الحد، فالطريقة الساذجة نجحت هنا. لكن الأرقام قريبة من حد الانفجار.
+جرّب 800 بدل 500، وسترى القيم غير الرقمية. الطريقة المستقرة تعمل دائماً.</pre></section></article><section class="askbox" data-kind="ask" hidden><div class="al">عندك سؤال عن هذا الدرس؟ اسأل كلود</div><div class="ah">اكتب سؤالك بالعربي. كلود يقرأ نص الدرس ويجيبك. هذا يستهلك من رصيد استخدامك.</div><textarea id="ask-l13" dir="auto" placeholder="مثلاً: لماذا نضرب هنا في المشتقة؟"></textarea><div class="row"><button type="button" class="btn ask-go">اسأل</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></section><div class="donebox"><span class="dmsg"></span><button type="button" class="btn">أنهيت هذا الدرس</button></div><nav class="pager" aria-label="التنقل بين الدروس"><a class="prev" href="#l12"><small>الدرس السابق</small>التوزيعات والقيمة المتوقعة</a><a class="next" href="#l14"><small>الدرس التالي</small>الأرجحية والإنتروبيا المتقاطعة</a></nav></div>

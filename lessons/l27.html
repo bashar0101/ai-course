@@ -1,0 +1,1673 @@
+<div class="page"><article><div class="eyebrow">الجزء الثالث · تقييم النماذج</div><h1>الإفراط في التعلّم وقلّة التعلّم</h1><div class="meta"><span>الدرس 27 من 59</span><span>المدة: حوالي 50 دقيقة</span><span class="nbdl-slot"></span></div><div class="chips" dir="ltr"><bdi class="chip">underfitting</bdi><bdi class="chip">overfitting</bdi><bdi class="chip">model complexity</bdi><bdi class="chip">bias</bdi><bdi class="chip">variance</bdi><bdi class="chip">bias-variance tradeoff</bdi><bdi class="chip">learning curve</bdi><bdi class="chip">generalization gap</bdi></div><div class="goals"><b>بعد هذا الدرس ستعرف:</b><ul><li>تميّز بين قلة التعلّم والإفراط في التعلّم من أرقام التدريب والتحقق</li><li>تفهم الانحياز والتباين بمثال رمي السهام</li><li>ترى بيدك كيف يطابق نموذج معقد نقاط التدريب تماماً، ويفشل مع نقطة جديدة</li><li>ترسم منحنى التعقيد ومنحنى التعلّم، وتقرأهما</li><li>تعرف علاج كل حالة</li></ul></div><h2>مشكلتان متعاكستان</h2><div class="blk"><p><b>قلة التعلّم:</b> النموذج بسيط جداً على المشكلة. مثل خط مستقيم لبيانات على شكل قوس.</p><p>يخطئ كثيراً على بيانات التدريب نفسها. لم يتعلّم حتى ما رآه.</p></div><div class="blk"><p><b>الإفراط في التعلّم:</b> النموذج معقد جداً على كمية البيانات. يحفظ كل نقطة، ومعها الضجيج.</p><p>ممتاز على التدريب، وسيئ على البيانات الجديدة. مثل الطالب الذي حفظ الأجوبة.</p></div><div class="blk"><div class="term" dir="ltr"><code>underfitting · overfitting</code></div></div><h3>كيف تعرف أيهما؟</h3><div class="blk"><p>من رقمين فقط: خطأ التدريب، وخطأ التحقق.</p></div><div class="tablewrap"><table><thead><tr><th>خطأ التدريب</th><th>خطأ التحقق</th><th>التشخيص</th></tr></thead><tbody><tr><td>كبير</td><td>كبير، وقريب منه</td><td>قلة تعلّم</td></tr><tr><td>صغير</td><td>كبير، وبعيد عنه</td><td>إفراط في التعلّم</td></tr><tr><td>صغير</td><td>صغير، وقريب منه</td><td>ممتاز</td></tr></tbody></table></div><div class="blk"><p>الفرق بين الرقمين اسمه <b>فجوة التعميم</b>. الفجوة الكبيرة علامة الإفراط.</p></div><div class="blk"><div class="term" dir="ltr"><code>generalization gap</code></div></div><section class="hand"><div class="hand-h"><span class="hand-tag">مثال محلول باليد</span><div class="hand-t">خط، أم منحنى يمر بكل النقاط؟</div></div><div class="hand-body"><div class="blk"><p>أربع نقاط فيها ضجيج حول خط صاعد:</p></div><div class="tablewrap"><table><thead><tr><th><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>x</mi></mrow></math></bdi></th><th>0</th><th>1</th><th>2</th><th>3</th></tr></thead><tbody><tr><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>y</mi></mrow></math></bdi></td><td>1</td><td>3</td><td>2</td><td>4</td></tr></tbody></table></div><div class="step">النموذج البسيط: أفضل خط</div><div class="blk"><p>المتوسطان: 1.5 و 2.5. من الدرس 16:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>w</mi><mo>=</mo><mfrac><mrow><mo stretchy="false">(</mo><mo>−</mo><mn>1.5</mn><mo stretchy="false">)</mo><mo stretchy="false">(</mo><mo>−</mo><mn>1.5</mn><mo stretchy="false">)</mo><mo>+</mo><mo stretchy="false">(</mo><mo>−</mo><mn>0.5</mn><mo stretchy="false">)</mo><mo stretchy="false">(</mo><mn>0.5</mn><mo stretchy="false">)</mo><mo>+</mo><mo stretchy="false">(</mo><mn>0.5</mn><mo stretchy="false">)</mo><mo stretchy="false">(</mo><mo>−</mo><mn>0.5</mn><mo stretchy="false">)</mo><mo>+</mo><mo stretchy="false">(</mo><mn>1.5</mn><mo stretchy="false">)</mo><mo stretchy="false">(</mo><mn>1.5</mn><mo stretchy="false">)</mo></mrow><mrow><mn>2.25</mn><mo>+</mo><mn>0.25</mn><mo>+</mo><mn>0.25</mn><mo>+</mo><mn>2.25</mn></mrow></mfrac><mo>=</mo><mfrac><mn>4</mn><mn>5</mn></mfrac><mo>=</mo><mn>0.8</mn></mrow></math></div></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>b</mi><mo>=</mo><mn>2.5</mn><mo>−</mo><mn>0.8</mn><mo>×</mo><mn>1.5</mn><mo>=</mo><mn>1.3</mn></mrow></math></div></div><div class="blk"><p>التوقعات: 1.3 و 2.1 و 2.9 و 3.7. والأخطاء: 0.3، وسالب 0.9، و 0.9، وسالب 0.3:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mtext>MSE</mtext><mtext>train</mtext></msub><mo>=</mo><mfrac><mrow><mn>0.09</mn><mo>+</mo><mn>0.81</mn><mo>+</mo><mn>0.81</mn><mo>+</mo><mn>0.09</mn></mrow><mn>4</mn></mfrac><mo>=</mo><mn>0.45</mn></mrow></math></div></div><div class="step">النموذج المعقد: كثيرة حدود من الدرجة الثالثة</div><div class="blk"><p>أربعة معاملات، وأربع نقاط: يستطيع أن يمر بها كلها بالضبط. المنحنى الوحيد الذي يفعل ذلك:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>p</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><msup><mi>x</mi><mn>3</mn></msup><mo>−</mo><mn>4.5</mn><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><mn>5.5</mn><mi>x</mi><mo>+</mo><mn>1</mn></mrow></math></div></div><div class="blk"><p>تحقق: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>p</mi><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo><mo>=</mo><mn>1</mn><mo>−</mo><mn>4.5</mn><mo>+</mo><mn>5.5</mn><mo>+</mo><mn>1</mn><mo>=</mo><mn>3</mn></mrow></math></bdi>. صحيح.</p><p>خطأ التدريب: <b>صفر</b>. يبدو مثالياً.</p></div><div class="step">نقطة جديدة</div><div class="blk"><p>جاءت نقطة جديدة عند <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>x</mi><mo>=</mo><mn>4</mn></mrow></math></bdi>. الاتجاه العام يقول إن قيمتها قرب 5.</p></div><div class="blk"><p>الخط يتوقع:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mn>0.8</mn><mo>×</mo><mn>4</mn><mo>+</mo><mn>1.3</mn><mo>=</mo><mn>4.5</mn></mrow></math></div></div><div class="blk"><p>والمنحنى المعقد يتوقع:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>p</mi><mo stretchy="false">(</mo><mn>4</mn><mo stretchy="false">)</mo><mo>=</mo><mn>64</mn><mo>−</mo><mn>72</mn><mo>+</mo><mn>22</mn><mo>+</mo><mn>1</mn><mo>=</mo><mn>15</mn></mrow></math></div></div><div class="step">الدرس</div><div class="blk"><p>المنحنى لم يتعلّم الاتجاه. حفظ الضجيج: القفزة من 3 إلى 2 كانت صدفة، فبنى عليها كل شكله.</p><p>خطأ تدريب صفر لا يعني نموذجاً جيداً. غالباً يعني العكس.</p></div></div></section><h2>الانحياز والتباين</h2><div class="blk"><p>اسمان مشهوران جداً لنفس الفكرة. تخيل لاعب سهام يرمي على هدف:</p></div><figure><div class="svgwrap"><svg viewBox="0 0 560 330" width="560" role="img" aria-label="أربعة أهداف رمي سهام: انحياز قليل أو كبير، وتباين قليل أو كبير" fill="none">
+  <g stroke="currentColor" stroke-opacity=".4">
+    <circle cx="150" cy="95" r="62"/><circle cx="150" cy="95" r="40"/><circle cx="150" cy="95" r="18"/>
+    <circle cx="410" cy="95" r="62"/><circle cx="410" cy="95" r="40"/><circle cx="410" cy="95" r="18"/>
+    <circle cx="150" cy="245" r="62"/><circle cx="150" cy="245" r="40"/><circle cx="150" cy="245" r="18"/>
+    <circle cx="410" cy="245" r="62"/><circle cx="410" cy="245" r="40"/><circle cx="410" cy="245" r="18"/>
+  </g>
+  <g class="f-orange">
+    <circle cx="146" cy="92" r="4"/><circle cx="154" cy="97" r="4"/><circle cx="150" cy="100" r="4"/><circle cx="145" cy="99" r="4"/><circle cx="155" cy="90" r="4"/>
+    <circle cx="380" cy="70" r="4"/><circle cx="440" cy="100" r="4"/><circle cx="405" cy="130" r="4"/><circle cx="430" cy="62" r="4"/><circle cx="392" cy="112" r="4"/>
+    <circle cx="176" cy="220" r="4"/><circle cx="183" cy="226" r="4"/><circle cx="178" cy="231" r="4"/><circle cx="186" cy="219" r="4"/><circle cx="181" cy="214" r="4"/>
+    <circle cx="440" cy="215" r="4"/><circle cx="462" cy="250" r="4"/><circle cx="425" cy="200" r="4"/><circle cx="458" cy="205" r="4"/><circle cx="447" cy="268" r="4"/>
+  </g>
+  <g font-size="13" fill="currentColor" text-anchor="middle">
+    <text x="150" y="174">انحياز قليل، تباين قليل</text>
+    <text x="410" y="174">انحياز قليل، تباين كبير</text>
+    <text x="150" y="324">انحياز كبير، تباين قليل</text>
+    <text x="410" y="324">انحياز كبير، تباين كبير</text>
+  </g>
+</svg></div><figcaption>الانحياز: هل السهام حول المركز في المتوسط؟ التباين: هل السهام متقاربة أم متفرقة؟ النموذج البسيط منحاز لكنه ثابت. والمعقد جداً غير منحاز لكنه متقلب.</figcaption></figure><ul class="l"><li><b>الانحياز:</b> خطأ ثابت في اتجاه واحد. يأتي من افتراضات النموذج البسيطة. خط مستقيم لقوس منحاز دائماً، مهما أعطيته بيانات.</li><li><b>التباين:</b> حساسية النموذج لعينة التدريب بالذات. درّب النموذج المعقد على عينة أخرى من نفس المصدر، فتحصل على منحنى مختلف جداً.</li></ul><div class="blk"><div class="term" dir="ltr"><code>bias · variance</code></div></div><div class="key">النموذج البسيط: انحياز كبير وتباين صغير. النموذج المعقد: انحياز صغير وتباين كبير. نبحث عن التوازن بينهما.</div><div class="blk"><p>هذا التوازن اسمه:</p></div><div class="blk"><div class="term" dir="ltr"><code>bias-variance tradeoff</code></div></div><h2>جرّب بنفسك</h2><div class="blk"><p>النقاط البرتقالية للتدريب، والرمادية للاختبار. غيّر الدرجة من صفر إلى 12:</p></div><div class="widget" data-widget="overfit" data-args="{}"><div class="w-fallback">هنا أداة تفاعلية. إذا لم تظهر، حدّث الصفحة.</div></div><div class="blk"><p>لاحظ الرسم السفلي: خطأ التدريب ينزل دائماً مع الدرجة. خطأ الاختبار ينزل، ثم يصعد.</p><p>هذا الشكل من أشهر الرسوم في المجال.</p></div><h2>منحنى التعقيد، بالكود</h2><div class="code "><div class="code-head"><span class="path">complexity.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_pipeline</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">PolynomialFeatures</span><span class="p">,</span> <span class="n">StandardScaler</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.linear_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinearRegression</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">mean_squared_error</span>
+
+<span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mf">2.6</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.2</span> <span class="o">+</span> <span class="mf">0.4</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.28</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">X_tr</span><span class="p">,</span> <span class="n">X_val</span><span class="p">,</span> <span class="n">y_tr</span><span class="p">,</span> <span class="n">y_val</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">degrees</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
+<span class="n">tr_err</span><span class="p">,</span> <span class="n">val_err</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">degrees</span><span class="p">:</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">PolynomialFeatures</span><span class="p">(</span><span class="n">d</span><span class="p">),</span> <span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">LinearRegression</span><span class="p">())</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_tr</span><span class="p">,</span> <span class="n">y_tr</span><span class="p">)</span>
+    <span class="n">tr_err</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mean_squared_error</span><span class="p">(</span><span class="n">y_tr</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_tr</span><span class="p">)))</span>
+    <span class="n">val_err</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mean_squared_error</span><span class="p">(</span><span class="n">y_val</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_val</span><span class="p">)))</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">3.4</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">degrees</span><span class="p">,</span> <span class="n">tr_err</span><span class="p">,</span> <span class="s2">&quot;o-&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">degrees</span><span class="p">,</span> <span class="n">val_err</span><span class="p">,</span> <span class="s2">&quot;o-&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;validation&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">yscale</span><span class="p">(</span><span class="s2">&quot;log&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;polynomial degree (model complexity)&quot;</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;MSE (log scale)&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span> <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="n">best</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">val_err</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;best degree by validation:&quot;</span><span class="p">,</span> <span class="n">best</span><span class="p">,</span> <span class="s2">&quot; train MSE:&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">tr_err</span><span class="p">[</span><span class="n">best</span><span class="p">],</span> <span class="mi">3</span><span class="p">),</span> <span class="s2">&quot; val MSE:&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">val_err</span><span class="p">[</span><span class="n">best</span><span class="p">],</span> <span class="mi">3</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>best degree by validation: 6  train MSE: 0.063  val MSE: 0.088</pre></div><figure class="plot"><div class="svgwrap"><svg xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 396.695938 235.187875" xmlns="http://www.w3.org/2000/svg" version="1.1">
+<defs>
+</defs>
+<g id="figure_1">
+<g id="patch_1">
+<path d="M 0 235.187875 
+L 396.695938 235.187875 
+L 396.695938 -0 
+L 0 -0 
+L 0 235.187875 
+z
+" style="fill: none"/>
+</g>
+<g id="axes_1">
+<g id="patch_2">
+<path d="M 54.695938 195.696 
+L 389.495938 195.696 
+L 389.495938 7.2 
+L 54.695938 7.2 
+L 54.695938 195.696 
+z
+" style="fill: none"/>
+</g>
+<g id="matplotlib.axis_1">
+<g id="xtick_1">
+<g id="line2d_1">
+<path d="M 69.914119 195.696 
+L 69.914119 7.2 
+" clip-path="url(#p206f9f60f7)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_2">
+<defs>
+<path id="m5c944dcb30" d="M 0 0 
+L 0 3.5 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#m5c944dcb30" x="69.914119" y="195.696" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_1">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="69.914119" y="211.054281" transform="rotate(-0 69.914119 211.054281)">0</text>
+</g>
+</g>
+<g id="xtick_2">
+<g id="line2d_3">
+<path d="M 110.495938 195.696 
+L 110.495938 7.2 
+" clip-path="url(#p206f9f60f7)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_4">
+<g>
+<use xlink:href="#m5c944dcb30" x="110.495938" y="195.696" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_2">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="110.495938" y="211.054281" transform="rotate(-0 110.495938 211.054281)">2</text>
+</g>
+</g>
+<g id="xtick_3">
+<g id="line2d_5">
+<path d="M 151.077756 195.696 
+L 151.077756 7.2 
+" clip-path="url(#p206f9f60f7)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_6">
+<g>
+<use xlink:href="#m5c944dcb30" x="151.077756" y="195.696" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_3">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="151.077756" y="211.054281" transform="rotate(-0 151.077756 211.054281)">4</text>
+</g>
+</g>
+<g id="xtick_4">
+<g id="line2d_7">
+<path d="M 191.659574 195.696 
+L 191.659574 7.2 
+" clip-path="url(#p206f9f60f7)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_8">
+<g>
+<use xlink:href="#m5c944dcb30" x="191.659574" y="195.696" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_4">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="191.659574" y="211.054281" transform="rotate(-0 191.659574 211.054281)">6</text>
+</g>
+</g>
+<g id="xtick_5">
+<g id="line2d_9">
+<path d="M 232.241392 195.696 
+L 232.241392 7.2 
+" clip-path="url(#p206f9f60f7)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_10">
+<g>
+<use xlink:href="#m5c944dcb30" x="232.241392" y="195.696" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_5">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="232.241392" y="211.054281" transform="rotate(-0 232.241392 211.054281)">8</text>
+</g>
+</g>
+<g id="xtick_6">
+<g id="line2d_11">
+<path d="M 272.82321 195.696 
+L 272.82321 7.2 
+" clip-path="url(#p206f9f60f7)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_12">
+<g>
+<use xlink:href="#m5c944dcb30" x="272.82321" y="195.696" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_6">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="272.82321" y="211.054281" transform="rotate(-0 272.82321 211.054281)">10</text>
+</g>
+</g>
+<g id="xtick_7">
+<g id="line2d_13">
+<path d="M 313.405028 195.696 
+L 313.405028 7.2 
+" clip-path="url(#p206f9f60f7)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_14">
+<g>
+<use xlink:href="#m5c944dcb30" x="313.405028" y="195.696" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_7">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="313.405028" y="211.054281" transform="rotate(-0 313.405028 211.054281)">12</text>
+</g>
+</g>
+<g id="xtick_8">
+<g id="line2d_15">
+<path d="M 353.986847 195.696 
+L 353.986847 7.2 
+" clip-path="url(#p206f9f60f7)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_16">
+<g>
+<use xlink:href="#m5c944dcb30" x="353.986847" y="195.696" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_8">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="353.986847" y="211.054281" transform="rotate(-0 353.986847 211.054281)">14</text>
+</g>
+</g>
+<g id="text_9">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="222.095938" y="225.700219" transform="rotate(-0 222.095938 225.700219)">polynomial degree (model complexity)</text>
+</g>
+</g>
+<g id="matplotlib.axis_2">
+<g id="ytick_1">
+<g id="line2d_17">
+<path d="M 54.695938 152.868671 
+L 389.495938 152.868671 
+" clip-path="url(#p206f9f60f7)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_18">
+<defs>
+<path id="ma32329e6d7" d="M 0 0 
+L -3.5 0 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#ma32329e6d7" x="54.695938" y="152.868671" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_10">
+<!-- $\mathdefault{10^{-1}}$ -->
+<g style="fill: currentColor" transform="translate(21.845938 157.047811)">
+<text>
+<tspan x="0" y="-0.178125" style="font-size: 11px; font-family: 'DejaVu Sans'; fill: currentColor">1</tspan>
+<tspan x="6.998535" y="-0.178125" style="font-size: 11px; font-family: 'DejaVu Sans'; fill: currentColor">0</tspan>
+<tspan x="14.102344" y="-4.389063" style="font-size: 7.7px; font-family: 'DejaVu Sans'; fill: currentColor">−</tspan>
+<tspan x="20.554102" y="-4.389063" style="font-size: 7.7px; font-family: 'DejaVu Sans'; fill: currentColor">1</tspan>
+</text>
+</g>
+</g>
+</g>
+<g id="ytick_2">
+<g id="line2d_19">
+<path d="M 54.695938 85.005816 
+L 389.495938 85.005816 
+" clip-path="url(#p206f9f60f7)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_20">
+<g>
+<use xlink:href="#ma32329e6d7" x="54.695938" y="85.005816" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_11">
+<!-- $\mathdefault{10^{0}}$ -->
+<g style="fill: currentColor" transform="translate(28.335938 89.184956)">
+<text>
+<tspan x="0" y="-0.06875" style="font-size: 11px; font-family: 'DejaVu Sans'; fill: currentColor">1</tspan>
+<tspan x="6.998535" y="-0.06875" style="font-size: 11px; font-family: 'DejaVu Sans'; fill: currentColor">0</tspan>
+<tspan x="14.102344" y="-4.279688" style="font-size: 7.7px; font-family: 'DejaVu Sans'; fill: currentColor">0</tspan>
+</text>
+</g>
+</g>
+</g>
+<g id="ytick_3">
+<g id="line2d_21">
+<path d="M 54.695938 17.142961 
+L 389.495938 17.142961 
+" clip-path="url(#p206f9f60f7)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_22">
+<g>
+<use xlink:href="#ma32329e6d7" x="54.695938" y="17.142961" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_12">
+<!-- $\mathdefault{10^{1}}$ -->
+<g style="fill: currentColor" transform="translate(28.335938 21.322102)">
+<text>
+<tspan x="0" y="-0.178125" style="font-size: 11px; font-family: 'DejaVu Sans'; fill: currentColor">1</tspan>
+<tspan x="6.998535" y="-0.178125" style="font-size: 11px; font-family: 'DejaVu Sans'; fill: currentColor">0</tspan>
+<tspan x="14.102344" y="-4.389063" style="font-size: 7.7px; font-family: 'DejaVu Sans'; fill: currentColor">1</tspan>
+</text>
+</g>
+</g>
+</g>
+<g id="ytick_4">
+<g id="line2d_23">
+<defs>
+<path id="mb84b483f55" d="M 0 0 
+L -2 0 
+" style="stroke: currentColor; stroke-width: 0.6"/>
+</defs>
+<g>
+<use xlink:href="#mb84b483f55" x="54.695938" y="188.352715" style="fill: currentColor; stroke: currentColor; stroke-width: 0.6"/>
+</g>
+</g>
+</g>
+<g id="ytick_5">
+<g id="line2d_24">
+<g>
+<use xlink:href="#mb84b483f55" x="54.695938" y="179.874016" style="fill: currentColor; stroke: currentColor; stroke-width: 0.6"/>
+</g>
+</g>
+</g>
+<g id="ytick_6">
+<g id="line2d_25">
+<g>
+<use xlink:href="#mb84b483f55" x="54.695938" y="173.297426" style="fill: currentColor; stroke: currentColor; stroke-width: 0.6"/>
+</g>
+</g>
+</g>
+<g id="ytick_7">
+<g id="line2d_26">
+<g>
+<use xlink:href="#mb84b483f55" x="54.695938" y="167.92396" style="fill: currentColor; stroke: currentColor; stroke-width: 0.6"/>
+</g>
+</g>
+</g>
+<g id="ytick_8">
+<g id="line2d_27">
+<g>
+<use xlink:href="#mb84b483f55" x="54.695938" y="163.38076" style="fill: currentColor; stroke: currentColor; stroke-width: 0.6"/>
+</g>
+</g>
+</g>
+<g id="ytick_9">
+<g id="line2d_28">
+<g>
+<use xlink:href="#mb84b483f55" x="54.695938" y="159.445261" style="fill: currentColor; stroke: currentColor; stroke-width: 0.6"/>
+</g>
+</g>
+</g>
+<g id="ytick_10">
+<g id="line2d_29">
+<g>
+<use xlink:href="#mb84b483f55" x="54.695938" y="155.973905" style="fill: currentColor; stroke: currentColor; stroke-width: 0.6"/>
+</g>
+</g>
+</g>
+<g id="ytick_11">
+<g id="line2d_30">
+<g>
+<use xlink:href="#mb84b483f55" x="54.695938" y="132.439916" style="fill: currentColor; stroke: currentColor; stroke-width: 0.6"/>
+</g>
+</g>
+</g>
+<g id="ytick_12">
+<g id="line2d_31">
+<g>
+<use xlink:href="#mb84b483f55" x="54.695938" y="120.48986" style="fill: currentColor; stroke: currentColor; stroke-width: 0.6"/>
+</g>
+</g>
+</g>
+<g id="ytick_13">
+<g id="line2d_32">
+<g>
+<use xlink:href="#mb84b483f55" x="54.695938" y="112.011161" style="fill: currentColor; stroke: currentColor; stroke-width: 0.6"/>
+</g>
+</g>
+</g>
+<g id="ytick_14">
+<g id="line2d_33">
+<g>
+<use xlink:href="#mb84b483f55" x="54.695938" y="105.434571" style="fill: currentColor; stroke: currentColor; stroke-width: 0.6"/>
+</g>
+</g>
+</g>
+<g id="ytick_15">
+<g id="line2d_34">
+<g>
+<use xlink:href="#mb84b483f55" x="54.695938" y="100.061105" style="fill: currentColor; stroke: currentColor; stroke-width: 0.6"/>
+</g>
+</g>
+</g>
+<g id="ytick_16">
+<g id="line2d_35">
+<g>
+<use xlink:href="#mb84b483f55" x="54.695938" y="95.517905" style="fill: currentColor; stroke: currentColor; stroke-width: 0.6"/>
+</g>
+</g>
+</g>
+<g id="ytick_17">
+<g id="line2d_36">
+<g>
+<use xlink:href="#mb84b483f55" x="54.695938" y="91.582406" style="fill: currentColor; stroke: currentColor; stroke-width: 0.6"/>
+</g>
+</g>
+</g>
+<g id="ytick_18">
+<g id="line2d_37">
+<g>
+<use xlink:href="#mb84b483f55" x="54.695938" y="88.11105" style="fill: currentColor; stroke: currentColor; stroke-width: 0.6"/>
+</g>
+</g>
+</g>
+<g id="ytick_19">
+<g id="line2d_38">
+<g>
+<use xlink:href="#mb84b483f55" x="54.695938" y="64.577061" style="fill: currentColor; stroke: currentColor; stroke-width: 0.6"/>
+</g>
+</g>
+</g>
+<g id="ytick_20">
+<g id="line2d_39">
+<g>
+<use xlink:href="#mb84b483f55" x="54.695938" y="52.627005" style="fill: currentColor; stroke: currentColor; stroke-width: 0.6"/>
+</g>
+</g>
+</g>
+<g id="ytick_21">
+<g id="line2d_40">
+<g>
+<use xlink:href="#mb84b483f55" x="54.695938" y="44.148306" style="fill: currentColor; stroke: currentColor; stroke-width: 0.6"/>
+</g>
+</g>
+</g>
+<g id="ytick_22">
+<g id="line2d_41">
+<g>
+<use xlink:href="#mb84b483f55" x="54.695938" y="37.571716" style="fill: currentColor; stroke: currentColor; stroke-width: 0.6"/>
+</g>
+</g>
+</g>
+<g id="ytick_23">
+<g id="line2d_42">
+<g>
+<use xlink:href="#mb84b483f55" x="54.695938" y="32.19825" style="fill: currentColor; stroke: currentColor; stroke-width: 0.6"/>
+</g>
+</g>
+</g>
+<g id="ytick_24">
+<g id="line2d_43">
+<g>
+<use xlink:href="#mb84b483f55" x="54.695938" y="27.65505" style="fill: currentColor; stroke: currentColor; stroke-width: 0.6"/>
+</g>
+</g>
+</g>
+<g id="ytick_25">
+<g id="line2d_44">
+<g>
+<use xlink:href="#mb84b483f55" x="54.695938" y="23.719551" style="fill: currentColor; stroke: currentColor; stroke-width: 0.6"/>
+</g>
+</g>
+</g>
+<g id="ytick_26">
+<g id="line2d_45">
+<g>
+<use xlink:href="#mb84b483f55" x="54.695938" y="20.248195" style="fill: currentColor; stroke: currentColor; stroke-width: 0.6"/>
+</g>
+</g>
+</g>
+<g id="text_13">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="15.558281" y="101.448" transform="rotate(-90 15.558281 101.448)">MSE (log scale)</text>
+</g>
+</g>
+<g id="line2d_46">
+<path d="M 69.914119 75.503042 
+L 90.205028 132.22729 
+L 110.495938 132.665156 
+L 130.786847 161.590136 
+L 151.077756 166.568786 
+L 171.368665 166.568788 
+L 191.659574 166.719893 
+L 211.950483 172.671197 
+L 232.241392 178.232756 
+L 252.532301 179.137624 
+L 272.82321 179.674331 
+L 293.114119 180.518736 
+L 313.405028 180.745975 
+L 333.695938 180.747423 
+L 353.986847 182.322528 
+L 374.277756 187.128 
+" clip-path="url(#p206f9f60f7)" style="fill: none; stroke: #1f77b4; stroke-width: 2; stroke-linecap: square"/>
+<defs>
+<path id="m627835cd1c" d="M 0 3 
+C 0.795609 3 1.55874 2.683901 2.12132 2.12132 
+C 2.683901 1.55874 3 0.795609 3 0 
+C 3 -0.795609 2.683901 -1.55874 2.12132 -2.12132 
+C 1.55874 -2.683901 0.795609 -3 0 -3 
+C -0.795609 -3 -1.55874 -2.683901 -2.12132 -2.12132 
+C -2.683901 -1.55874 -3 -0.795609 -3 0 
+C -3 0.795609 -2.683901 1.55874 -2.12132 2.12132 
+C -1.55874 2.683901 -0.795609 3 0 3 
+z
+" style="stroke: #1f77b4"/>
+</defs>
+<g clip-path="url(#p206f9f60f7)">
+<use xlink:href="#m627835cd1c" x="69.914119" y="75.503042" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m627835cd1c" x="90.205028" y="132.22729" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m627835cd1c" x="110.495938" y="132.665156" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m627835cd1c" x="130.786847" y="161.590136" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m627835cd1c" x="151.077756" y="166.568786" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m627835cd1c" x="171.368665" y="166.568788" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m627835cd1c" x="191.659574" y="166.719893" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m627835cd1c" x="211.950483" y="172.671197" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m627835cd1c" x="232.241392" y="178.232756" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m627835cd1c" x="252.532301" y="179.137624" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m627835cd1c" x="272.82321" y="179.674331" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m627835cd1c" x="293.114119" y="180.518736" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m627835cd1c" x="313.405028" y="180.745975" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m627835cd1c" x="333.695938" y="180.747423" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m627835cd1c" x="353.986847" y="182.322528" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m627835cd1c" x="374.277756" y="187.128" style="fill: #1f77b4; stroke: #1f77b4"/>
+</g>
+</g>
+<g id="line2d_47">
+<path d="M 69.914119 74.683514 
+L 90.205028 118.318883 
+L 110.495938 117.931377 
+L 130.786847 154.099589 
+L 151.077756 155.387037 
+L 171.368665 155.385603 
+L 191.659574 156.791108 
+L 211.950483 153.580259 
+L 232.241392 142.694071 
+L 252.532301 137.415865 
+L 272.82321 142.277688 
+L 293.114119 131.958102 
+L 313.405028 137.152888 
+L 333.695938 138.307142 
+L 353.986847 93.608688 
+L 374.277756 15.768 
+" clip-path="url(#p206f9f60f7)" style="fill: none; stroke: #ff7f0e; stroke-width: 2; stroke-linecap: square"/>
+<defs>
+<path id="m3acd4427ba" d="M 0 3 
+C 0.795609 3 1.55874 2.683901 2.12132 2.12132 
+C 2.683901 1.55874 3 0.795609 3 0 
+C 3 -0.795609 2.683901 -1.55874 2.12132 -2.12132 
+C 1.55874 -2.683901 0.795609 -3 0 -3 
+C -0.795609 -3 -1.55874 -2.683901 -2.12132 -2.12132 
+C -2.683901 -1.55874 -3 -0.795609 -3 0 
+C -3 0.795609 -2.683901 1.55874 -2.12132 2.12132 
+C -1.55874 2.683901 -0.795609 3 0 3 
+z
+" style="stroke: #ff7f0e"/>
+</defs>
+<g clip-path="url(#p206f9f60f7)">
+<use xlink:href="#m3acd4427ba" x="69.914119" y="74.683514" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m3acd4427ba" x="90.205028" y="118.318883" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m3acd4427ba" x="110.495938" y="117.931377" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m3acd4427ba" x="130.786847" y="154.099589" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m3acd4427ba" x="151.077756" y="155.387037" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m3acd4427ba" x="171.368665" y="155.385603" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m3acd4427ba" x="191.659574" y="156.791108" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m3acd4427ba" x="211.950483" y="153.580259" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m3acd4427ba" x="232.241392" y="142.694071" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m3acd4427ba" x="252.532301" y="137.415865" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m3acd4427ba" x="272.82321" y="142.277688" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m3acd4427ba" x="293.114119" y="131.958102" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m3acd4427ba" x="313.405028" y="137.152888" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m3acd4427ba" x="333.695938" y="138.307142" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m3acd4427ba" x="353.986847" y="93.608688" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m3acd4427ba" x="374.277756" y="15.768" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+</g>
+</g>
+<g id="patch_3">
+<path d="M 54.695938 195.696 
+L 54.695938 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_4">
+<path d="M 389.495938 195.696 
+L 389.495938 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_5">
+<path d="M 54.695938 195.696 
+L 389.495938 195.696 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_6">
+<path d="M 54.695938 7.2 
+L 389.495938 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="legend_1">
+<g id="patch_7">
+<path d="M 62.395938 48.291875 
+L 151.75375 48.291875 
+Q 153.95375 48.291875 153.95375 46.091875 
+L 153.95375 14.9 
+Q 153.95375 12.7 151.75375 12.7 
+L 62.395938 12.7 
+Q 60.195938 12.7 60.195938 14.9 
+L 60.195938 46.091875 
+Q 60.195938 48.291875 62.395938 48.291875 
+L 62.395938 48.291875 
+z
+" style="fill: none; opacity: 0.35; stroke: currentColor; stroke-linejoin: miter"/>
+</g>
+<g id="line2d_48">
+<path d="M 64.595938 21.608281 
+L 75.595938 21.608281 
+L 86.595938 21.608281 
+" style="fill: none; stroke: #1f77b4; stroke-width: 2; stroke-linecap: square"/>
+<g>
+<use xlink:href="#m627835cd1c" x="75.595938" y="21.608281" style="fill: #1f77b4; stroke: #1f77b4"/>
+</g>
+</g>
+<g id="text_14">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="95.395938" y="25.458281" transform="rotate(-0 95.395938 25.458281)">train</text>
+</g>
+<g id="line2d_49">
+<path d="M 64.595938 37.754219 
+L 75.595938 37.754219 
+L 86.595938 37.754219 
+" style="fill: none; stroke: #ff7f0e; stroke-width: 2; stroke-linecap: square"/>
+<g>
+<use xlink:href="#m3acd4427ba" x="75.595938" y="37.754219" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+</g>
+</g>
+<g id="text_15">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="95.395938" y="41.604219" transform="rotate(-0 95.395938 41.604219)">validation</text>
+</g>
+</g>
+</g>
+</g>
+<defs>
+<clipPath id="p206f9f60f7">
+<rect x="54.695938" y="7.2" width="334.8" height="188.496"/>
+</clipPath>
+</defs>
+</svg></div><figcaption>الرسم الذي يظهر عندما تشغّل الكود.</figcaption></figure><div class="blk"><p>يسار الرسم: قلة تعلّم، والخطآن كبيران. يمين الرسم: إفراط، والفجوة تكبر.</p><p>أفضل درجة حيث خطأ التحقق أصغر ما يمكن.</p></div><h2>منحنى التعلّم: هل تحتاج بيانات أكثر؟</h2><div class="blk"><p>سؤال مكلف في العمل: هل نجمع بيانات أكثر؟ منحنى التعلّم يجيب.</p><p>نرسم خطأ التدريب والتحقق مقابل <b>حجم</b> بيانات التدريب:</p></div><div class="code "><div class="code-head"><span class="path">learning_curves.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">learning_curve</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_digits</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.tree</span><span class="w"> </span><span class="kn">import</span> <span class="n">DecisionTreeClassifier</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.linear_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">LogisticRegression</span>
+
+<span class="n">Xd</span><span class="p">,</span> <span class="n">yd</span> <span class="o">=</span> <span class="n">load_digits</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mf">3.4</span><span class="p">),</span> <span class="n">sharey</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">ax</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;deep tree&quot;</span><span class="p">,</span> <span class="n">DecisionTreeClassifier</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)),</span>
+                                     <span class="p">(</span><span class="s2">&quot;logistic regression&quot;</span><span class="p">,</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">max_iter</span><span class="o">=</span><span class="mi">2000</span><span class="p">)))]):</span>
+    <span class="n">sizes</span><span class="p">,</span> <span class="n">tr</span><span class="p">,</span> <span class="n">va</span> <span class="o">=</span> <span class="n">learning_curve</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">Xd</span><span class="p">,</span> <span class="n">yd</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">train_sizes</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sizes</span><span class="p">,</span> <span class="n">tr</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="s2">&quot;o-&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;train accuracy&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sizes</span><span class="p">,</span> <span class="n">va</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="s2">&quot;o-&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;validation accuracy&quot;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">name</span><span class="p">);</span> <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;training examples&quot;</span><span class="p">);</span> <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;accuracy&quot;</span><span class="p">);</span> <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></pre></div><figure class="plot"><div class="svgwrap"><svg xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 696.962299 234.17" xmlns="http://www.w3.org/2000/svg" version="1.1">
+<defs>
+</defs>
+<g id="figure_1">
+<g id="patch_1">
+<path d="M 0 234.17 
+L 696.962299 234.17 
+L 696.962299 0 
+L 0 0 
+L 0 234.17 
+z
+" style="fill: none"/>
+</g>
+<g id="axes_1">
+<g id="patch_2">
+<path d="M 46.339375 194.678125 
+L 353.582299 194.678125 
+L 353.582299 22.318125 
+L 46.339375 22.318125 
+L 46.339375 194.678125 
+z
+" style="fill: none"/>
+</g>
+<g id="matplotlib.axis_1">
+<g id="xtick_1">
+<g id="line2d_1">
+<path d="M 72.608494 194.678125 
+L 72.608494 22.318125 
+" clip-path="url(#p95eabf2ac1)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_2">
+<defs>
+<path id="m9129e267bf" d="M 0 0 
+L 0 3.5 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#m9129e267bf" x="72.608494" y="194.678125" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_1">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="72.608494" y="210.036406" transform="rotate(-0 72.608494 210.036406)">200</text>
+</g>
+</g>
+<g id="xtick_2">
+<g id="line2d_3">
+<path d="M 115.77878 194.678125 
+L 115.77878 22.318125 
+" clip-path="url(#p95eabf2ac1)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_4">
+<g>
+<use xlink:href="#m9129e267bf" x="115.77878" y="194.678125" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_2">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="115.77878" y="210.036406" transform="rotate(-0 115.77878 210.036406)">400</text>
+</g>
+</g>
+<g id="xtick_3">
+<g id="line2d_5">
+<path d="M 158.949065 194.678125 
+L 158.949065 22.318125 
+" clip-path="url(#p95eabf2ac1)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_6">
+<g>
+<use xlink:href="#m9129e267bf" x="158.949065" y="194.678125" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_3">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="158.949065" y="210.036406" transform="rotate(-0 158.949065 210.036406)">600</text>
+</g>
+</g>
+<g id="xtick_4">
+<g id="line2d_7">
+<path d="M 202.119351 194.678125 
+L 202.119351 22.318125 
+" clip-path="url(#p95eabf2ac1)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_8">
+<g>
+<use xlink:href="#m9129e267bf" x="202.119351" y="194.678125" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_4">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="202.119351" y="210.036406" transform="rotate(-0 202.119351 210.036406)">800</text>
+</g>
+</g>
+<g id="xtick_5">
+<g id="line2d_9">
+<path d="M 245.289637 194.678125 
+L 245.289637 22.318125 
+" clip-path="url(#p95eabf2ac1)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_10">
+<g>
+<use xlink:href="#m9129e267bf" x="245.289637" y="194.678125" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_5">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="245.289637" y="210.036406" transform="rotate(-0 245.289637 210.036406)">1000</text>
+</g>
+</g>
+<g id="xtick_6">
+<g id="line2d_11">
+<path d="M 288.459923 194.678125 
+L 288.459923 22.318125 
+" clip-path="url(#p95eabf2ac1)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_12">
+<g>
+<use xlink:href="#m9129e267bf" x="288.459923" y="194.678125" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_6">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="288.459923" y="210.036406" transform="rotate(-0 288.459923 210.036406)">1200</text>
+</g>
+</g>
+<g id="xtick_7">
+<g id="line2d_13">
+<path d="M 331.630209 194.678125 
+L 331.630209 22.318125 
+" clip-path="url(#p95eabf2ac1)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_14">
+<g>
+<use xlink:href="#m9129e267bf" x="331.630209" y="194.678125" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_7">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="331.630209" y="210.036406" transform="rotate(-0 331.630209 210.036406)">1400</text>
+</g>
+</g>
+<g id="text_8">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="199.960837" y="224.682344" transform="rotate(-0 199.960837 224.682344)">training examples</text>
+</g>
+</g>
+<g id="matplotlib.axis_2">
+<g id="ytick_1">
+<g id="line2d_15">
+<path d="M 46.339375 194.623759 
+L 353.582299 194.623759 
+" clip-path="url(#p95eabf2ac1)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_16">
+<defs>
+<path id="mbf4a627aff" d="M 0 0 
+L -3.5 0 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#mbf4a627aff" x="46.339375" y="194.623759" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_9">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="39.339375" y="198.8029" transform="rotate(-0 39.339375 198.8029)">0.5</text>
+</g>
+</g>
+<g id="ytick_2">
+<g id="line2d_17">
+<path d="M 46.339375 161.729542 
+L 353.582299 161.729542 
+" clip-path="url(#p95eabf2ac1)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_18">
+<g>
+<use xlink:href="#mbf4a627aff" x="46.339375" y="161.729542" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_10">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="39.339375" y="165.908682" transform="rotate(-0 39.339375 165.908682)">0.6</text>
+</g>
+</g>
+<g id="ytick_3">
+<g id="line2d_19">
+<path d="M 46.339375 128.835324 
+L 353.582299 128.835324 
+" clip-path="url(#p95eabf2ac1)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_20">
+<g>
+<use xlink:href="#mbf4a627aff" x="46.339375" y="128.835324" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_11">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="39.339375" y="133.014464" transform="rotate(-0 39.339375 133.014464)">0.7</text>
+</g>
+</g>
+<g id="ytick_4">
+<g id="line2d_21">
+<path d="M 46.339375 95.941106 
+L 353.582299 95.941106 
+" clip-path="url(#p95eabf2ac1)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_22">
+<g>
+<use xlink:href="#mbf4a627aff" x="46.339375" y="95.941106" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_12">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="39.339375" y="100.120247" transform="rotate(-0 39.339375 100.120247)">0.8</text>
+</g>
+</g>
+<g id="ytick_5">
+<g id="line2d_23">
+<path d="M 46.339375 63.046888 
+L 353.582299 63.046888 
+" clip-path="url(#p95eabf2ac1)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_24">
+<g>
+<use xlink:href="#mbf4a627aff" x="46.339375" y="63.046888" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_13">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="39.339375" y="67.226029" transform="rotate(-0 39.339375 67.226029)">0.9</text>
+</g>
+</g>
+<g id="ytick_6">
+<g id="line2d_25">
+<path d="M 46.339375 30.15267 
+L 353.582299 30.15267 
+" clip-path="url(#p95eabf2ac1)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_26">
+<g>
+<use xlink:href="#mbf4a627aff" x="46.339375" y="30.15267" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_14">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="39.339375" y="34.331811" transform="rotate(-0 39.339375 34.331811)">1.0</text>
+</g>
+</g>
+<g id="text_15">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="15.558281" y="108.498125" transform="rotate(-90 15.558281 108.498125)">accuracy</text>
+</g>
+</g>
+<g id="line2d_27">
+<path d="M 60.304962 30.15267 
+L 116.210483 30.15267 
+L 172.116003 30.15267 
+L 227.805671 30.15267 
+L 283.711191 30.15267 
+L 339.616711 30.15267 
+" clip-path="url(#p95eabf2ac1)" style="fill: none; stroke: #1f77b4; stroke-width: 2; stroke-linecap: square"/>
+<defs>
+<path id="m0eccbf5306" d="M 0 3 
+C 0.795609 3 1.55874 2.683901 2.12132 2.12132 
+C 2.683901 1.55874 3 0.795609 3 0 
+C 3 -0.795609 2.683901 -1.55874 2.12132 -2.12132 
+C 1.55874 -2.683901 0.795609 -3 0 -3 
+C -0.795609 -3 -1.55874 -2.683901 -2.12132 -2.12132 
+C -2.683901 -1.55874 -3 -0.795609 -3 0 
+C -3 0.795609 -2.683901 1.55874 -2.12132 2.12132 
+C -1.55874 2.683901 -0.795609 3 0 3 
+z
+" style="stroke: #1f77b4"/>
+</defs>
+<g clip-path="url(#p95eabf2ac1)">
+<use xlink:href="#m0eccbf5306" x="60.304962" y="30.15267" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m0eccbf5306" x="116.210483" y="30.15267" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m0eccbf5306" x="172.116003" y="30.15267" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m0eccbf5306" x="227.805671" y="30.15267" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m0eccbf5306" x="283.711191" y="30.15267" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m0eccbf5306" x="339.616711" y="30.15267" style="fill: #1f77b4; stroke: #1f77b4"/>
+</g>
+</g>
+<g id="line2d_28">
+<path d="M 60.304962 186.84358 
+L 116.210483 144.541269 
+L 172.116003 130.81702 
+L 227.805671 113.795713 
+L 283.711191 98.241462 
+L 339.616711 100.613083 
+" clip-path="url(#p95eabf2ac1)" style="fill: none; stroke: #ff7f0e; stroke-width: 2; stroke-linecap: square"/>
+<defs>
+<path id="m48adcdf77b" d="M 0 3 
+C 0.795609 3 1.55874 2.683901 2.12132 2.12132 
+C 2.683901 1.55874 3 0.795609 3 0 
+C 3 -0.795609 2.683901 -1.55874 2.12132 -2.12132 
+C 1.55874 -2.683901 0.795609 -3 0 -3 
+C -0.795609 -3 -1.55874 -2.683901 -2.12132 -2.12132 
+C -2.683901 -1.55874 -3 -0.795609 -3 0 
+C -3 0.795609 -2.683901 1.55874 -2.12132 2.12132 
+C -1.55874 2.683901 -0.795609 3 0 3 
+z
+" style="stroke: #ff7f0e"/>
+</defs>
+<g clip-path="url(#p95eabf2ac1)">
+<use xlink:href="#m48adcdf77b" x="60.304962" y="186.84358" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m48adcdf77b" x="116.210483" y="144.541269" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m48adcdf77b" x="172.116003" y="130.81702" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m48adcdf77b" x="227.805671" y="113.795713" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m48adcdf77b" x="283.711191" y="98.241462" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m48adcdf77b" x="339.616711" y="100.613083" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+</g>
+</g>
+<g id="patch_3">
+<path d="M 46.339375 194.678125 
+L 46.339375 22.318125 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_4">
+<path d="M 353.582299 194.678125 
+L 353.582299 22.318125 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_5">
+<path d="M 46.339375 194.678125 
+L 353.582299 194.678125 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_6">
+<path d="M 46.339375 22.318125 
+L 353.582299 22.318125 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="text_16">
+<text style="font-size: 12px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="199.960837" y="16.318125" transform="rotate(-0 199.960837 16.318125)">deep tree</text>
+</g>
+<g id="legend_1">
+<g id="patch_7">
+<path d="M 203.397924 189.178125 
+L 345.882299 189.178125 
+Q 348.082299 189.178125 348.082299 186.978125 
+L 348.082299 155.78625 
+Q 348.082299 153.58625 345.882299 153.58625 
+L 203.397924 153.58625 
+Q 201.197924 153.58625 201.197924 155.78625 
+L 201.197924 186.978125 
+Q 201.197924 189.178125 203.397924 189.178125 
+L 203.397924 189.178125 
+z
+" style="fill: none; opacity: 0.35; stroke: currentColor; stroke-linejoin: miter"/>
+</g>
+<g id="line2d_29">
+<path d="M 205.597924 162.494531 
+L 216.597924 162.494531 
+L 227.597924 162.494531 
+" style="fill: none; stroke: #1f77b4; stroke-width: 2; stroke-linecap: square"/>
+<g>
+<use xlink:href="#m0eccbf5306" x="216.597924" y="162.494531" style="fill: #1f77b4; stroke: #1f77b4"/>
+</g>
+</g>
+<g id="text_17">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="236.397924" y="166.344531" transform="rotate(-0 236.397924 166.344531)">train accuracy</text>
+</g>
+<g id="line2d_30">
+<path d="M 205.597924 178.640469 
+L 216.597924 178.640469 
+L 227.597924 178.640469 
+" style="fill: none; stroke: #ff7f0e; stroke-width: 2; stroke-linecap: square"/>
+<g>
+<use xlink:href="#m48adcdf77b" x="216.597924" y="178.640469" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+</g>
+</g>
+<g id="text_18">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="236.397924" y="182.490469" transform="rotate(-0 236.397924 182.490469)">validation accuracy</text>
+</g>
+</g>
+</g>
+<g id="axes_2">
+<g id="patch_8">
+<path d="M 382.519375 194.678125 
+L 689.762299 194.678125 
+L 689.762299 22.318125 
+L 382.519375 22.318125 
+L 382.519375 194.678125 
+z
+" style="fill: none"/>
+</g>
+<g id="matplotlib.axis_3">
+<g id="xtick_8">
+<g id="line2d_31">
+<path d="M 408.788494 194.678125 
+L 408.788494 22.318125 
+" clip-path="url(#pa5e201b13d)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_32">
+<g>
+<use xlink:href="#m9129e267bf" x="408.788494" y="194.678125" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_19">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="408.788494" y="210.036406" transform="rotate(-0 408.788494 210.036406)">200</text>
+</g>
+</g>
+<g id="xtick_9">
+<g id="line2d_33">
+<path d="M 451.95878 194.678125 
+L 451.95878 22.318125 
+" clip-path="url(#pa5e201b13d)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_34">
+<g>
+<use xlink:href="#m9129e267bf" x="451.95878" y="194.678125" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_20">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="451.95878" y="210.036406" transform="rotate(-0 451.95878 210.036406)">400</text>
+</g>
+</g>
+<g id="xtick_10">
+<g id="line2d_35">
+<path d="M 495.129065 194.678125 
+L 495.129065 22.318125 
+" clip-path="url(#pa5e201b13d)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_36">
+<g>
+<use xlink:href="#m9129e267bf" x="495.129065" y="194.678125" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_21">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="495.129065" y="210.036406" transform="rotate(-0 495.129065 210.036406)">600</text>
+</g>
+</g>
+<g id="xtick_11">
+<g id="line2d_37">
+<path d="M 538.299351 194.678125 
+L 538.299351 22.318125 
+" clip-path="url(#pa5e201b13d)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_38">
+<g>
+<use xlink:href="#m9129e267bf" x="538.299351" y="194.678125" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_22">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="538.299351" y="210.036406" transform="rotate(-0 538.299351 210.036406)">800</text>
+</g>
+</g>
+<g id="xtick_12">
+<g id="line2d_39">
+<path d="M 581.469637 194.678125 
+L 581.469637 22.318125 
+" clip-path="url(#pa5e201b13d)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_40">
+<g>
+<use xlink:href="#m9129e267bf" x="581.469637" y="194.678125" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_23">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="581.469637" y="210.036406" transform="rotate(-0 581.469637 210.036406)">1000</text>
+</g>
+</g>
+<g id="xtick_13">
+<g id="line2d_41">
+<path d="M 624.639923 194.678125 
+L 624.639923 22.318125 
+" clip-path="url(#pa5e201b13d)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_42">
+<g>
+<use xlink:href="#m9129e267bf" x="624.639923" y="194.678125" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_24">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="624.639923" y="210.036406" transform="rotate(-0 624.639923 210.036406)">1200</text>
+</g>
+</g>
+<g id="xtick_14">
+<g id="line2d_43">
+<path d="M 667.810209 194.678125 
+L 667.810209 22.318125 
+" clip-path="url(#pa5e201b13d)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_44">
+<g>
+<use xlink:href="#m9129e267bf" x="667.810209" y="194.678125" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_25">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="667.810209" y="210.036406" transform="rotate(-0 667.810209 210.036406)">1400</text>
+</g>
+</g>
+<g id="text_26">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="536.140837" y="224.682344" transform="rotate(-0 536.140837 224.682344)">training examples</text>
+</g>
+</g>
+<g id="matplotlib.axis_4">
+<g id="ytick_7">
+<g id="line2d_45">
+<path d="M 382.519375 194.623759 
+L 689.762299 194.623759 
+" clip-path="url(#pa5e201b13d)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_46">
+<g>
+<use xlink:href="#mbf4a627aff" x="382.519375" y="194.623759" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+</g>
+<g id="ytick_8">
+<g id="line2d_47">
+<path d="M 382.519375 161.729542 
+L 689.762299 161.729542 
+" clip-path="url(#pa5e201b13d)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_48">
+<g>
+<use xlink:href="#mbf4a627aff" x="382.519375" y="161.729542" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+</g>
+<g id="ytick_9">
+<g id="line2d_49">
+<path d="M 382.519375 128.835324 
+L 689.762299 128.835324 
+" clip-path="url(#pa5e201b13d)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_50">
+<g>
+<use xlink:href="#mbf4a627aff" x="382.519375" y="128.835324" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+</g>
+<g id="ytick_10">
+<g id="line2d_51">
+<path d="M 382.519375 95.941106 
+L 689.762299 95.941106 
+" clip-path="url(#pa5e201b13d)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_52">
+<g>
+<use xlink:href="#mbf4a627aff" x="382.519375" y="95.941106" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+</g>
+<g id="ytick_11">
+<g id="line2d_53">
+<path d="M 382.519375 63.046888 
+L 689.762299 63.046888 
+" clip-path="url(#pa5e201b13d)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_54">
+<g>
+<use xlink:href="#mbf4a627aff" x="382.519375" y="63.046888" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+</g>
+<g id="ytick_12">
+<g id="line2d_55">
+<path d="M 382.519375 30.15267 
+L 689.762299 30.15267 
+" clip-path="url(#pa5e201b13d)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_56">
+<g>
+<use xlink:href="#mbf4a627aff" x="382.519375" y="30.15267" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+</g>
+</g>
+<g id="line2d_57">
+<path d="M 396.484962 30.15267 
+L 452.390483 30.15267 
+L 508.296003 30.15267 
+L 563.985671 30.15267 
+L 619.891191 30.15267 
+L 675.796711 30.473143 
+" clip-path="url(#pa5e201b13d)" style="fill: none; stroke: #1f77b4; stroke-width: 2; stroke-linecap: square"/>
+<g clip-path="url(#pa5e201b13d)">
+<use xlink:href="#m0eccbf5306" x="396.484962" y="30.15267" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m0eccbf5306" x="452.390483" y="30.15267" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m0eccbf5306" x="508.296003" y="30.15267" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m0eccbf5306" x="563.985671" y="30.15267" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m0eccbf5306" x="619.891191" y="30.15267" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#m0eccbf5306" x="675.796711" y="30.473143" style="fill: #1f77b4; stroke: #1f77b4"/>
+</g>
+</g>
+<g id="line2d_58">
+<path d="M 396.484962 103.001502 
+L 452.390483 69.493381 
+L 508.296003 60.528663 
+L 563.985671 57.233642 
+L 619.891191 55.772186 
+L 675.796711 56.503678 
+" clip-path="url(#pa5e201b13d)" style="fill: none; stroke: #ff7f0e; stroke-width: 2; stroke-linecap: square"/>
+<g clip-path="url(#pa5e201b13d)">
+<use xlink:href="#m48adcdf77b" x="396.484962" y="103.001502" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m48adcdf77b" x="452.390483" y="69.493381" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m48adcdf77b" x="508.296003" y="60.528663" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m48adcdf77b" x="563.985671" y="57.233642" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m48adcdf77b" x="619.891191" y="55.772186" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m48adcdf77b" x="675.796711" y="56.503678" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+</g>
+</g>
+<g id="patch_9">
+<path d="M 382.519375 194.678125 
+L 382.519375 22.318125 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_10">
+<path d="M 689.762299 194.678125 
+L 689.762299 22.318125 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_11">
+<path d="M 382.519375 194.678125 
+L 689.762299 194.678125 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_12">
+<path d="M 382.519375 22.318125 
+L 689.762299 22.318125 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="text_27">
+<text style="font-size: 12px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="536.140837" y="16.318125" transform="rotate(-0 536.140837 16.318125)">logistic regression</text>
+</g>
+</g>
+</g>
+<defs>
+<clipPath id="p95eabf2ac1">
+<rect x="46.339375" y="22.318125" width="307.242924" height="172.36"/>
+</clipPath>
+<clipPath id="pa5e201b13d">
+<rect x="382.519375" y="22.318125" width="307.242924" height="172.36"/>
+</clipPath>
+</defs>
+</svg></div><figcaption>يسار: الشجرة العميقة دقتها على التدريب 100% دائماً، والتحقق أقل بكثير، لكنه يتحسن مع البيانات: إفراط، والبيانات الإضافية تساعد. يمين: الخطان قريبان ومرتفعان: وضع جيد.</figcaption></figure><div class="blk"><p>كيف تقرأ منحنى التعلّم:</p></div><ul class="l"><li><b>فجوة كبيرة، والتحقق ما زال يصعد:</b> إفراط. بيانات أكثر ستساعد.</li><li><b>الخطان التقيا ويستقران على أداء سيئ:</b> قلة تعلّم. بيانات أكثر <b>لن</b> تساعد. تحتاج نموذجاً أقوى أو ميزات أفضل.</li></ul><h2>العلاج</h2><div class="tablewrap"><table><thead><tr><th>المشكلة</th><th>ماذا تجرب</th></tr></thead><tbody><tr><td>قلة التعلّم</td><td>نموذج أقوى، وميزات أكثر أو أفضل، وتنظيم أقل، وتدريب أطول</td></tr><tr><td>الإفراط</td><td>بيانات أكثر، ونموذج أبسط، وتنظيم أكثر، وميزات أقل، وإيقاف مبكر</td></tr></tbody></table></div><div class="blk"><p>التنظيم موضوع الدرس 32، والإيقاف المبكر في الدرس 40.</p></div><div class="callout mistake"><div class="ct">خطأ شائع: الحكم من رقم التدريب وحده</div><div class="blk"><p>دقة تدريب 99% لا تقول شيئاً عن جودة النموذج. قد تكون أسوأ علامة ممكنة.</p><p>انظر دائماً إلى الرقمين معاً: التدريب والتحقق.</p></div></div><div class="callout interview"><div class="ct">سؤال مقابلة</div><div class="blk"><p>سؤال قد تسمعه في المقابلة:</p></div><div class="en" dir="ltr"><p>Explain the bias-variance tradeoff.</p></div><div class="blk"><p>جواب قصير وجيد:</p></div><div class="en" dir="ltr"><p>Bias is the error from wrong or too simple assumptions: a simple model misses real patterns and underfits. Variance is the error from being too sensitive to the specific training sample: a complex model fits the noise and overfits. Making a model more complex usually lowers bias and raises variance. We choose the complexity that gives the lowest error on validation data.</p></div></div><section class="summary"><div class="ct">الخلاصة</div><ul class="l"><li>قلة التعلّم: خطأ كبير في التدريب والتحقق. الإفراط: تدريب ممتاز، وتحقق سيئ.</li><li>الانحياز من البساطة الزائدة. والتباين من الحساسية الزائدة لعينة التدريب.</li><li>خطأ التدريب ينزل دائماً مع التعقيد. خطأ التحقق ينزل ثم يصعد. نختار القاع.</li><li>منحنى التعلّم يقول هل البيانات الإضافية ستساعد.</li><li>علاج الإفراط: بيانات أكثر، وتبسيط، وتنظيم. وعلاج قلة التعلّم: نموذج أقوى وميزات أفضل.</li></ul></section><section class="quiz" data-quiz="l27-q"><h2>اختبر فهمك</h2><div class="q" data-answer="1"><div class="qt"><span class="qn">1.</span>دقة التدريب 99%، ودقة التحقق 70%. ما التشخيص؟</div><div class="opts"><button type="button" class="opt">قلة تعلّم</button><button type="button" class="opt">إفراط في التعلّم</button><button type="button" class="opt">لا مشكلة</button></div><div class="explain" hidden><span class="verdict"></span><p>فجوة كبيرة بين الرقمين.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">2.</span>دقة التدريب 62%، ودقة التحقق 60%، والمطلوب 90%. ماذا تجرب أولاً؟</div><div class="opts"><button type="button" class="opt">جمع بيانات أكثر</button><button type="button" class="opt">نموذجاً أقوى، أو ميزات أفضل</button><button type="button" class="opt">تنظيماً أقوى</button></div><div class="explain" hidden><span class="verdict"></span><p>الرقمان قريبان وسيئان: النموذج لم يتعلّم حتى التدريب.</p></div></div><div class="q" data-answer="0"><div class="qt"><span class="qn">3.</span>ماذا يعني أن النموذج له تباين كبير؟</div><div class="opts"><button type="button" class="opt">تدريبه على عينة أخرى من نفس المصدر يعطي نموذجاً مختلفاً جداً</button><button type="button" class="opt">توقعاته قريبة من المتوسط دائماً</button><button type="button" class="opt">يحتاج توحيد مقياس</button></div><div class="explain" hidden><span class="verdict"></span><p>حساس جداً لعينة التدريب بالذات.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">4.</span>كثيرة حدود من الدرجة 9 تمر بعشر نقاط تدريب تماماً. ماذا تتوقع مع نقاط جديدة؟</div><div class="opts"><button type="button" class="opt">أداء ممتاز لأن خطأ التدريب صفر</button><button type="button" class="opt">أداء سيئ غالباً، لأنها حفظت الضجيج</button><button type="button" class="opt">نفس أداء الخط المستقيم</button></div><div class="explain" hidden><span class="verdict"></span><p>خطأ التدريب صفر علامة حفظ، وليس فهماً.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">5.</span>في منحنى التعلّم، التقى خطا التدريب والتحقق عند أداء سيئ واستقرا. هل تساعد بيانات أكثر؟</div><div class="opts"><button type="button" class="opt">نعم، كثيراً</button><button type="button" class="opt">لا، المشكلة قلة تعلّم، وتحتاج نموذجاً أقوى</button><button type="button" class="opt">لا يمكن المعرفة</button></div><div class="explain" hidden><span class="verdict"></span><p>الخطان لن يصعدا أكثر مع بيانات إضافية.</p></div></div><div class="row"><span class="score"></span><button type="button" class="btn ghost quiz-reset">أعد المحاولة</button></div></section><section class="exercise"><div class="xt">تمرين: اختر العمق بالتحقق</div><div class="blk"><p>استخدم بيانات أورام الثدي. قسّمها: 60% تدريب، و 20% تحقق، و 20% اختبار.</p></div><ol class="l"><li>درّب أشجار قرار بأعماق من 1 إلى 12. لكل عمق، احسب الدقة على التدريب والتحقق.</li><li>ارسم الخطين. أين تبدأ الفجوة بالكبر؟</li><li>اختر العمق الأفضل حسب التحقق، ثم قيّمه <b>مرة واحدة</b> على الاختبار.</li></ol><details><summary>تلميح</summary><div class="dbody"><div class="blk"><p>استخدم التقسيم المزدوج من الدرس السابق.</p></div></div></details><details class="sol"><summary>الحل (افتحه بعد أن تحاول)</summary><div class="dbody"><div class="code "><div class="code-head"><span class="path"></span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.datasets</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_breast_cancer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.tree</span><span class="w"> </span><span class="kn">import</span> <span class="n">DecisionTreeClassifier</span>
+
+<span class="n">Xb</span><span class="p">,</span> <span class="n">yb</span> <span class="o">=</span> <span class="n">load_breast_cancer</span><span class="p">(</span><span class="n">return_X_y</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">X_tmp</span><span class="p">,</span> <span class="n">X_te</span><span class="p">,</span> <span class="n">y_tmp</span><span class="p">,</span> <span class="n">y_te</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">Xb</span><span class="p">,</span> <span class="n">yb</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">stratify</span><span class="o">=</span><span class="n">yb</span><span class="p">)</span>
+<span class="n">X_tr</span><span class="p">,</span> <span class="n">X_va</span><span class="p">,</span> <span class="n">y_tr</span><span class="p">,</span> <span class="n">y_va</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X_tmp</span><span class="p">,</span> <span class="n">y_tmp</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">stratify</span><span class="o">=</span><span class="n">y_tmp</span><span class="p">)</span>
+
+<span class="n">depths</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">13</span><span class="p">)</span>
+<span class="n">tr_acc</span><span class="p">,</span> <span class="n">va_acc</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">depths</span><span class="p">:</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">DecisionTreeClassifier</span><span class="p">(</span><span class="n">max_depth</span><span class="o">=</span><span class="n">d</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_tr</span><span class="p">,</span> <span class="n">y_tr</span><span class="p">)</span>
+    <span class="n">tr_acc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_tr</span><span class="p">,</span> <span class="n">y_tr</span><span class="p">))</span>
+    <span class="n">va_acc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_va</span><span class="p">,</span> <span class="n">y_va</span><span class="p">))</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">3.2</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">depths</span><span class="p">,</span> <span class="n">tr_acc</span><span class="p">,</span> <span class="s2">&quot;o-&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">depths</span><span class="p">,</span> <span class="n">va_acc</span><span class="p">,</span> <span class="s2">&quot;o-&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;validation&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;max_depth&quot;</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span> <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="n">best</span> <span class="o">=</span> <span class="n">depths</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">va_acc</span><span class="p">))]</span>
+<span class="n">final</span> <span class="o">=</span> <span class="n">DecisionTreeClassifier</span><span class="p">(</span><span class="n">max_depth</span><span class="o">=</span><span class="n">best</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_tr</span><span class="p">,</span> <span class="n">y_tr</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;best depth:&quot;</span><span class="p">,</span> <span class="n">best</span><span class="p">,</span> <span class="s2">&quot; validation:&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">va_acc</span><span class="p">),</span> <span class="mi">3</span><span class="p">),</span> <span class="s2">&quot; test:&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">final</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_te</span><span class="p">,</span> <span class="n">y_te</span><span class="p">),</span> <span class="mi">3</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>best depth: 4  validation: 0.947  test: 0.939</pre></div><figure class="plot"><div class="svgwrap"><svg xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 380.692187 224.405812" xmlns="http://www.w3.org/2000/svg" version="1.1">
+<defs>
+</defs>
+<g id="figure_1">
+<g id="patch_1">
+<path d="M 0 224.405812 
+L 380.692187 224.405812 
+L 380.692187 0 
+L 0 0 
+L 0 224.405812 
+z
+" style="fill: none"/>
+</g>
+<g id="axes_1">
+<g id="patch_2">
+<path d="M 38.692188 184.608 
+L 373.492188 184.608 
+L 373.492188 7.2 
+L 38.692188 7.2 
+L 38.692188 184.608 
+z
+" style="fill: none"/>
+</g>
+<g id="matplotlib.axis_1">
+<g id="xtick_1">
+<g id="line2d_1">
+<path d="M 81.579791 184.608 
+L 81.579791 7.2 
+" clip-path="url(#pe984fc115d)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_2">
+<defs>
+<path id="m3cb4a053b7" d="M 0 0 
+L 0 3.5 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#m3cb4a053b7" x="81.579791" y="184.608" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_1">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="81.579791" y="199.966281" transform="rotate(-0 81.579791 199.966281)">2</text>
+</g>
+</g>
+<g id="xtick_2">
+<g id="line2d_3">
+<path d="M 136.918634 184.608 
+L 136.918634 7.2 
+" clip-path="url(#pe984fc115d)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_4">
+<g>
+<use xlink:href="#m3cb4a053b7" x="136.918634" y="184.608" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_2">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="136.918634" y="199.966281" transform="rotate(-0 136.918634 199.966281)">4</text>
+</g>
+</g>
+<g id="xtick_3">
+<g id="line2d_5">
+<path d="M 192.257477 184.608 
+L 192.257477 7.2 
+" clip-path="url(#pe984fc115d)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_6">
+<g>
+<use xlink:href="#m3cb4a053b7" x="192.257477" y="184.608" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_3">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="192.257477" y="199.966281" transform="rotate(-0 192.257477 199.966281)">6</text>
+</g>
+</g>
+<g id="xtick_4">
+<g id="line2d_7">
+<path d="M 247.59632 184.608 
+L 247.59632 7.2 
+" clip-path="url(#pe984fc115d)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_8">
+<g>
+<use xlink:href="#m3cb4a053b7" x="247.59632" y="184.608" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_4">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="247.59632" y="199.966281" transform="rotate(-0 247.59632 199.966281)">8</text>
+</g>
+</g>
+<g id="xtick_5">
+<g id="line2d_9">
+<path d="M 302.935163 184.608 
+L 302.935163 7.2 
+" clip-path="url(#pe984fc115d)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_10">
+<g>
+<use xlink:href="#m3cb4a053b7" x="302.935163" y="184.608" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_5">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="302.935163" y="199.966281" transform="rotate(-0 302.935163 199.966281)">10</text>
+</g>
+</g>
+<g id="xtick_6">
+<g id="line2d_11">
+<path d="M 358.274006 184.608 
+L 358.274006 7.2 
+" clip-path="url(#pe984fc115d)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_12">
+<g>
+<use xlink:href="#m3cb4a053b7" x="358.274006" y="184.608" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_6">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="358.274006" y="199.966281" transform="rotate(-0 358.274006 199.966281)">12</text>
+</g>
+</g>
+<g id="text_7">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="206.092188" y="214.612219" transform="rotate(-0 206.092188 214.612219)">max_depth</text>
+</g>
+</g>
+<g id="matplotlib.axis_2">
+<g id="ytick_1">
+<g id="line2d_13">
+<path d="M 38.692188 168.48 
+L 373.492188 168.48 
+" clip-path="url(#pe984fc115d)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_14">
+<defs>
+<path id="m90f9e8957a" d="M 0 0 
+L -3.5 0 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#m90f9e8957a" x="38.692188" y="168.48" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_8">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="31.692188" y="172.659141" transform="rotate(-0 31.692188 172.659141)">0.90</text>
+</g>
+</g>
+<g id="ytick_2">
+<g id="line2d_15">
+<path d="M 38.692188 137.8368 
+L 373.492188 137.8368 
+" clip-path="url(#pe984fc115d)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_16">
+<g>
+<use xlink:href="#m90f9e8957a" x="38.692188" y="137.8368" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_9">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="31.692188" y="142.015941" transform="rotate(-0 31.692188 142.015941)">0.92</text>
+</g>
+</g>
+<g id="ytick_3">
+<g id="line2d_17">
+<path d="M 38.692188 107.1936 
+L 373.492188 107.1936 
+" clip-path="url(#pe984fc115d)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_18">
+<g>
+<use xlink:href="#m90f9e8957a" x="38.692188" y="107.1936" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_10">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="31.692188" y="111.372741" transform="rotate(-0 31.692188 111.372741)">0.94</text>
+</g>
+</g>
+<g id="ytick_4">
+<g id="line2d_19">
+<path d="M 38.692188 76.5504 
+L 373.492188 76.5504 
+" clip-path="url(#pe984fc115d)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_20">
+<g>
+<use xlink:href="#m90f9e8957a" x="38.692188" y="76.5504" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_11">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="31.692188" y="80.729541" transform="rotate(-0 31.692188 80.729541)">0.96</text>
+</g>
+</g>
+<g id="ytick_5">
+<g id="line2d_21">
+<path d="M 38.692188 45.9072 
+L 373.492188 45.9072 
+" clip-path="url(#pe984fc115d)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_22">
+<g>
+<use xlink:href="#m90f9e8957a" x="38.692188" y="45.9072" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_12">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="31.692188" y="50.086341" transform="rotate(-0 31.692188 50.086341)">0.98</text>
+</g>
+</g>
+<g id="ytick_6">
+<g id="line2d_23">
+<path d="M 38.692188 15.264 
+L 373.492188 15.264 
+" clip-path="url(#pe984fc115d)" style="fill: none; stroke: currentColor; stroke-opacity: 0.18; stroke-width: 0.8; stroke-linecap: square"/>
+</g>
+<g id="line2d_24">
+<g>
+<use xlink:href="#m90f9e8957a" x="38.692188" y="15.264" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_13">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="31.692188" y="19.443141" transform="rotate(-0 31.692188 19.443141)">1.00</text>
+</g>
+</g>
+</g>
+<g id="line2d_25">
+<path d="M 53.910369 127.592446 
+L 81.579791 82.661067 
+L 109.249212 42.222827 
+L 136.918634 37.729689 
+L 164.588055 28.743413 
+L 192.257477 15.264 
+L 219.926898 15.264 
+L 247.59632 15.264 
+L 275.265741 15.264 
+L 302.935163 15.264 
+L 330.604584 15.264 
+L 358.274006 15.264 
+" clip-path="url(#pe984fc115d)" style="fill: none; stroke: #1f77b4; stroke-width: 1.5; stroke-linecap: square"/>
+<defs>
+<path id="mb82faecf03" d="M 0 3 
+C 0.795609 3 1.55874 2.683901 2.12132 2.12132 
+C 2.683901 1.55874 3 0.795609 3 0 
+C 3 -0.795609 2.683901 -1.55874 2.12132 -2.12132 
+C 1.55874 -2.683901 0.795609 -3 0 -3 
+C -0.795609 -3 -1.55874 -2.683901 -2.12132 -2.12132 
+C -2.683901 -1.55874 -3 -0.795609 -3 0 
+C -3 0.795609 -2.683901 1.55874 -2.12132 2.12132 
+C -1.55874 2.683901 -0.795609 3 0 3 
+z
+" style="stroke: #1f77b4"/>
+</defs>
+<g clip-path="url(#pe984fc115d)">
+<use xlink:href="#mb82faecf03" x="53.910369" y="127.592446" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#mb82faecf03" x="81.579791" y="82.661067" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#mb82faecf03" x="109.249212" y="42.222827" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#mb82faecf03" x="136.918634" y="37.729689" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#mb82faecf03" x="164.588055" y="28.743413" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#mb82faecf03" x="192.257477" y="15.264" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#mb82faecf03" x="219.926898" y="15.264" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#mb82faecf03" x="247.59632" y="15.264" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#mb82faecf03" x="275.265741" y="15.264" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#mb82faecf03" x="302.935163" y="15.264" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#mb82faecf03" x="330.604584" y="15.264" style="fill: #1f77b4; stroke: #1f77b4"/>
+<use xlink:href="#mb82faecf03" x="358.274006" y="15.264" style="fill: #1f77b4; stroke: #1f77b4"/>
+</g>
+</g>
+<g id="line2d_26">
+<path d="M 53.910369 176.544 
+L 81.579791 109.344 
+L 109.249212 122.784 
+L 136.918634 95.904 
+L 164.588055 122.784 
+L 192.257477 109.344 
+L 219.926898 109.344 
+L 247.59632 109.344 
+L 275.265741 109.344 
+L 302.935163 109.344 
+L 330.604584 109.344 
+L 358.274006 109.344 
+" clip-path="url(#pe984fc115d)" style="fill: none; stroke: #ff7f0e; stroke-width: 1.5; stroke-linecap: square"/>
+<defs>
+<path id="m339c434386" d="M 0 3 
+C 0.795609 3 1.55874 2.683901 2.12132 2.12132 
+C 2.683901 1.55874 3 0.795609 3 0 
+C 3 -0.795609 2.683901 -1.55874 2.12132 -2.12132 
+C 1.55874 -2.683901 0.795609 -3 0 -3 
+C -0.795609 -3 -1.55874 -2.683901 -2.12132 -2.12132 
+C -2.683901 -1.55874 -3 -0.795609 -3 0 
+C -3 0.795609 -2.683901 1.55874 -2.12132 2.12132 
+C -1.55874 2.683901 -0.795609 3 0 3 
+z
+" style="stroke: #ff7f0e"/>
+</defs>
+<g clip-path="url(#pe984fc115d)">
+<use xlink:href="#m339c434386" x="53.910369" y="176.544" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m339c434386" x="81.579791" y="109.344" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m339c434386" x="109.249212" y="122.784" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m339c434386" x="136.918634" y="95.904" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m339c434386" x="164.588055" y="122.784" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m339c434386" x="192.257477" y="109.344" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m339c434386" x="219.926898" y="109.344" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m339c434386" x="247.59632" y="109.344" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m339c434386" x="275.265741" y="109.344" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m339c434386" x="302.935163" y="109.344" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m339c434386" x="330.604584" y="109.344" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+<use xlink:href="#m339c434386" x="358.274006" y="109.344" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+</g>
+</g>
+<g id="patch_3">
+<path d="M 38.692188 184.608 
+L 38.692188 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_4">
+<path d="M 373.492188 184.608 
+L 373.492188 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_5">
+<path d="M 38.692188 184.608 
+L 373.492188 184.608 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_6">
+<path d="M 38.692188 7.2 
+L 373.492188 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="legend_1">
+<g id="patch_7">
+<path d="M 276.434375 179.108 
+L 365.792188 179.108 
+Q 367.992188 179.108 367.992188 176.908 
+L 367.992188 145.716125 
+Q 367.992188 143.516125 365.792188 143.516125 
+L 276.434375 143.516125 
+Q 274.234375 143.516125 274.234375 145.716125 
+L 274.234375 176.908 
+Q 274.234375 179.108 276.434375 179.108 
+L 276.434375 179.108 
+z
+" style="fill: none; opacity: 0.35; stroke: currentColor; stroke-linejoin: miter"/>
+</g>
+<g id="line2d_27">
+<path d="M 278.634375 152.424406 
+L 289.634375 152.424406 
+L 300.634375 152.424406 
+" style="fill: none; stroke: #1f77b4; stroke-width: 1.5; stroke-linecap: square"/>
+<g>
+<use xlink:href="#mb82faecf03" x="289.634375" y="152.424406" style="fill: #1f77b4; stroke: #1f77b4"/>
+</g>
+</g>
+<g id="text_14">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="309.434375" y="156.274406" transform="rotate(-0 309.434375 156.274406)">train</text>
+</g>
+<g id="line2d_28">
+<path d="M 278.634375 168.570344 
+L 289.634375 168.570344 
+L 300.634375 168.570344 
+" style="fill: none; stroke: #ff7f0e; stroke-width: 1.5; stroke-linecap: square"/>
+<g>
+<use xlink:href="#m339c434386" x="289.634375" y="168.570344" style="fill: #ff7f0e; stroke: #ff7f0e"/>
+</g>
+</g>
+<g id="text_15">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="309.434375" y="172.420344" transform="rotate(-0 309.434375 172.420344)">validation</text>
+</g>
+</g>
+</g>
+</g>
+<defs>
+<clipPath id="pe984fc115d">
+<rect x="38.692188" y="7.2" width="334.8" height="177.408"/>
+</clipPath>
+</defs>
+</svg></div><figcaption>الرسم الذي يظهر عندما تشغّل الكود.</figcaption></figure><div class="blk"><p>الفجوة تكبر بعد عمق صغير: التدريب يصل إلى 100%، والتحقق يتوقف.</p><p>رقم الاختبار هو تقديرك الصادق. ورقم التحقق للفائز متفائل قليلاً، لأننا اخترنا الأعلى من بين 12.</p></div></div></details><div class="askbox" data-kind="review" hidden><div class="al">اطلب من كلود أن يراجع حلّك</div><div class="ah">اكتب إجابتك أو الصق الكود. سيقارنه بالحل ويشرح لك بالعربي. هذا يستهلك من رصيد استخدامك.</div><textarea id="rv-l27-1" dir="auto" placeholder="اكتب إجابتك هنا"></textarea><div class="row"><button type="button" class="btn ask-go">راجع حلّي</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></div><pre hidden class="x-task">استخدم بيانات أورام الثدي. قسّمها: 60% تدريب، و 20% تحقق، و 20% اختبار.
+
+1. درّب أشجار قرار بأعماق من 1 إلى 12. لكل عمق، احسب الدقة على التدريب والتحقق.
+2. ارسم الخطين. أين تبدأ الفجوة بالكبر؟
+3. اختر العمق الأفضل حسب التحقق، ثم قيّمه مرة واحدة على الاختبار.</pre><pre hidden class="x-solution">```python
+from sklearn.datasets import load_breast_cancer
+from sklearn.tree import DecisionTreeClassifier
+
+Xb, yb = load_breast_cancer(return_X_y=True)
+X_tmp, X_te, y_tmp, y_te = train_test_split(Xb, yb, test_size=0.2, random_state=1, stratify=yb)
+X_tr, X_va, y_tr, y_va = train_test_split(X_tmp, y_tmp, test_size=0.25, random_state=1, stratify=y_tmp)
+
+depths = range(1, 13)
+tr_acc, va_acc = [], []
+for d in depths:
+    t = DecisionTreeClassifier(max_depth=d, random_state=0).fit(X_tr, y_tr)
+    tr_acc.append(t.score(X_tr, y_tr))
+    va_acc.append(t.score(X_va, y_va))
+
+plt.figure(figsize=(6, 3.2))
+plt.plot(depths, tr_acc, "o-", label="train"); plt.plot(depths, va_acc, "o-", label="validation")
+plt.xlabel("max_depth"); plt.legend(); plt.grid(True)
+plt.show()
+
+best = depths[int(np.argmax(va_acc))]
+final = DecisionTreeClassifier(max_depth=best, random_state=0).fit(X_tr, y_tr)
+print("best depth:", best, " validation:", round(max(va_acc), 3), " test:", round(final.score(X_te, y_te), 3))
+```
+
+الفجوة تكبر بعد عمق صغير: التدريب يصل إلى 100%، والتحقق يتوقف.
+رقم الاختبار هو تقديرك الصادق. ورقم التحقق للفائز متفائل قليلاً، لأننا اخترنا الأعلى من بين 12.</pre></section></article><section class="askbox" data-kind="ask" hidden><div class="al">عندك سؤال عن هذا الدرس؟ اسأل كلود</div><div class="ah">اكتب سؤالك بالعربي. كلود يقرأ نص الدرس ويجيبك. هذا يستهلك من رصيد استخدامك.</div><textarea id="ask-l27" dir="auto" placeholder="مثلاً: لماذا نضرب هنا في المشتقة؟"></textarea><div class="row"><button type="button" class="btn ask-go">اسأل</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></section><div class="donebox"><span class="dmsg"></span><button type="button" class="btn">أنهيت هذا الدرس</button></div><nav class="pager" aria-label="التنقل بين الدروس"><a class="prev" href="#l26"><small>الدرس السابق</small>التدريب والتحقق والاختبار، وتسريب البيانات</a><a class="next" href="#l28"><small>الدرس التالي</small>التحقق المتقاطع</a></nav></div>

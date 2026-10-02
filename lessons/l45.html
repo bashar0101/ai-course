@@ -1,0 +1,841 @@
+<div class="page"><article><div class="eyebrow">الجزء الخامس · الترانسفورمرز</div><h1>نمذجة اللغة: توقّع الرمز التالي</h1><div class="meta"><span>الدرس 45 من 59</span><span>المدة: حوالي 55 دقيقة</span><span class="nbdl-slot"></span></div><div class="chips" dir="ltr"><bdi class="chip">language model</bdi><bdi class="chip">next-token prediction</bdi><bdi class="chip">chain rule of probability</bdi><bdi class="chip">bigram</bdi><bdi class="chip">n-gram</bdi><bdi class="chip">smoothing</bdi><bdi class="chip">perplexity</bdi><bdi class="chip">self-supervised learning</bdi><bdi class="chip">context window</bdi></div><div class="goals"><b>بعد هذا الدرس ستعرف:</b><ul><li>تفهم مهمة النموذج اللغوي: توقّع الرمز التالي</li><li>تحسب احتمال جملة بقاعدة السلسلة، ثم بنموذج الثنائيات، بيدك</li><li>تفهم الحيرة كمقياس، وتحسبها من الخسارة</li><li>تبني نموذج ثنائيات للحروف على نص شكسبير، بالعدّ، ثم بشبكة</li><li>ترى لماذا لا يكفي السياق القصير، وما الذي نحتاجه بعده</li></ul></div><h2>المهمة: توقّع الرمز التالي</h2><div class="blk"><p>النموذج اللغوي يجيب عن سؤال واحد فقط: <b>ما الرمز التالي؟</b></p><p>ليس جواباً واحداً، بل احتمال لكل رمز في المفردات.</p></div><div class="blk"><p>"ذهبت إلى السوق لأشتري ..." خبزاً باحتمال عالٍ، وسيارة باحتمال أقل، وغيمة باحتمال قريب من الصفر.</p></div><div class="blk"><div class="term" dir="ltr"><code>language model · next-token prediction</code></div></div><div class="blk"><p>ومن هذا السؤال البسيط يأتي كل شيء: نختار رمزاً من الاحتمالات، ونضيفه للنص، ونسأل مرة أخرى. هكذا تكتب النماذج اللغوية الكبيرة. هذه المهمة وحدها، بنموذج ضخم وبيانات هائلة، هي أساس كل ما سنراه في الجزء القادم.</p></div><h3>احتمال جملة كاملة</h3><div class="blk"><p>من قاعدة السلسلة في الاحتمالات، الدرس 11: احتمال تسلسل يساوي حاصل ضرب احتمالات كل رمز بشرط ما قبله:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>P</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mn>1</mn></msub><mo separator="true">,</mo><msub><mi>x</mi><mn>2</mn></msub><mo separator="true">,</mo><mo>…</mo><mo separator="true">,</mo><msub><mi>x</mi><mi>n</mi></msub><mo stretchy="false">)</mo><mo>=</mo><mi>P</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mn>1</mn></msub><mo stretchy="false">)</mo><mtext> </mtext><mi>P</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mn>2</mn></msub><mo>∣</mo><msub><mi>x</mi><mn>1</mn></msub><mo stretchy="false">)</mo><mtext> </mtext><mi>P</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mn>3</mn></msub><mo>∣</mo><msub><mi>x</mi><mn>1</mn></msub><mo separator="true">,</mo><msub><mi>x</mi><mn>2</mn></msub><mo stretchy="false">)</mo><mo>⋯</mo><mi>P</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mi>n</mi></msub><mo>∣</mo><msub><mi>x</mi><mn>1</mn></msub><mo separator="true">,</mo><mo>…</mo><mo separator="true">,</mo><msub><mi>x</mi><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow></msub><mo stretchy="false">)</mo></mrow></math></div></div><div class="blk"><p>هذه ليست تقريباً: هي صحيحة دائماً. والنموذج اللغوي يحاول أن يتعلّم كل عامل فيها.</p></div><div class="blk"><div class="term" dir="ltr"><code>chain rule of probability</code></div></div><h2>أبسط نموذج: الثنائيات</h2><div class="blk"><p>المشكلة: الشرط "كل ما قبله" يطول مع النص. أبسط تبسيط: انظر إلى الرمز <b>السابق فقط</b>:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>P</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mi>t</mi></msub><mo>∣</mo><msub><mi>x</mi><mn>1</mn></msub><mo separator="true">,</mo><mo>…</mo><mo separator="true">,</mo><msub><mi>x</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo stretchy="false">)</mo><mo>≈</mo><mi>P</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mi>t</mi></msub><mo>∣</mo><msub><mi>x</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo stretchy="false">)</mo></mrow></math></div></div><div class="blk"><p>وكيف نقدّر هذا الاحتمال؟ بالعدّ: كم مرة جاء "ب" بعد "أ"، مقسوماً على عدد مرات "أ".</p></div><div class="blk"><div class="term" dir="ltr"><code>bigram model</code></div></div><div class="blk"><p>نضيف رمزين خاصين: بداية الجملة، ونهايتها. لكي يتعلّم النموذج كيف تبدأ الجمل، ومتى تنتهي.</p></div><section class="hand"><div class="hand-h"><span class="hand-tag">مثال محلول باليد</span><div class="hand-t">نموذج ثنائيات من ثلاث جمل</div></div><div class="hand-body"><div class="step">النص</div><div class="blk"><p>ثلاث جمل، مع رمزي البداية والنهاية:</p></div><div class="tablewrap"><table><thead><tr><th>الجملة</th></tr></thead><tbody><tr><td>بداية، أنا، أحب، القهوة، نهاية</td></tr><tr><td>بداية، أنا، أحب، الشاي، نهاية</td></tr><tr><td>بداية، أنت، تحب، القهوة، نهاية</td></tr></tbody></table></div><div class="step">العدّ والاحتمالات</div><div class="tablewrap"><table><thead><tr><th>الكلمة السابقة</th><th>ما جاء بعدها</th><th>الاحتمال</th></tr></thead><tbody><tr><td>بداية</td><td>أنا مرتين، أنت مرة</td><td>أنا: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>2</mn><mi mathvariant="normal">/</mi><mn>3</mn></mrow></math></bdi>، أنت: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1</mn><mi mathvariant="normal">/</mi><mn>3</mn></mrow></math></bdi></td></tr><tr><td>أنا</td><td>أحب مرتين</td><td>أحب: 1</td></tr><tr><td>أحب</td><td>القهوة مرة، الشاي مرة</td><td>كل واحدة: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1</mn><mi mathvariant="normal">/</mi><mn>2</mn></mrow></math></bdi></td></tr><tr><td>أنت</td><td>تحب مرة</td><td>تحب: 1</td></tr><tr><td>تحب</td><td>القهوة مرة</td><td>القهوة: 1</td></tr><tr><td>القهوة</td><td>نهاية مرتين</td><td>نهاية: 1</td></tr><tr><td>الشاي</td><td>نهاية مرة</td><td>نهاية: 1</td></tr></tbody></table></div><div class="step">احتمال جملة</div><div class="blk"><p>"أنا أحب القهوة": نضرب احتمال كل خطوة، من البداية إلى النهاية:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mn>2</mn><mn>3</mn></mfrac><mo>×</mo><mn>1</mn><mo>×</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mo>×</mo><mn>1</mn><mo>=</mo><mfrac><mn>1</mn><mn>3</mn></mfrac></mrow></math></div></div><div class="step">مشكلة الصفر</div><div class="blk"><p>"أنت تحب الشاي" جملة سليمة تماماً. لكن "الشاي" لم يأتِ أبداً بعد "تحب" في نصنا:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mn>1</mn><mn>3</mn></mfrac><mo>×</mo><mn>1</mn><mo>×</mo><mn>0</mn><mo>=</mo><mn>0</mn></mrow></math></div></div><div class="blk"><p>احتمال صفر لجملة ممكنة! الحل البسيط: <b>التنعيم</b>. نضيف 1 لكل عدّ.</p><p>بعد "تحب" يمكن أن تأتي 7 كلمات مختلفة: الكلمات الست، ورمز النهاية. فيصبح احتمال "الشاي" بعد "تحب":</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mfrac><mrow><mn>0</mn><mo>+</mo><mn>1</mn></mrow><mrow><mn>1</mn><mo>+</mo><mn>7</mn></mrow></mfrac><mo>=</mo><mfrac><mn>1</mn><mn>8</mn></mfrac></mrow></math></div></div><div class="step">الخسارة والحيرة</div><div class="blk"><p>خسارة النموذج على الجملة الأولى: متوسط سالب لوغاريتم احتمالات خطواتها الأربع، أي الإنتروبيا المتقاطعة من الدرس 14:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>L</mi><mo>=</mo><mfrac><mrow><mo>−</mo><mi>ln</mi><mo>⁡</mo><mfrac><mn>2</mn><mn>3</mn></mfrac><mo>−</mo><mi>ln</mi><mo>⁡</mo><mn>1</mn><mo>−</mo><mi>ln</mi><mo>⁡</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mo>−</mo><mi>ln</mi><mo>⁡</mo><mn>1</mn></mrow><mn>4</mn></mfrac><mo>=</mo><mfrac><mrow><mn>0.405</mn><mo>+</mo><mn>0.693</mn></mrow><mn>4</mn></mfrac><mo>≈</mo><mn>0.275</mn></mrow></math></div></div><div class="blk"><p>والحيرة: الأسّ الطبيعي للخسارة:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msup><mi>e</mi><mn>0.275</mn></msup><mo>≈</mo><mn>1.32</mn></mrow></math></div></div><div class="blk"><p>المعنى: في كل خطوة، النموذج متردد كأنه يختار بالتساوي بين 1.32 خياراً فقط. واثق جداً.</p><p>نموذج لا يعرف شيئاً يختار بالتساوي بين الخيارات السبعة: حيرته 7.</p></div></div></section><h2>الحيرة</h2><div class="blk"><p>الحيرة هي الأسّ الطبيعي لمتوسط الخسارة:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>PPL</mtext><mo>=</mo><msup><mi>e</mi><mi>L</mi></msup></mrow></math></div></div><div class="blk"><div class="term" dir="ltr"><code>perplexity</code></div></div><div class="blk"><p>معناها بسيط: النموذج متردد كأنه يختار بالتساوي بين هذا العدد من الرموز.</p></div><div class="tablewrap"><table><thead><tr><th>النموذج</th><th>الحيرة</th></tr></thead><tbody><tr><td>لا يعرف شيئاً، مع 65 رمزاً</td><td>65</td></tr><tr><td>يعرف الجواب دائماً بثقة كاملة</td><td>1</td></tr></tbody></table></div><div class="blk"><p>كلما قلت الحيرة كان أفضل. وهي مفيدة لأنها أسهل في الفهم من رقم الخسارة.</p><p>لكن انتبه: لا تقارن الحيرة بين نموذجين بمقطّعين مختلفين. رمز الحرف ورمز الكلمة مهمتان مختلفتان تماماً.</p></div><h2>التعلّم الذاتي الإشراف</h2><div class="blk"><p>من أين تأتي الأجوبة الصحيحة للتدريب؟ من النص نفسه!</p><p>كل موضع في النص مثال تدريب: المدخل ما قبله، والجواب الرمز الذي فيه. لا نحتاج أي إنسان ليكتب أجوبة.</p></div><div class="blk"><div class="term" dir="ltr"><code>self-supervised learning</code></div></div><div class="blk"><p>نص من مليون حرف يعطي تقريباً مليون مثال. وهذا سر قوة النماذج اللغوية: كل النصوص في العالم بيانات تدريب جاهزة.</p></div><div class="blk"><p>في الكود، الأجوبة هي نفس النص، مزاحاً خطوة واحدة:</p></div><div class="blk"><div class="term" dir="ltr"><code>x = data[:-1]   ·   y = data[1:]</code></div></div><h2>حدود السياق القصير</h2><div class="blk"><p>الثنائيات ترى رمزاً واحداً للخلف. لتوقع ما بعد "أنا أحب ..."، ترى "أحب" فقط، وتنسى من يتكلم.</p></div><div class="blk"><p>الفكرة الأولى: سياق أطول، بالعدّ أيضاً. لكن عدد الجداول ينفجر:</p></div><div class="tablewrap"><table><thead><tr><th>السياق</th><th>حجم جدول العدّ لـ 65 حرفاً</th></tr></thead><tbody><tr><td>حرف واحد</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msup><mn>65</mn><mn>2</mn></msup><mo>=</mo><mn>4,225</mn></mrow></math></bdi></td></tr><tr><td>حرفان</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msup><mn>65</mn><mn>3</mn></msup><mo>=</mo><mn>274,625</mn></mrow></math></bdi></td></tr><tr><td>أربعة حروف</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msup><mn>65</mn><mn>5</mn></msup></mrow></math></bdi>، أكثر من مليار</td></tr></tbody></table></div><div class="blk"><p>وأغلب الخانات صفر: لن نرى كل التركيبات أبداً.</p></div><div class="blk"><p>الحل: شبكة عصبية تعمم. السياقات المتشابهة، عبر التضمينات، تعطي توقعات متشابهة، حتى لو لم نرَ التركيبة بالضبط.</p><p>الشبكات التكرارية حاولت ذلك، ورأينا حدودها في الدرس 42. والانتباه، في الدرس القادم، يسمح لكل رمز أن ينظر إلى كل ما قبله مباشرة، ضمن <b>نافذة سياق</b> بطول محدد.</p></div><div class="blk"><div class="term" dir="ltr"><code>context window</code></div></div><h2>بالكود</h2><h3>المثال المحلول</h3><div class="code "><div class="code-head"><span class="path">word_bigram.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">Counter</span><span class="p">,</span> <span class="n">defaultdict</span>
+
+<span class="n">sentences</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;أنا أحب القهوة&quot;</span><span class="p">,</span> <span class="s2">&quot;أنا أحب الشاي&quot;</span><span class="p">,</span> <span class="s2">&quot;أنت تحب القهوة&quot;</span><span class="p">]</span>
+<span class="n">counts</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="n">Counter</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sentences</span><span class="p">:</span>
+    <span class="n">words</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&lt;s&gt;&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">s</span><span class="o">.</span><span class="n">split</span><span class="p">()</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;&lt;/s&gt;&quot;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">prev</span><span class="p">,</span> <span class="n">nxt</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">words</span><span class="p">,</span> <span class="n">words</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+        <span class="n">counts</span><span class="p">[</span><span class="n">prev</span><span class="p">][</span><span class="n">nxt</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">prob</span><span class="p">(</span><span class="n">prev</span><span class="p">,</span> <span class="n">nxt</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">counts</span><span class="p">[</span><span class="n">prev</span><span class="p">][</span><span class="n">nxt</span><span class="p">]</span> <span class="o">/</span> <span class="nb">sum</span><span class="p">(</span><span class="n">counts</span><span class="p">[</span><span class="n">prev</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">sentence_prob</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="n">words</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&lt;s&gt;&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">s</span><span class="o">.</span><span class="n">split</span><span class="p">()</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;&lt;/s&gt;&quot;</span><span class="p">]</span>
+    <span class="n">steps</span> <span class="o">=</span> <span class="p">[</span><span class="n">prob</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">words</span><span class="p">,</span> <span class="n">words</span><span class="p">[</span><span class="mi">1</span><span class="p">:])]</span>
+    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">steps</span><span class="p">),</span> <span class="n">steps</span>
+
+<span class="n">p</span><span class="p">,</span> <span class="n">steps</span> <span class="o">=</span> <span class="n">sentence_prob</span><span class="p">(</span><span class="s2">&quot;أنا أحب القهوة&quot;</span><span class="p">)</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="o">-</span><span class="nb">sum</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">q</span><span class="p">)</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">steps</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">steps</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;P =&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="s2">&quot; steps:&quot;</span><span class="p">,</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">steps</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;loss =&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">loss</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="s2">&quot; perplexity =&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">loss</span><span class="p">),</span> <span class="mi">2</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;P(أنت تحب الشاي) =&quot;</span><span class="p">,</span> <span class="n">sentence_prob</span><span class="p">(</span><span class="s2">&quot;أنت تحب الشاي&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>P = 0.3333  steps: [0.667, 1.0, 0.5, 1.0]
+loss = 0.275  perplexity = 1.32
+P(أنت تحب الشاي) = 0.0</pre></div><h3>حروف شكسبير</h3><div class="blk"><p>ننتقل إلى الحروف، ونص حقيقي. المفردات: كل الحروف المختلفة في النص.</p></div><div class="code "><div class="code-head"><span class="path">char_data.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">urllib.request</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">nn</span>
+
+<span class="n">URL</span> <span class="o">=</span> <span class="s2">&quot;https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt&quot;</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s2">&quot;tinyshakespeare.txt&quot;</span><span class="p">):</span>
+    <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlretrieve</span><span class="p">(</span><span class="n">URL</span><span class="p">,</span> <span class="s2">&quot;tinyshakespeare.txt&quot;</span><span class="p">)</span>
+<span class="n">text</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;tinyshakespeare.txt&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+<span class="n">chars</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">text</span><span class="p">))</span>
+<span class="n">V</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">chars</span><span class="p">)</span>
+<span class="n">stoi</span> <span class="o">=</span> <span class="p">{</span><span class="n">c</span><span class="p">:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">chars</span><span class="p">)}</span>           <span class="c1"># character -&gt; id</span>
+<span class="n">itos</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="n">c</span> <span class="k">for</span> <span class="n">c</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">stoi</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>               <span class="c1"># id -&gt; character</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">stoi</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">text</span><span class="p">])</span>
+<span class="n">split</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.9</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+<span class="n">train</span><span class="p">,</span> <span class="n">val</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:</span><span class="n">split</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">split</span><span class="p">:]</span>              <span class="c1"># first 90% / last 10%</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;vocabulary:&quot;</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="s2">&quot;characters&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">chars</span><span class="p">)))</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;train </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">train</span><span class="p">)</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> | validation </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">)</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>vocabulary: 65 characters
+"\n !$&amp;',-.3:;?ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+train 1,003,854 | validation 111,540</pre></div><h3>نموذج الثنائيات بالعدّ</h3><div class="code "><div class="code-head"><span class="path">count_bigram.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="n">N</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">V</span><span class="p">,</span> <span class="n">V</span><span class="p">))</span>
+<span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="p">(</span><span class="n">train</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">train</span><span class="p">[</span><span class="mi">1</span><span class="p">:]),</span> <span class="mi">1</span><span class="p">)</span>              <span class="c1"># count every (previous, next) pair</span>
+<span class="n">P</span> <span class="o">=</span> <span class="p">(</span><span class="n">N</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">N</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>      <span class="c1"># add-one smoothing, rows sum to 1</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">nll</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+    <span class="k">return</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">P</span><span class="p">[</span><span class="n">d</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]))</span>
+
+<span class="n">val_loss</span> <span class="o">=</span> <span class="n">nll</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;validation loss </span><span class="si">{</span><span class="n">val_loss</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> | perplexity </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">val_loss</span><span class="p">)</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> | &quot;</span>
+      <span class="sa">f</span><span class="s2">&quot;know-nothing baseline: loss </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">V</span><span class="p">)</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, perplexity </span><span class="si">{</span><span class="n">V</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;q&quot;</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">]:</span>
+    <span class="n">top</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="o">-</span><span class="n">P</span><span class="p">[</span><span class="n">stoi</span><span class="p">[</span><span class="n">c</span><span class="p">]])[:</span><span class="mi">4</span><span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;after </span><span class="si">{</span><span class="n">c</span><span class="si">!r}</span><span class="s2">:&quot;</span><span class="p">,</span> <span class="p">[(</span><span class="n">itos</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">P</span><span class="p">[</span><span class="n">stoi</span><span class="p">[</span><span class="n">c</span><span class="p">],</span> <span class="n">j</span><span class="p">]),</span> <span class="mi">3</span><span class="p">))</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">top</span><span class="p">])</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>validation loss 2.482 | perplexity 12.0 | know-nothing baseline: loss 4.174, perplexity 65
+after 'q': [('u', 0.898), ('\n', 0.002), ('!', 0.002), (' ', 0.002)]
+after 't': [('h', 0.341), (' ', 0.246), ('o', 0.088), ('e', 0.065)]
+after ' ': [('t', 0.141), ('a', 0.079), ('s', 0.071), ('h', 0.071)]</pre></div><div class="blk"><p>بعد هذا الحرف يأتي حرف واحد تقريباً دائماً، باحتمال يقارب 90%:</p></div><div class="blk"><div class="term" dir="ltr"><code>q → u</code></div></div><div class="blk"><p>وبعد هذا الحرف، الأكثر حرف يصنع أشهر كلمتين في الإنجليزية:</p></div><div class="blk"><div class="term" dir="ltr"><code>t → h   (the · that)</code></div></div><div class="blk"><p>والحيرة حوالي 12 بدل 65: النموذج البسيط تعلّم كثيراً.</p></div><figure class="plot"><div class="svgwrap"><svg xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 411.617075 354.252437" xmlns="http://www.w3.org/2000/svg" version="1.1">
+<defs>
+</defs>
+<g id="figure_1">
+<g id="patch_1">
+<path d="M 0 354.252437 
+L 411.617075 354.252437 
+L 411.617075 0 
+L 0 0 
+L 0 354.252437 
+z
+" style="fill: none"/>
+</g>
+<g id="axes_1">
+<g id="patch_2">
+<path d="M 36.638438 317.664 
+L 347.102438 317.664 
+L 347.102438 7.2 
+L 36.638438 7.2 
+L 36.638438 317.664 
+z
+" style="fill: none"/>
+</g>
+<g clip-path="url(#p4975db1266)">
+<image xlink:href="data:image/png;base64,
+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" id="imagead74e6058a" transform="scale(1 -1) translate(0 -311.04)" x="36.638438" y="-6.624" width="311.04" height="311.04"/>
+</g>
+<g id="matplotlib.axis_1">
+<g id="xtick_1">
+<g id="line2d_1">
+<defs>
+<path id="m7cecfe1b3a" d="M 0 0 
+L 0 3.5 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#m7cecfe1b3a" x="42.608899" y="317.664" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_1">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="42.608899" y="330.74275" transform="rotate(-0 42.608899 330.74275)">a</text>
+</g>
+</g>
+<g id="xtick_2">
+<g id="line2d_2">
+<g>
+<use xlink:href="#m7cecfe1b3a" x="54.549822" y="317.664" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_2">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="54.549822" y="330.74275" transform="rotate(-0 54.549822 330.74275)">b</text>
+</g>
+</g>
+<g id="xtick_3">
+<g id="line2d_3">
+<g>
+<use xlink:href="#m7cecfe1b3a" x="66.490745" y="317.664" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_3">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="66.490745" y="330.74275" transform="rotate(-0 66.490745 330.74275)">c</text>
+</g>
+</g>
+<g id="xtick_4">
+<g id="line2d_4">
+<g>
+<use xlink:href="#m7cecfe1b3a" x="78.431668" y="317.664" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_4">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="78.431668" y="330.74275" transform="rotate(-0 78.431668 330.74275)">d</text>
+</g>
+</g>
+<g id="xtick_5">
+<g id="line2d_5">
+<g>
+<use xlink:href="#m7cecfe1b3a" x="90.372591" y="317.664" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_5">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="90.372591" y="330.74275" transform="rotate(-0 90.372591 330.74275)">e</text>
+</g>
+</g>
+<g id="xtick_6">
+<g id="line2d_6">
+<g>
+<use xlink:href="#m7cecfe1b3a" x="102.313514" y="317.664" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_6">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="102.313514" y="330.74275" transform="rotate(-0 102.313514 330.74275)">f</text>
+</g>
+</g>
+<g id="xtick_7">
+<g id="line2d_7">
+<g>
+<use xlink:href="#m7cecfe1b3a" x="114.254438" y="317.664" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_7">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="114.254438" y="330.74275" transform="rotate(-0 114.254438 330.74275)">g</text>
+</g>
+</g>
+<g id="xtick_8">
+<g id="line2d_8">
+<g>
+<use xlink:href="#m7cecfe1b3a" x="126.195361" y="317.664" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_8">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="126.195361" y="330.74275" transform="rotate(-0 126.195361 330.74275)">h</text>
+</g>
+</g>
+<g id="xtick_9">
+<g id="line2d_9">
+<g>
+<use xlink:href="#m7cecfe1b3a" x="138.136284" y="317.664" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_9">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="138.136284" y="330.74275" transform="rotate(-0 138.136284 330.74275)">i</text>
+</g>
+</g>
+<g id="xtick_10">
+<g id="line2d_10">
+<g>
+<use xlink:href="#m7cecfe1b3a" x="150.077207" y="317.664" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_10">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="150.077207" y="330.74275" transform="rotate(-0 150.077207 330.74275)">j</text>
+</g>
+</g>
+<g id="xtick_11">
+<g id="line2d_11">
+<g>
+<use xlink:href="#m7cecfe1b3a" x="162.01813" y="317.664" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_11">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="162.01813" y="330.74275" transform="rotate(-0 162.01813 330.74275)">k</text>
+</g>
+</g>
+<g id="xtick_12">
+<g id="line2d_12">
+<g>
+<use xlink:href="#m7cecfe1b3a" x="173.959053" y="317.664" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_12">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="173.959053" y="330.74275" transform="rotate(-0 173.959053 330.74275)">l</text>
+</g>
+</g>
+<g id="xtick_13">
+<g id="line2d_13">
+<g>
+<use xlink:href="#m7cecfe1b3a" x="185.899976" y="317.664" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_13">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="185.899976" y="330.74275" transform="rotate(-0 185.899976 330.74275)">m</text>
+</g>
+</g>
+<g id="xtick_14">
+<g id="line2d_14">
+<g>
+<use xlink:href="#m7cecfe1b3a" x="197.840899" y="317.664" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_14">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="197.840899" y="330.74275" transform="rotate(-0 197.840899 330.74275)">n</text>
+</g>
+</g>
+<g id="xtick_15">
+<g id="line2d_15">
+<g>
+<use xlink:href="#m7cecfe1b3a" x="209.781822" y="317.664" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_15">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="209.781822" y="330.74275" transform="rotate(-0 209.781822 330.74275)">o</text>
+</g>
+</g>
+<g id="xtick_16">
+<g id="line2d_16">
+<g>
+<use xlink:href="#m7cecfe1b3a" x="221.722745" y="317.664" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_16">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="221.722745" y="330.74275" transform="rotate(-0 221.722745 330.74275)">p</text>
+</g>
+</g>
+<g id="xtick_17">
+<g id="line2d_17">
+<g>
+<use xlink:href="#m7cecfe1b3a" x="233.663668" y="317.664" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_17">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="233.663668" y="330.74275" transform="rotate(-0 233.663668 330.74275)">q</text>
+</g>
+</g>
+<g id="xtick_18">
+<g id="line2d_18">
+<g>
+<use xlink:href="#m7cecfe1b3a" x="245.604591" y="317.664" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_18">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="245.604591" y="330.74275" transform="rotate(-0 245.604591 330.74275)">r</text>
+</g>
+</g>
+<g id="xtick_19">
+<g id="line2d_19">
+<g>
+<use xlink:href="#m7cecfe1b3a" x="257.545514" y="317.664" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_19">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="257.545514" y="330.74275" transform="rotate(-0 257.545514 330.74275)">s</text>
+</g>
+</g>
+<g id="xtick_20">
+<g id="line2d_20">
+<g>
+<use xlink:href="#m7cecfe1b3a" x="269.486438" y="317.664" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_20">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="269.486438" y="330.74275" transform="rotate(-0 269.486438 330.74275)">t</text>
+</g>
+</g>
+<g id="xtick_21">
+<g id="line2d_21">
+<g>
+<use xlink:href="#m7cecfe1b3a" x="281.427361" y="317.664" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_21">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="281.427361" y="330.74275" transform="rotate(-0 281.427361 330.74275)">u</text>
+</g>
+</g>
+<g id="xtick_22">
+<g id="line2d_22">
+<g>
+<use xlink:href="#m7cecfe1b3a" x="293.368284" y="317.664" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_22">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="293.368284" y="330.74275" transform="rotate(-0 293.368284 330.74275)">v</text>
+</g>
+</g>
+<g id="xtick_23">
+<g id="line2d_23">
+<g>
+<use xlink:href="#m7cecfe1b3a" x="305.309207" y="317.664" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_23">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="305.309207" y="330.74275" transform="rotate(-0 305.309207 330.74275)">w</text>
+</g>
+</g>
+<g id="xtick_24">
+<g id="line2d_24">
+<g>
+<use xlink:href="#m7cecfe1b3a" x="317.25013" y="317.664" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_24">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="317.25013" y="330.74275" transform="rotate(-0 317.25013 330.74275)">x</text>
+</g>
+</g>
+<g id="xtick_25">
+<g id="line2d_25">
+<g>
+<use xlink:href="#m7cecfe1b3a" x="329.191053" y="317.664" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_25">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="329.191053" y="330.74275" transform="rotate(-0 329.191053 330.74275)">y</text>
+</g>
+</g>
+<g id="xtick_26">
+<g id="line2d_26">
+<g>
+<use xlink:href="#m7cecfe1b3a" x="341.131976" y="317.664" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_26">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="341.131976" y="330.74275" transform="rotate(-0 341.131976 330.74275)">z</text>
+</g>
+</g>
+<g id="text_27">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="191.870438" y="344.764781" transform="rotate(-0 191.870438 344.764781)">next character</text>
+</g>
+</g>
+<g id="matplotlib.axis_2">
+<g id="ytick_1">
+<g id="line2d_27">
+<defs>
+<path id="mf2594ff481" d="M 0 0 
+L -3.5 0 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#mf2594ff481" x="36.638438" y="13.170462" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_28">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="29.638438" y="16.209837" transform="rotate(-0 29.638438 16.209837)">a</text>
+</g>
+</g>
+<g id="ytick_2">
+<g id="line2d_28">
+<g>
+<use xlink:href="#mf2594ff481" x="36.638438" y="25.111385" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_29">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="29.638438" y="28.15076" transform="rotate(-0 29.638438 28.15076)">b</text>
+</g>
+</g>
+<g id="ytick_3">
+<g id="line2d_29">
+<g>
+<use xlink:href="#mf2594ff481" x="36.638438" y="37.052308" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_30">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="29.638438" y="40.091683" transform="rotate(-0 29.638438 40.091683)">c</text>
+</g>
+</g>
+<g id="ytick_4">
+<g id="line2d_30">
+<g>
+<use xlink:href="#mf2594ff481" x="36.638438" y="48.993231" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_31">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="29.638438" y="52.032606" transform="rotate(-0 29.638438 52.032606)">d</text>
+</g>
+</g>
+<g id="ytick_5">
+<g id="line2d_31">
+<g>
+<use xlink:href="#mf2594ff481" x="36.638438" y="60.934154" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_32">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="29.638438" y="63.973529" transform="rotate(-0 29.638438 63.973529)">e</text>
+</g>
+</g>
+<g id="ytick_6">
+<g id="line2d_32">
+<g>
+<use xlink:href="#mf2594ff481" x="36.638438" y="72.875077" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_33">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="29.638438" y="75.914452" transform="rotate(-0 29.638438 75.914452)">f</text>
+</g>
+</g>
+<g id="ytick_7">
+<g id="line2d_33">
+<g>
+<use xlink:href="#mf2594ff481" x="36.638438" y="84.816" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_34">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="29.638438" y="87.855375" transform="rotate(-0 29.638438 87.855375)">g</text>
+</g>
+</g>
+<g id="ytick_8">
+<g id="line2d_34">
+<g>
+<use xlink:href="#mf2594ff481" x="36.638438" y="96.756923" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_35">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="29.638438" y="99.796298" transform="rotate(-0 29.638438 99.796298)">h</text>
+</g>
+</g>
+<g id="ytick_9">
+<g id="line2d_35">
+<g>
+<use xlink:href="#mf2594ff481" x="36.638438" y="108.697846" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_36">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="29.638438" y="111.737221" transform="rotate(-0 29.638438 111.737221)">i</text>
+</g>
+</g>
+<g id="ytick_10">
+<g id="line2d_36">
+<g>
+<use xlink:href="#mf2594ff481" x="36.638438" y="120.638769" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_37">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="29.638438" y="123.678144" transform="rotate(-0 29.638438 123.678144)">j</text>
+</g>
+</g>
+<g id="ytick_11">
+<g id="line2d_37">
+<g>
+<use xlink:href="#mf2594ff481" x="36.638438" y="132.579692" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_38">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="29.638438" y="135.619067" transform="rotate(-0 29.638438 135.619067)">k</text>
+</g>
+</g>
+<g id="ytick_12">
+<g id="line2d_38">
+<g>
+<use xlink:href="#mf2594ff481" x="36.638438" y="144.520615" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_39">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="29.638438" y="147.55999" transform="rotate(-0 29.638438 147.55999)">l</text>
+</g>
+</g>
+<g id="ytick_13">
+<g id="line2d_39">
+<g>
+<use xlink:href="#mf2594ff481" x="36.638438" y="156.461538" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_40">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="29.638438" y="159.500913" transform="rotate(-0 29.638438 159.500913)">m</text>
+</g>
+</g>
+<g id="ytick_14">
+<g id="line2d_40">
+<g>
+<use xlink:href="#mf2594ff481" x="36.638438" y="168.402462" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_41">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="29.638438" y="171.441837" transform="rotate(-0 29.638438 171.441837)">n</text>
+</g>
+</g>
+<g id="ytick_15">
+<g id="line2d_41">
+<g>
+<use xlink:href="#mf2594ff481" x="36.638438" y="180.343385" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_42">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="29.638438" y="183.38276" transform="rotate(-0 29.638438 183.38276)">o</text>
+</g>
+</g>
+<g id="ytick_16">
+<g id="line2d_42">
+<g>
+<use xlink:href="#mf2594ff481" x="36.638438" y="192.284308" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_43">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="29.638438" y="195.323683" transform="rotate(-0 29.638438 195.323683)">p</text>
+</g>
+</g>
+<g id="ytick_17">
+<g id="line2d_43">
+<g>
+<use xlink:href="#mf2594ff481" x="36.638438" y="204.225231" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_44">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="29.638438" y="207.264606" transform="rotate(-0 29.638438 207.264606)">q</text>
+</g>
+</g>
+<g id="ytick_18">
+<g id="line2d_44">
+<g>
+<use xlink:href="#mf2594ff481" x="36.638438" y="216.166154" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_45">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="29.638438" y="219.205529" transform="rotate(-0 29.638438 219.205529)">r</text>
+</g>
+</g>
+<g id="ytick_19">
+<g id="line2d_45">
+<g>
+<use xlink:href="#mf2594ff481" x="36.638438" y="228.107077" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_46">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="29.638438" y="231.146452" transform="rotate(-0 29.638438 231.146452)">s</text>
+</g>
+</g>
+<g id="ytick_20">
+<g id="line2d_46">
+<g>
+<use xlink:href="#mf2594ff481" x="36.638438" y="240.048" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_47">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="29.638438" y="243.087375" transform="rotate(-0 29.638438 243.087375)">t</text>
+</g>
+</g>
+<g id="ytick_21">
+<g id="line2d_47">
+<g>
+<use xlink:href="#mf2594ff481" x="36.638438" y="251.988923" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_48">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="29.638438" y="255.028298" transform="rotate(-0 29.638438 255.028298)">u</text>
+</g>
+</g>
+<g id="ytick_22">
+<g id="line2d_48">
+<g>
+<use xlink:href="#mf2594ff481" x="36.638438" y="263.929846" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_49">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="29.638438" y="266.969221" transform="rotate(-0 29.638438 266.969221)">v</text>
+</g>
+</g>
+<g id="ytick_23">
+<g id="line2d_49">
+<g>
+<use xlink:href="#mf2594ff481" x="36.638438" y="275.870769" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_50">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="29.638438" y="278.910144" transform="rotate(-0 29.638438 278.910144)">w</text>
+</g>
+</g>
+<g id="ytick_24">
+<g id="line2d_50">
+<g>
+<use xlink:href="#mf2594ff481" x="36.638438" y="287.811692" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_51">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="29.638438" y="290.851067" transform="rotate(-0 29.638438 290.851067)">x</text>
+</g>
+</g>
+<g id="ytick_25">
+<g id="line2d_51">
+<g>
+<use xlink:href="#mf2594ff481" x="36.638438" y="299.752615" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_52">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="29.638438" y="302.79199" transform="rotate(-0 29.638438 302.79199)">y</text>
+</g>
+</g>
+<g id="ytick_26">
+<g id="line2d_52">
+<g>
+<use xlink:href="#mf2594ff481" x="36.638438" y="311.693538" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_53">
+<text style="font-size: 8px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="29.638438" y="314.732913" transform="rotate(-0 29.638438 314.732913)">z</text>
+</g>
+</g>
+<g id="text_54">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="15.558281" y="162.432" transform="rotate(-90 15.558281 162.432)">previous character</text>
+</g>
+</g>
+<g id="patch_3">
+<path d="M 36.638438 317.664 
+L 36.638438 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_4">
+<path d="M 347.102438 317.664 
+L 347.102438 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_5">
+<path d="M 36.638438 317.664 
+L 347.102438 317.664 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_6">
+<path d="M 36.638438 7.2 
+L 347.102438 7.2 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+</g>
+<g id="axes_2">
+<g id="patch_7">
+<path d="M 364.400438 317.664 
+L 379.923637 317.664 
+L 379.923637 7.2 
+L 364.400438 7.2 
+L 364.400438 317.664 
+z
+" style="fill: none"/>
+</g>
+<image xlink:href="data:image/png;base64,
+iVBORw0KGgoAAAANSUhEUgAAABYAAAGvCAYAAABfBiUyAAACFUlEQVR4nO2cyY3EMBDEtAPnn+4+BrDnIankBOpBgAygIFTT7WOPv//v84wCn0boGGNcnfOOcT2jk9yronTg5vBqwcAq1G0Ft6zgLSGebrwqeMHe8wJPt949j3j7V7eJugV1C81F34FXRfH52Eeshbq9gnFLiLjoW8HAKtRtBbuENuoW1C2o2wn2nrfh6eYSCjzdXEKBp5tLKPB0cwkFdQvqFtTtFew9b8HT7bpLWvCq8MoLvSpu4JXnT24m6naCeVUAdcOd+HZXLLxATnDLCl4VvIfC68E9H9+l4KZurbVZiSVWwdMNWIVrM8F+Vti4K0JzV3SCm2+mtOH1no9xVQC/Yvlys0Duilqww5sAhwe8/Tu8Hcz7PMYbHnFXlD6EOLwNcHjAKkrBDi+46EPv+zGvCt6Je8OrxBKr4N2lfTMN6hbULfjjihPsPW8DvPJ4VajbCa7EEt/zvPICrwqebsAqeLoBF72/f7xQtxPMq4Knm4t+o27vYKuY8HRzeAE5vEousAp1C+oW1O0dbBUTnm5WEXgndniBtyuuu/TBglcFTzerCOoWfJcOxH8R5vAWnvgE6/GGd2JgFepWD+ZVwTuxHgdPHNQtOLx+MK8K3nMFsApPXA/meezwQnN4vBN3/grSKoK6haZuDm+CHJ5VTHi6WUXg6WYVoXji0q9BEKsAntjhTdwVgdexVQSeblYReLrxqvgB7b4cGpPxfosAAAAASUVORK5CYII=" id="image07492b0289" transform="scale(1 -1) translate(0 -310.32)" x="364.32" y="-7.2" width="15.84" height="310.32"/>
+<g id="matplotlib.axis_3"/>
+<g id="matplotlib.axis_4">
+<g id="ytick_27">
+<g id="line2d_53">
+<defs>
+<path id="mfcba0ad237" d="M 0 0 
+L 3.5 0 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#mfcba0ad237" x="379.923637" y="283.099686" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_55">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="386.923637" y="287.278827" transform="rotate(-0 386.923637 287.278827)">0.1</text>
+</g>
+</g>
+<g id="ytick_28">
+<g id="line2d_54">
+<g>
+<use xlink:href="#mfcba0ad237" x="379.923637" y="248.529654" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_56">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="386.923637" y="252.708794" transform="rotate(-0 386.923637 252.708794)">0.2</text>
+</g>
+</g>
+<g id="ytick_29">
+<g id="line2d_55">
+<g>
+<use xlink:href="#mfcba0ad237" x="379.923637" y="213.959621" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_57">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="386.923637" y="218.138762" transform="rotate(-0 386.923637 218.138762)">0.3</text>
+</g>
+</g>
+<g id="ytick_30">
+<g id="line2d_56">
+<g>
+<use xlink:href="#mfcba0ad237" x="379.923637" y="179.389589" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_58">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="386.923637" y="183.568729" transform="rotate(-0 386.923637 183.568729)">0.4</text>
+</g>
+</g>
+<g id="ytick_31">
+<g id="line2d_57">
+<g>
+<use xlink:href="#mfcba0ad237" x="379.923637" y="144.819556" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_59">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="386.923637" y="148.998697" transform="rotate(-0 386.923637 148.998697)">0.5</text>
+</g>
+</g>
+<g id="ytick_32">
+<g id="line2d_58">
+<g>
+<use xlink:href="#mfcba0ad237" x="379.923637" y="110.249524" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_60">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="386.923637" y="114.428664" transform="rotate(-0 386.923637 114.428664)">0.6</text>
+</g>
+</g>
+<g id="ytick_33">
+<g id="line2d_59">
+<g>
+<use xlink:href="#mfcba0ad237" x="379.923637" y="75.679491" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_61">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="386.923637" y="79.858632" transform="rotate(-0 386.923637 79.858632)">0.7</text>
+</g>
+</g>
+<g id="ytick_34">
+<g id="line2d_60">
+<g>
+<use xlink:href="#mfcba0ad237" x="379.923637" y="41.109459" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_62">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="386.923637" y="45.288599" transform="rotate(-0 386.923637 45.288599)">0.8</text>
+</g>
+</g>
+</g>
+<g id="LineCollection_1"/>
+<g id="patch_8">
+<path d="M 364.400438 317.664 
+L 372.162037 317.664 
+L 379.923637 317.664 
+L 379.923637 7.2 
+L 372.162037 7.2 
+L 364.400438 7.2 
+L 364.400438 317.664 
+z
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+</g>
+</g>
+<defs>
+<clipPath id="p4975db1266">
+<rect x="36.638438" y="7.2" width="310.464" height="310.464"/>
+</clipPath>
+</defs>
+</svg></div><figcaption>احتمال الحرف التالي، لكل حرف سابق من الحروف الصغيرة. كل صف توزيع احتمال. لاحظ الصف الذي فيه مربع غامق وحيد: حرف لا يتبعه إلا حرف واحد تقريباً. ولاحظ الأعمدة الغامقة: حروف العلة تأتي بعد أغلب الحروف.</figcaption></figure><details class="setup"><summary>كود الرسم</summary><div class="dbody"><div class="code "><div class="code-head"><span class="path">bigram_heatmap.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="n">letters</span> <span class="o">=</span> <span class="p">[</span><span class="n">stoi</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="s2">&quot;abcdefghijklmnopqrstuvwxyz&quot;</span><span class="p">]</span>
+<span class="n">sub</span> <span class="o">=</span> <span class="n">P</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ix_</span><span class="p">(</span><span class="n">letters</span><span class="p">,</span> <span class="n">letters</span><span class="p">)]</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">6.2</span><span class="p">,</span> <span class="mf">5.6</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">sub</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;Blues&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">26</span><span class="p">),</span> <span class="nb">list</span><span class="p">(</span><span class="s2">&quot;abcdefghijklmnopqrstuvwxyz&quot;</span><span class="p">),</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">26</span><span class="p">),</span> <span class="nb">list</span><span class="p">(</span><span class="s2">&quot;abcdefghijklmnopqrstuvwxyz&quot;</span><span class="p">),</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;next character&quot;</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;previous character&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">fraction</span><span class="o">=</span><span class="mf">0.046</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></pre></div></div></details><h3>توليد نص</h3><div class="blk"><p>نبدأ من سطر جديد، ونختار الحرف التالي عشوائياً حسب الاحتمالات، ونكرر:</p></div><div class="code "><div class="code-head"><span class="path">sample_bigram.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">i</span> <span class="o">=</span> <span class="n">stoi</span><span class="p">[</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">]</span>
+<span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">250</span><span class="p">):</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">P</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">itos</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">out</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>O:
+
+Tormetl
+V:
+
+Whan ashe:ayarin se!
+Wine, ges o tilo g is LI ar; by arththelyoounerdent stt two; tle tr, it sh s
+Ths t gethalof finor:
+Thuliou, w ter h pent t hedve!
+Windy busitroue rl!
+Whe me y,
+Turais nfu mod RTENooust V: oobomooro n'sexayoourit t</pre></div><div class="blk"><p>يشبه الإنجليزية من بعيد: أسماء شخصيات، ونقطتان، وأسطر جديدة. لكن الكلمات بلا معنى. حرف واحد من السياق قليل جداً.</p></div><h3>نفس النموذج، لكن كشبكة</h3><div class="blk"><p>جدول تضمين من 65 في 65: صف لكل حرف سابق، فيه 65 درجة خاماً للحرف التالي. ندرّبه بالنزول بالتدرّج، بالإنتروبيا المتقاطعة:</p></div><div class="code "><div class="code-head"><span class="path">neural_bigram.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Embedding</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">V</span><span class="p">)</span>                  <span class="c1"># row = previous char, columns = logits of next char</span>
+<span class="n">nn</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">zeros_</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">weight</span><span class="p">)</span>                <span class="c1"># start with a uniform prediction</span>
+<span class="n">opt</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+<span class="n">loss_fn</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span>
+
+<span class="n">x_tr</span><span class="p">,</span> <span class="n">y_tr</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">train</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">train</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+<span class="n">x_val</span><span class="p">,</span> <span class="n">y_val</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">val</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+<span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;step    0: val loss </span><span class="si">{</span><span class="n">loss_fn</span><span class="p">(</span><span class="n">model</span><span class="p">(</span><span class="n">x_val</span><span class="p">),</span><span class="w"> </span><span class="n">y_val</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">g</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Generator</span><span class="p">()</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3001</span><span class="p">):</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">x_tr</span><span class="p">),</span> <span class="p">(</span><span class="mi">4096</span><span class="p">,),</span> <span class="n">generator</span><span class="o">=</span><span class="n">g</span><span class="p">)</span>
+    <span class="n">loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">model</span><span class="p">(</span><span class="n">x_tr</span><span class="p">[</span><span class="n">idx</span><span class="p">]),</span> <span class="n">y_tr</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+    <span class="n">opt</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">();</span> <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">();</span> <span class="n">opt</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">step</span> <span class="o">%</span> <span class="mi">1000</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;step </span><span class="si">{</span><span class="n">step</span><span class="si">:</span><span class="s2">4</span><span class="si">}</span><span class="s2">: val loss </span><span class="si">{</span><span class="n">loss_fn</span><span class="p">(</span><span class="n">model</span><span class="p">(</span><span class="n">x_val</span><span class="p">),</span><span class="w"> </span><span class="n">y_val</span><span class="p">)</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>step    0: val loss 4.174
+step 1000: val loss 2.485
+step 2000: val loss 2.490
+step 3000: val loss 2.489</pre></div><div class="blk"><p>البداية بالضبط <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>ln</mi><mo>⁡</mo><mn>65</mn><mo>≈</mo><mn>4.174</mn></mrow></math></bdi>: أوزان صفرية تعني احتمالات متساوية، كما توقعنا في الدرس 37.</p><p>والنهاية نفس خسارة العدّ تقريباً. النزول بالتدرّج <b>أعاد اكتشاف جدول العدّ</b> وحده.</p><p>الفرق المهم: الشبكة يمكن توسيعها. سياق أطول، وتضمينات، وطبقات. هذا ما نبنيه في الدروس القادمة.</p></div><div class="callout mistake"><div class="ct">تقييم النموذج على نص التدريب</div><div class="blk"><p>خسارة التدريب لنموذج لغوي كبير قد تنزل كثيراً لأنه يحفظ. قِس دائماً على نص لم يتدرب عليه.</p><p>وانتبه للتسريب: النصوص المنسوخة، أو المكررة في الإنترنت، قد تظهر في التدريب والاختبار معاً.</p></div></div><div class="callout interview"><div class="ct">سؤال مقابلة</div><div class="blk"><p>سؤال قد تسمعه في المقابلة:</p></div><div class="en" dir="ltr"><p>What does a language model compute, and how is it trained?</p></div><div class="blk"><p>جواب قصير وجيد:</p></div><div class="en" dir="ltr"><p>It computes a probability distribution over the next token given the previous tokens. By the chain rule, the product of these conditionals gives the probability of any sequence. It is trained with cross-entropy on the next token at every position of a large text corpus, which is self-supervised because the targets come from the text itself.</p></div><div class="blk"><p>سؤال قد تسمعه في المقابلة:</p></div><div class="en" dir="ltr"><p>What is perplexity?</p></div><div class="blk"><p>جواب قصير وجيد:</p></div><div class="en" dir="ltr"><p>Perplexity is the exponential of the average negative log-likelihood per token. It can be read as the effective number of equally likely choices the model is hesitating between at each step. Lower is better, and it is only comparable between models that use the same tokenizer and the same test data.</p></div><div class="blk"><p>سؤال قد تسمعه في المقابلة:</p></div><div class="en" dir="ltr"><p>Why do n-gram models not scale to long contexts?</p></div><div class="blk"><p>جواب قصير وجيد:</p></div><div class="en" dir="ltr"><p>The number of possible contexts grows exponentially with the context length, so the count tables become huge and almost all entries are never observed. Neural language models generalize across similar contexts through learned representations instead of exact counts.</p></div></div><section class="summary"><div class="ct">الخلاصة</div><ul class="l"><li>النموذج اللغوي يعطي احتمالاً لكل رمز تالٍ. واحتمال الجملة حاصل ضرب هذه الاحتمالات.</li><li>الثنائيات: الرمز السابق فقط، والاحتمال بالعدّ. والتنعيم يمنع الأصفار.</li><li>الخسارة: الإنتروبيا المتقاطعة للرمز التالي. والحيرة: أسّها الطبيعي.</li><li>التعلّم ذاتي الإشراف: الأجوبة هي النص نفسه، مزاحاً خطوة.</li><li>شبكة بسيطة وصلت إلى نفس نتيجة العدّ. وميزتها أنها تتوسع.</li><li>العدّ لا يتوسع لسياق طويل. نحتاج شبكة تنظر إلى كل السياق: الانتباه.</li></ul></section><section class="quiz" data-quiz="l45-q"><h2>اختبر فهمك</h2><div class="q" data-answer="1"><div class="qt"><span class="qn">1.</span>في نص، جاءت كلمة "صباح" 10 مرات. بعدها جاء "الخير" 6 مرات. ما احتمال "الخير" بعد "صباح" في نموذج الثنائيات؟</div><div class="opts"><button type="button" class="opt">6</button><button type="button" class="opt">0.6</button><button type="button" class="opt">0.1</button></div><div class="explain" hidden><span class="verdict"></span><p>العدّ مقسوماً على عدد مرات الكلمة السابقة: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>6</mn><mi mathvariant="normal">/</mi><mn>10</mn></mrow></math></bdi>.</p></div></div><div class="q" data-answer="0"><div class="qt"><span class="qn">2.</span>خسارة نموذج على نص اختبار 0.693، أي <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>ln</mi><mo>⁡</mo><mn>2</mn></mrow></math></bdi>. ما حيرته؟</div><div class="opts"><button type="button" class="opt">2</button><button type="button" class="opt">0.693</button><button type="button" class="opt">1</button></div><div class="explain" hidden><span class="verdict"></span><p>الحيرة <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msup><mi>e</mi><mrow><mi>ln</mi><mo>⁡</mo><mn>2</mn></mrow></msup><mo>=</mo><mn>2</mn></mrow></math></bdi>: كأنه يختار بين خيارين متساويين.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">3.</span>نموذج ثنائيات بدون تنعيم أعطى جملة سليمة احتمال صفر. لماذا؟</div><div class="opts"><button type="button" class="opt">لأن الجملة طويلة</button><button type="button" class="opt">لأن زوجاً متجاوراً فيها لم يظهر أبداً في نص التدريب</button><button type="button" class="opt">لأن الحيرة عالية</button></div><div class="explain" hidden><span class="verdict"></span><p>عدّ صفر يعطي احتمال صفر، فحاصل الضرب كله صفر.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">4.</span>لماذا يسمى تدريب النماذج اللغوية "ذاتي الإشراف"؟</div><div class="opts"><button type="button" class="opt">لأن النموذج يدرّب نفسه بدون حاسوب</button><button type="button" class="opt">لأن الجواب الصحيح لكل موضع هو الرمز التالي في النص نفسه، بدون تعليم بشري</button><button type="button" class="opt">لأنه لا يستخدم أي خسارة</button></div><div class="explain" hidden><span class="verdict"></span><p>النص يعطي المدخلات والأجوبة معاً.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">5.</span>مفردات من 100 رمز، ونموذج يعطي كل الرموز نفس الاحتمال. ما خسارته؟</div><div class="opts"><button type="button" class="opt">100</button><button type="button" class="opt"><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>ln</mi><mo>⁡</mo><mn>100</mn><mo>≈</mo><mn>4.6</mn></mrow></math></bdi></button><button type="button" class="opt">1</button></div><div class="explain" hidden><span class="verdict"></span><p>سالب لوغاريتم <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1</mn><mi mathvariant="normal">/</mi><mn>100</mn></mrow></math></bdi>.</p></div></div><div class="row"><span class="score"></span><button type="button" class="btn ghost quiz-reset">أعد المحاولة</button></div></section><section class="exercise"><div class="xt">تمرين: ثنائيات الكلمات</div><div class="blk"><p>استخدم الجمل الثلاث من المثال المحلول، مع التنعيم بإضافة 1، حيث الكلمات الممكنة بعد أي كلمة سبع.</p></div><ol class="l"><li>احسب بيدك احتمال "أحب" بعد "أنا" مع التنعيم.</li><li>احسب احتمال جملة "أنت تحب الشاي" كاملة مع التنعيم.</li><li>تحقق بالكود.</li></ol><details><summary>تلميح</summary><div class="dbody"><div class="blk"><p>مع التنعيم: العدّ زائد 1، على مجموع العدّ للكلمة السابقة زائد 7. وبعد "بداية" مجموع العدّ 3.</p></div></div></details><details class="sol"><summary>الحل (افتحه بعد أن تحاول)</summary><div class="dbody"><ol class="l"><li>"أنا" جاءت بعدها "أحب" مرتين، ومجموع ما بعدها 2: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>2</mn><mo>+</mo><mn>1</mn><mo stretchy="false">)</mo><mi mathvariant="normal">/</mi><mo stretchy="false">(</mo><mn>2</mn><mo>+</mo><mn>7</mn><mo stretchy="false">)</mo><mo>=</mo><mn>3</mn><mi mathvariant="normal">/</mi><mn>9</mn><mo>=</mo><mn>1</mn><mi mathvariant="normal">/</mi><mn>3</mn></mrow></math></bdi>.</li></ol><ol class="l"><li>أربع خطوات:</li></ol><ul class="l"><li>"أنت" بعد البداية: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><mn>1</mn><mo stretchy="false">)</mo><mi mathvariant="normal">/</mi><mo stretchy="false">(</mo><mn>3</mn><mo>+</mo><mn>7</mn><mo stretchy="false">)</mo><mo>=</mo><mn>0.2</mn></mrow></math></bdi>.</li><li>"تحب" بعد "أنت": <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><mn>1</mn><mo stretchy="false">)</mo><mi mathvariant="normal">/</mi><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><mn>7</mn><mo stretchy="false">)</mo><mo>=</mo><mn>0.25</mn></mrow></math></bdi>.</li><li>"الشاي" بعد "تحب": <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>0</mn><mo>+</mo><mn>1</mn><mo stretchy="false">)</mo><mi mathvariant="normal">/</mi><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><mn>7</mn><mo stretchy="false">)</mo><mo>=</mo><mn>0.125</mn></mrow></math></bdi>.</li><li>النهاية بعد "الشاي": <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><mn>1</mn><mo stretchy="false">)</mo><mi mathvariant="normal">/</mi><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><mn>7</mn><mo stretchy="false">)</mo><mo>=</mo><mn>0.25</mn></mrow></math></bdi>.</li></ul><div class="blk"><p>الحاصل: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>0.2</mn><mo>×</mo><mn>0.25</mn><mo>×</mo><mn>0.125</mn><mo>×</mo><mn>0.25</mn><mo>≈</mo><mn>0.00156</mn></mrow></math></bdi>. صغير، لكنه ليس صفراً.</p></div><div class="code "><div class="code-head"><span class="path"></span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="k">def</span><span class="w"> </span><span class="nf">smooth_prob</span><span class="p">(</span><span class="n">prev</span><span class="p">,</span> <span class="n">nxt</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">7</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">counts</span><span class="p">[</span><span class="n">prev</span><span class="p">][</span><span class="n">nxt</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">counts</span><span class="p">[</span><span class="n">prev</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="o">+</span> <span class="n">k</span><span class="p">)</span>
+
+<span class="n">words</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&lt;s&gt;&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;أنت تحب الشاي&quot;</span><span class="o">.</span><span class="n">split</span><span class="p">()</span> <span class="o">+</span> <span class="p">[</span><span class="s2">&quot;&lt;/s&gt;&quot;</span><span class="p">]</span>
+<span class="n">steps</span> <span class="o">=</span> <span class="p">[</span><span class="n">smooth_prob</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">words</span><span class="p">,</span> <span class="n">words</span><span class="p">[</span><span class="mi">1</span><span class="p">:])]</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">smooth_prob</span><span class="p">(</span><span class="s2">&quot;أنا&quot;</span><span class="p">,</span> <span class="s2">&quot;أحب&quot;</span><span class="p">),</span> <span class="mi">4</span><span class="p">),</span> <span class="p">[</span><span class="nb">round</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">steps</span><span class="p">],</span> <span class="nb">round</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">steps</span><span class="p">),</span> <span class="mi">5</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>0.3333 [0.2, 0.25, 0.125, 0.25] 0.00156</pre></div></div></details><div class="askbox" data-kind="review" hidden><div class="al">اطلب من كلود أن يراجع حلّك</div><div class="ah">اكتب إجابتك أو الصق الكود. سيقارنه بالحل ويشرح لك بالعربي. هذا يستهلك من رصيد استخدامك.</div><textarea id="rv-l45-1" dir="auto" placeholder="اكتب إجابتك هنا"></textarea><div class="row"><button type="button" class="btn ask-go">راجع حلّي</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></div><pre hidden class="x-task">استخدم الجمل الثلاث من المثال المحلول، مع التنعيم بإضافة 1، حيث الكلمات الممكنة بعد أي كلمة سبع.
+
+1. احسب بيدك احتمال "أحب" بعد "أنا" مع التنعيم.
+2. احسب احتمال جملة "أنت تحب الشاي" كاملة مع التنعيم.
+3. تحقق بالكود.</pre><pre hidden class="x-solution">1. "أنا" جاءت بعدها "أحب" مرتين، ومجموع ما بعدها 2: $(2 + 1)/(2 + 7) = 3/9 = 1/3$.
+
+2. أربع خطوات:
+- "أنت" بعد البداية: $(1 + 1)/(3 + 7) = 0.2$.
+- "تحب" بعد "أنت": $(1 + 1)/(1 + 7) = 0.25$.
+- "الشاي" بعد "تحب": $(0 + 1)/(1 + 7) = 0.125$.
+- النهاية بعد "الشاي": $(1 + 1)/(1 + 7) = 0.25$.
+
+الحاصل: $0.2 \times 0.25 \times 0.125 \times 0.25 \approx 0.00156$. صغير، لكنه ليس صفراً.
+
+```python
+def smooth_prob(prev, nxt, k=7):
+    return (counts[prev][nxt] + 1) / (sum(counts[prev].values()) + k)
+
+words = ["&lt;s&gt;"] + "أنت تحب الشاي".split() + ["&lt;/s&gt;"]
+steps = [smooth_prob(a, b) for a, b in zip(words, words[1:])]
+print(round(smooth_prob("أنا", "أحب"), 4), [round(s, 4) for s in steps], round(math.prod(steps), 5))
+```</pre></section></article><section class="askbox" data-kind="ask" hidden><div class="al">عندك سؤال عن هذا الدرس؟ اسأل كلود</div><div class="ah">اكتب سؤالك بالعربي. كلود يقرأ نص الدرس ويجيبك. هذا يستهلك من رصيد استخدامك.</div><textarea id="ask-l45" dir="auto" placeholder="مثلاً: لماذا نضرب هنا في المشتقة؟"></textarea><div class="row"><button type="button" class="btn ask-go">اسأل</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></section><div class="donebox"><span class="dmsg"></span><button type="button" class="btn">أنهيت هذا الدرس</button></div><nav class="pager" aria-label="التنقل بين الدروس"><a class="prev" href="#l44"><small>الدرس السابق</small>التضمينات: الكلمات كمتجهات</a><a class="next" href="#l46"><small>الدرس التالي</small>الانتباه الذاتي باليد</a></nav></div>

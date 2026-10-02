@@ -1,0 +1,817 @@
+<div class="page"><article><div class="eyebrow">الجزء الأول · الرياضيات والإحصاء</div><h1>الإحصاء الوصفي: المتوسط والتشتت</h1><div class="meta"><span>الدرس 10 من 59</span><span>المدة: حوالي 40 دقيقة</span><span class="nbdl-slot"></span></div><div class="chips" dir="ltr"><bdi class="chip">mean</bdi><bdi class="chip">median</bdi><bdi class="chip">outlier</bdi><bdi class="chip">variance</bdi><bdi class="chip">standard deviation</bdi><bdi class="chip">z-score</bdi><bdi class="chip">standardization</bdi><bdi class="chip">min-max scaling</bdi><bdi class="chip">correlation</bdi></div><div class="goals"><b>بعد هذا الدرس ستعرف:</b><ul><li>تلخص عموداً من الأرقام بالمتوسط والوسيط</li><li>تفهم أثر القيمة الشاذة، ومتى تستخدم الوسيط</li><li>تقيس التشتت بالتباين والانحراف المعياري</li><li>توحّد مقياس الأعمدة بطريقتين، وتعرف لماذا تحتاجها النماذج</li><li>تقيس العلاقة بين عمودين بمعامل الارتباط، وتعرف حدوده</li></ul></div><h2>لماذا نبدأ بالإحصاء؟</h2><div class="blk"><p>قبل أي نموذج، يجب أن تعرف بياناتك.</p><p>ما القيم المعتادة؟ هل توجد قيم غريبة؟ هل الأعمدة على مقاييس مختلفة جداً؟</p></div><div class="blk"><p>الإحصاء الوصفي يلخص عموداً كاملاً من الأرقام في رقمين أو ثلاثة.</p><p>وستحتاجه أيضاً داخل النماذج نفسها: لتوحيد مقياس الأعمدة، كما وعدنا في الدرس 4.</p></div><div class="blk"><p>سنستخدم مثالاً واحداً في الدرس كله: تأخير حافلة بالدقائق، في ثمانية أيام:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mn>2</mn><mo separator="true">,</mo><mtext>  </mtext><mn>4</mn><mo separator="true">,</mo><mtext>  </mtext><mn>4</mn><mo separator="true">,</mo><mtext>  </mtext><mn>4</mn><mo separator="true">,</mo><mtext>  </mtext><mn>5</mn><mo separator="true">,</mo><mtext>  </mtext><mn>5</mn><mo separator="true">,</mo><mtext>  </mtext><mn>7</mn><mo separator="true">,</mo><mtext>  </mtext><mn>9</mn></mrow></math></div></div><h2>أين المركز؟ المتوسط والوسيط</h2><div class="blk"><p><b>المتوسط:</b> اجمع كل القيم، واقسم على عددها:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mover accent="true"><mi>x</mi><mo>ˉ</mo></mover><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><msub><mi>x</mi><mi>i</mi></msub></mrow></math></div></div><div class="blk"><p>الخط فوق الحرف يعني المتوسط.</p></div><div class="blk"><p><b>الوسيط:</b> رتّب القيم، وخذ التي في المنتصف.</p><p>إذا كان العدد زوجياً، خذ متوسط القيمتين في المنتصف.</p></div><h3>القيمة الشاذة</h3><div class="blk"><p>في اليوم الأخير تعطلت الحافلة، فتأخرت 45 دقيقة بدل 9.</p><p>المتوسط يقفز كثيراً، لأن كل قيمة تدخل في المجموع.</p><p>أما الوسيط فلا يتغير أبداً، لأنه ينظر فقط إلى الترتيب.</p></div><div class="key">الوسيط لا يتأثر كثيراً بالقيم الشاذة. استخدمه عندما تكون البيانات فيها قيم متطرفة، مثل الرواتب وأسعار البيوت.</div><h2>كم هي متفرقة؟ التباين والانحراف المعياري</h2><div class="blk"><p>مجموعتان لهما نفس المتوسط 5:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mn>5</mn><mo separator="true">,</mo><mtext>  </mtext><mn>5</mn><mo separator="true">,</mo><mtext>  </mtext><mn>5</mn><mo separator="true">,</mo><mtext>  </mtext><mn>5</mn><mspace width="2em"/><mspace width="2em"/><mn>0</mn><mo separator="true">,</mo><mtext>  </mtext><mn>10</mn><mo separator="true">,</mo><mtext>  </mtext><mn>0</mn><mo separator="true">,</mo><mtext>  </mtext><mn>10</mn></mrow></math></div></div><div class="blk"><p>الأولى ثابتة تماماً. والثانية متفرقة جداً. المتوسط وحده لا يرى الفرق.</p></div><div class="blk"><p><b>التباين:</b> متوسط مربعات البعد عن المتوسط:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msup><mi>σ</mi><mn>2</mn></msup><mo>=</mo><mfrac><mn>1</mn><mi>n</mi></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mo stretchy="false">(</mo><msub><mi>x</mi><mi>i</mi></msub><mo>−</mo><mover accent="true"><mi>x</mi><mo>ˉ</mo></mover><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow></math></div></div><div class="blk"><p>نربّع لنفس السبب في الدرس 3: لكي لا يلغي البعد الموجب البعد السالب.</p></div><div class="blk"><p><b>الانحراف المعياري:</b> الجذر التربيعي للتباين. نرجع به إلى نفس وحدة البيانات: دقائق، وليس دقائق مربعة.</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>σ</mi><mo>=</mo><msqrt><msup><mi>σ</mi><mn>2</mn></msup></msqrt></mrow></math></div></div><div class="blk"><p>الحرف اليوناني <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>σ</mi></mrow></math></bdi> يُقرأ "سيغما".</p></div><div class="callout warn"><div class="ct">تقسم على العدد، أم على العدد ناقص واحد؟</div><div class="blk"><p>في الإحصاء نوعان من التباين:</p></div><ul class="l"><li>نقسم على العدد <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>n</mi></mrow></math></bdi>: عندما تكون البيانات هي كل ما يهمنا.</li><li>نقسم على <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow></math></bdi>: عندما تكون البيانات عينة، ونريد أن نقدّر تباين الكل.</li></ul><div class="blk"><p>الفرق صغير مع بيانات كثيرة. لكن انتبه:</p></div><div class="blk"><div class="term" dir="ltr"><code>numpy: np.std(x) → n        pandas: df.std() → n - 1</code></div></div><div class="blk"><p>نمباي وباندا تعطيان نتيجتين مختلفتين لنفس العمود! هذا سبب شائع للحيرة.</p></div></div><section class="hand"><div class="hand-h"><span class="hand-tag">مثال محلول باليد</span><div class="hand-t">نلخص تأخير الحافلة</div></div><div class="hand-body"><div class="blk"><p>البيانات: <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>2</mn><mo separator="true">,</mo><mtext>  </mtext><mn>4</mn><mo separator="true">,</mo><mtext>  </mtext><mn>4</mn><mo separator="true">,</mo><mtext>  </mtext><mn>4</mn><mo separator="true">,</mo><mtext>  </mtext><mn>5</mn><mo separator="true">,</mo><mtext>  </mtext><mn>5</mn><mo separator="true">,</mo><mtext>  </mtext><mn>7</mn><mo separator="true">,</mo><mtext>  </mtext><mn>9</mn></mrow></math></bdi>.</p></div><div class="step">المتوسط</div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mover accent="true"><mi>x</mi><mo>ˉ</mo></mover><mo>=</mo><mfrac><mrow><mn>2</mn><mo>+</mo><mn>4</mn><mo>+</mo><mn>4</mn><mo>+</mo><mn>4</mn><mo>+</mo><mn>5</mn><mo>+</mo><mn>5</mn><mo>+</mo><mn>7</mn><mo>+</mo><mn>9</mn></mrow><mn>8</mn></mfrac><mo>=</mo><mfrac><mn>40</mn><mn>8</mn></mfrac><mo>=</mo><mn>5</mn></mrow></math></div></div><div class="step">الوسيط</div><div class="blk"><p>البيانات مرتبة. العدد 8 زوجي، فالمنتصف بين الرابعة والخامسة:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtext>median</mtext><mo>=</mo><mfrac><mrow><mn>4</mn><mo>+</mo><mn>5</mn></mrow><mn>2</mn></mfrac><mo>=</mo><mn>4.5</mn></mrow></math></div></div><div class="step">التباين</div><div class="blk"><p>نحسب البعد عن المتوسط، ثم مربعه:</p></div><div class="tablewrap"><table><thead><tr><th>القيمة</th><th>البعد عن 5</th><th>المربع</th></tr></thead><tbody><tr><td>2</td><td>−3</td><td>9</td></tr><tr><td>4</td><td>−1</td><td>1</td></tr><tr><td>4</td><td>−1</td><td>1</td></tr><tr><td>4</td><td>−1</td><td>1</td></tr><tr><td>5</td><td>0</td><td>0</td></tr><tr><td>5</td><td>0</td><td>0</td></tr><tr><td>7</td><td>2</td><td>4</td></tr><tr><td>9</td><td>4</td><td>16</td></tr></tbody></table></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msup><mi>σ</mi><mn>2</mn></msup><mo>=</mo><mfrac><mn>32</mn><mn>8</mn></mfrac><mo>=</mo><mn>4</mn><mspace width="2em"/><mi>σ</mi><mo>=</mo><mn>2</mn></mrow></math></div></div><div class="step">القيمة الشاذة</div><div class="blk"><p>نستبدل 9 بـ 45:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mover accent="true"><mi>x</mi><mo>ˉ</mo></mover><mo>=</mo><mfrac><mrow><mn>40</mn><mo>−</mo><mn>9</mn><mo>+</mo><mn>45</mn></mrow><mn>8</mn></mfrac><mo>=</mo><mfrac><mn>76</mn><mn>8</mn></mfrac><mo>=</mo><mn>9.5</mn></mrow></math></div></div><div class="blk"><p>المتوسط تضاعف تقريباً. والوسيط بقي 4.5.</p></div><div class="step">التوحيد القياسي</div><div class="blk"><p>نطرح المتوسط، ونقسم على الانحراف المعياري:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>z</mi><mo>=</mo><mfrac><mrow><mi>x</mi><mo>−</mo><mover accent="true"><mi>x</mi><mo>ˉ</mo></mover></mrow><mi>σ</mi></mfrac></mrow></math></div></div><div class="blk"><p>القيمة 9 تصبح <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mn>9</mn><mo>−</mo><mn>5</mn><mo stretchy="false">)</mo><mi mathvariant="normal">/</mi><mn>2</mn><mo>=</mo><mn>2</mn></mrow></math></bdi>: أي أنها أعلى من المتوسط بانحرافين معياريين.</p><p>والقيمة 2 تصبح سالب 1.5.</p></div></div></section><h2>توحيد المقياس: لماذا تحتاجه النماذج؟</h2><div class="blk"><p>تذكّر مشكلة الشقق في الدرس 4: المساحة بالمئات، والغرف بالآحاد.</p><p>المسافة كانت تسمع المساحة فقط. والنزول بالتدرّج أيضاً يتعثر في هذه الحالة، كما سنرى في الدرس 17.</p></div><div class="blk"><p>الحل: نضع كل الأعمدة على مقياس متقارب. طريقتان شائعتان:</p></div><div class="tablewrap"><table><thead><tr><th>الطريقة</th><th>المعادلة</th><th>الناتج</th></tr></thead><tbody><tr><td>التوحيد القياسي</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mi>x</mi><mo>−</mo><mover accent="true"><mi>x</mi><mo>ˉ</mo></mover><mo stretchy="false">)</mo><mi mathvariant="normal">/</mi><mi>σ</mi></mrow></math></bdi></td><td>متوسط صفر، وانحراف معياري واحد</td></tr><tr><td>التطبيع بين الحدين</td><td><bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo stretchy="false">(</mo><mi>x</mi><mo>−</mo><mi>min</mi><mo>⁡</mo><mo stretchy="false">)</mo><mi mathvariant="normal">/</mi><mo stretchy="false">(</mo><mi>max</mi><mo>⁡</mo><mo>−</mo><mi>min</mi><mo>⁡</mo><mo stretchy="false">)</mo></mrow></math></bdi></td><td>كل القيم بين صفر وواحد</td></tr></tbody></table></div><div class="blk"><p>الأسماء بالإنجليزية:</p></div><div class="blk"><div class="term" dir="ltr"><code>standardization (z-score) · min-max scaling</code></div></div><div class="blk"><p>التوحيد القياسي هو الخيار الافتراضي غالباً.</p><p>والتطبيع بين الحدين مفيد عندما تحتاج مجالاً محدداً، مثل قيم البكسل في الصور.</p></div><div class="callout mistake"><div class="ct">خطأ شائع سنعود إليه</div><div class="blk"><p>المتوسط والانحراف المعياري للتوحيد يُحسبان من بيانات <b>التدريب فقط</b>، ثم يُطبقان على البيانات الجديدة.</p><p>إذا حسبتهما من كل البيانات، فالنموذج يرى شيئاً من بيانات الاختبار قبل الأوان. هذا اسمه تسريب البيانات، وموضوعه الدرس 26.</p></div></div><h2>العلاقة بين عمودين: معامل الارتباط</h2><div class="blk"><p>هل الطلاب الذين يدرسون ساعات أكثر يحصلون على تقييم أعلى؟</p><p>معامل الارتباط رقم بين سالب واحد وواحد يقيس هذه العلاقة:</p></div><div class="tablewrap"><table><thead><tr><th>القيمة</th><th>المعنى</th></tr></thead><tbody><tr><td>قريب من 1</td><td>علاقة خطية طردية قوية: كلما زاد الأول، زاد الثاني</td></tr><tr><td>قريب من 0</td><td>لا علاقة خطية</td></tr><tr><td>قريب من −1</td><td>علاقة خطية عكسية قوية: كلما زاد الأول، نقص الثاني</td></tr></tbody></table></div><div class="blk"><p>المعادلة: نوحّد العمودين، ثم نأخذ متوسط حاصل ضربهما.</p><p>أو بشكل مكافئ:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>r</mi><mo>=</mo><mfrac><mrow><mo>∑</mo><mo stretchy="false">(</mo><msub><mi>x</mi><mi>i</mi></msub><mo>−</mo><mover accent="true"><mi>x</mi><mo>ˉ</mo></mover><mo stretchy="false">)</mo><mo stretchy="false">(</mo><msub><mi>y</mi><mi>i</mi></msub><mo>−</mo><mover accent="true"><mi>y</mi><mo>ˉ</mo></mover><mo stretchy="false">)</mo></mrow><mrow><msqrt><mrow><mo>∑</mo><mo stretchy="false">(</mo><msub><mi>x</mi><mi>i</mi></msub><mo>−</mo><mover accent="true"><mi>x</mi><mo>ˉ</mo></mover><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow></msqrt><mtext>  </mtext><msqrt><mrow><mo>∑</mo><mo stretchy="false">(</mo><msub><mi>y</mi><mi>i</mi></msub><mo>−</mo><mover accent="true"><mi>y</mi><mo>ˉ</mo></mover><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow></msqrt></mrow></mfrac></mrow></math></div></div><div class="blk"><p>لاحظ الشكل: هذا جيب تمام الزاوية من الدرس 4، بين العمودين بعد طرح متوسط كل منهما!</p></div><section class="hand"><div class="hand-h"><span class="hand-tag">مثال محلول باليد</span><div class="hand-t">ساعات الدراسة والتقييم</div></div><div class="hand-body"><div class="blk"><p>ساعات الدراسة لخمسة طلاب، وتقييمهم من 5:</p></div><div class="tablewrap"><table><thead><tr><th>الطالب</th><th>الساعات <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>x</mi></mrow></math></bdi></th><th>التقييم <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>y</mi></mrow></math></bdi></th></tr></thead><tbody><tr><td>1</td><td>1</td><td>2</td></tr><tr><td>2</td><td>2</td><td>4</td></tr><tr><td>3</td><td>3</td><td>5</td></tr><tr><td>4</td><td>4</td><td>4</td></tr><tr><td>5</td><td>5</td><td>5</td></tr></tbody></table></div><div class="step">المتوسطان</div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mover accent="true"><mi>x</mi><mo>ˉ</mo></mover><mo>=</mo><mn>3</mn><mspace width="2em"/><mover accent="true"><mi>y</mi><mo>ˉ</mo></mover><mo>=</mo><mfrac><mn>20</mn><mn>5</mn></mfrac><mo>=</mo><mn>4</mn></mrow></math></div></div><div class="step">البعد عن المتوسط لكل عمود</div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>x</mi><mo>−</mo><mover accent="true"><mi>x</mi><mo>ˉ</mo></mover><mo>=</mo><mo stretchy="false">(</mo><mo>−</mo><mn>2</mn><mo separator="true">,</mo><mo>−</mo><mn>1</mn><mo separator="true">,</mo><mn>0</mn><mo separator="true">,</mo><mn>1</mn><mo separator="true">,</mo><mn>2</mn><mo stretchy="false">)</mo><mspace width="2em"/><mi>y</mi><mo>−</mo><mover accent="true"><mi>y</mi><mo>ˉ</mo></mover><mo>=</mo><mo stretchy="false">(</mo><mo>−</mo><mn>2</mn><mo separator="true">,</mo><mn>0</mn><mo separator="true">,</mo><mn>1</mn><mo separator="true">,</mo><mn>0</mn><mo separator="true">,</mo><mn>1</mn><mo stretchy="false">)</mo></mrow></math></div></div><div class="step">حاصل الضرب ومجموعه</div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mo stretchy="false">(</mo><mo>−</mo><mn>2</mn><mo stretchy="false">)</mo><mo stretchy="false">(</mo><mo>−</mo><mn>2</mn><mo stretchy="false">)</mo><mo>+</mo><mo stretchy="false">(</mo><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo><mo stretchy="false">(</mo><mn>0</mn><mo stretchy="false">)</mo><mo>+</mo><mo stretchy="false">(</mo><mn>0</mn><mo stretchy="false">)</mo><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo><mo>+</mo><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo><mo stretchy="false">(</mo><mn>0</mn><mo stretchy="false">)</mo><mo>+</mo><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo><mo stretchy="false">(</mo><mn>1</mn><mo stretchy="false">)</mo><mo>=</mo><mn>4</mn><mo>+</mo><mn>2</mn><mo>=</mo><mn>6</mn></mrow></math></div></div><div class="step">المقام</div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mo>∑</mo><mo stretchy="false">(</mo><mi>x</mi><mo>−</mo><mover accent="true"><mi>x</mi><mo>ˉ</mo></mover><msup><mo stretchy="false">)</mo><mn>2</mn></msup><mo>=</mo><mn>4</mn><mo>+</mo><mn>1</mn><mo>+</mo><mn>0</mn><mo>+</mo><mn>1</mn><mo>+</mo><mn>4</mn><mo>=</mo><mn>10</mn><mspace width="2em"/><mo>∑</mo><mo stretchy="false">(</mo><mi>y</mi><mo>−</mo><mover accent="true"><mi>y</mi><mo>ˉ</mo></mover><msup><mo stretchy="false">)</mo><mn>2</mn></msup><mo>=</mo><mn>4</mn><mo>+</mo><mn>0</mn><mo>+</mo><mn>1</mn><mo>+</mo><mn>0</mn><mo>+</mo><mn>1</mn><mo>=</mo><mn>6</mn></mrow></math></div></div><div class="step">المعامل</div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>r</mi><mo>=</mo><mfrac><mn>6</mn><mrow><msqrt><mn>10</mn></msqrt><mtext> </mtext><msqrt><mn>6</mn></msqrt></mrow></mfrac><mo>=</mo><mfrac><mn>6</mn><msqrt><mn>60</mn></msqrt></mfrac><mo>≈</mo><mn>0.775</mn></mrow></math></div></div><div class="blk"><p>علاقة طردية قوية، لكنها ليست كاملة.</p></div></div></section><div class="callout warn"><div class="ct">الارتباط ليس سبباً</div><div class="blk"><p>بيع المثلجات يرتبط بقوة مع حوادث الغرق. هل المثلجات تسبب الغرق؟</p><p>لا. السبب الثالث هو الصيف: الحر يزيد الاثنين معاً.</p><p>الارتباط يقول إن العمودين يتحركان معاً. لا يقول لماذا.</p><p>وانتبه أيضاً: الارتباط يقيس العلاقة <b>الخطية</b> فقط. علاقة قوية على شكل منحنى قد تعطي ارتباطاً قريباً من الصفر.</p></div></div><h2>بالكود</h2><div class="code "><div class="code-head"><span class="path">summary.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="n">delays</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">9</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;mean:&quot;</span><span class="p">,</span> <span class="n">delays</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="s2">&quot; median:&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">delays</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;variance:&quot;</span><span class="p">,</span> <span class="n">delays</span><span class="o">.</span><span class="n">var</span><span class="p">(),</span> <span class="s2">&quot; std:&quot;</span><span class="p">,</span> <span class="n">delays</span><span class="o">.</span><span class="n">std</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;std with n-1:&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">delays</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="mi">3</span><span class="p">))</span>
+
+<span class="n">with_outlier</span> <span class="o">=</span> <span class="n">delays</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">with_outlier</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">45</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;with outlier -&gt; mean:&quot;</span><span class="p">,</span> <span class="n">with_outlier</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="s2">&quot; median:&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">with_outlier</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>mean: 5.0  median: 4.5
+variance: 4.0  std: 2.0
+std with n-1: 2.138
+with outlier -&gt; mean: 9.5  median: 4.5</pre></div><h3>التوحيد بيدك، وبمكتبة سايكت ليرن</h3><div class="code "><div class="code-head"><span class="path">scaling.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="n">z</span> <span class="o">=</span> <span class="p">(</span><span class="n">delays</span> <span class="o">-</span> <span class="n">delays</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">/</span> <span class="n">delays</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+<span class="n">mm</span> <span class="o">=</span> <span class="p">(</span><span class="n">delays</span> <span class="o">-</span> <span class="n">delays</span><span class="o">.</span><span class="n">min</span><span class="p">())</span> <span class="o">/</span> <span class="p">(</span><span class="n">delays</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">delays</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;z-scores:&quot;</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;min-max :&quot;</span><span class="p">,</span> <span class="n">mm</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.preprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">StandardScaler</span><span class="p">,</span> <span class="n">MinMaxScaler</span>
+
+<span class="n">col</span> <span class="o">=</span> <span class="n">delays</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>          <span class="c1"># المكتبة تنتظر جدولاً: صف لكل مثال</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;sklearn z:&quot;</span><span class="p">,</span> <span class="n">StandardScaler</span><span class="p">()</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">col</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">())</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>z-scores: [-1.5 -0.5 -0.5 -0.5  0.   0.   1.   2. ]
+min-max : [0.    0.286 0.286 0.286 0.429 0.429 0.714 1.   ]
+sklearn z: [-1.5 -0.5 -0.5 -0.5  0.   0.   1.   2. ]</pre></div><div class="blk"><p>المكتبة تنتظر دائماً جدولاً بصفوف وأعمدة، حتى لو كان عندك عمود واحد. لذلك غيّرنا الشكل.</p><p>ولاحظ أن مكتبة سايكت ليرن تقسم على العدد، مثل نمباي.</p></div><h3>باندا: ملخص كامل في سطر</h3><div class="code "><div class="code-head"><span class="path">describe.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s2">&quot;hours&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+    <span class="s2">&quot;grade&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+<span class="p">})</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">corr</span><span class="p">()</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>       hours  grade
+count  5.000  5.000
+mean   3.000  4.000
+std    1.581  1.225
+min    1.000  2.000
+25%    2.000  4.000
+50%    3.000  4.000
+75%    4.000  5.000
+max    5.000  5.000
+
+       hours  grade
+hours  1.000  0.775
+grade  0.775  1.000</pre></div><div class="blk"><p>صف الانحراف المعياري في باندا يقسم على العدد ناقص واحد. تذكّر التحذير.</p></div><h3>التوزيع الملتوي</h3><div class="blk"><p>في بيانات مثل الرواتب، أغلب القيم صغيرة، وقلة قليلة كبيرة جداً.</p><p>المتوسط يُسحب نحو القيم الكبيرة، والوسيط يبقى حيث أغلب الناس:</p></div><div class="code "><div class="code-head"><span class="path">skewed.py</span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">salaries</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">lognormal</span><span class="p">(</span><span class="n">mean</span><span class="o">=</span><span class="mf">3.4</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">2000</span><span class="p">)</span>   <span class="c1"># بيانات مصنوعة</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">3.4</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">salaries</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C0&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.75</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">salaries</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C1&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;mean = </span><span class="si">{</span><span class="n">salaries</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">salaries</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C2&quot;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">ls</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;median = </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">salaries</span><span class="p">)</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;salary (thousands)&quot;</span><span class="p">);</span> <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;count&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></pre></div><figure class="plot"><div class="svgwrap"><svg xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 394.232669 236.902104" xmlns="http://www.w3.org/2000/svg" version="1.1">
+<defs>
+</defs>
+<g id="figure_1">
+<g id="patch_1">
+<path d="M 0 236.902104 
+L 394.232669 236.902104 
+L 394.232669 -0 
+L 0 -0 
+L 0 236.902104 
+z
+" style="fill: none"/>
+</g>
+<g id="axes_1">
+<g id="patch_2">
+<path d="M 49.842188 197.410229 
+L 384.642188 197.410229 
+L 384.642188 8.914229 
+L 49.842188 8.914229 
+L 49.842188 197.410229 
+z
+" style="fill: none"/>
+</g>
+<g id="patch_3">
+<path d="M 65.060369 197.410229 
+L 70.133097 197.410229 
+L 70.133097 186.248363 
+L 65.060369 186.248363 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_4">
+<path d="M 70.133097 197.410229 
+L 75.205824 197.410229 
+L 75.205824 161.134167 
+L 70.133097 161.134167 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_5">
+<path d="M 75.205824 197.410229 
+L 80.278551 197.410229 
+L 80.278551 110.905773 
+L 75.205824 110.905773 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_6">
+<path d="M 80.278551 197.410229 
+L 85.351278 197.410229 
+L 85.351278 36.493338 
+L 80.278551 36.493338 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_7">
+<path d="M 85.351278 197.410229 
+L 90.424006 197.410229 
+L 90.424006 42.07427 
+L 85.351278 42.07427 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_8">
+<path d="M 90.424006 197.410229 
+L 95.496733 197.410229 
+L 95.496733 19.75054 
+L 90.424006 19.75054 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_9">
+<path d="M 95.496733 197.410229 
+L 100.56946 197.410229 
+L 100.56946 17.890229 
+L 95.496733 17.890229 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_10">
+<path d="M 100.56946 197.410229 
+L 105.642188 197.410229 
+L 105.642188 27.191783 
+L 100.56946 27.191783 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_11">
+<path d="M 105.642188 197.410229 
+L 110.714915 197.410229 
+L 110.714915 61.607534 
+L 105.642188 61.607534 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_12">
+<path d="M 110.714915 197.410229 
+L 115.787642 197.410229 
+L 115.787642 78.350332 
+L 110.714915 78.350332 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_13">
+<path d="M 115.787642 197.410229 
+L 120.860369 197.410229 
+L 120.860369 102.534374 
+L 115.787642 102.534374 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_14">
+<path d="M 120.860369 197.410229 
+L 125.933097 197.410229 
+L 125.933097 92.302664 
+L 120.860369 92.302664 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_15">
+<path d="M 125.933097 197.410229 
+L 131.005824 197.410229 
+L 131.005824 112.766084 
+L 125.933097 112.766084 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_16">
+<path d="M 131.005824 197.410229 
+L 136.078551 197.410229 
+L 136.078551 122.997793 
+L 131.005824 122.997793 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_17">
+<path d="M 136.078551 197.410229 
+L 141.151278 197.410229 
+L 141.151278 164.854788 
+L 136.078551 164.854788 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_18">
+<path d="M 141.151278 197.410229 
+L 146.224006 197.410229 
+L 146.224006 162.064322 
+L 141.151278 162.064322 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_19">
+<path d="M 146.224006 197.410229 
+L 151.296733 197.410229 
+L 151.296733 159.273856 
+L 146.224006 159.273856 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_20">
+<path d="M 151.296733 197.410229 
+L 156.36946 197.410229 
+L 156.36946 166.715099 
+L 151.296733 166.715099 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_21">
+<path d="M 156.36946 197.410229 
+L 161.442187 197.410229 
+L 161.442187 176.946809 
+L 156.36946 176.946809 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_22">
+<path d="M 161.442188 197.410229 
+L 166.514915 197.410229 
+L 166.514915 186.248363 
+L 161.442188 186.248363 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_23">
+<path d="M 166.514915 197.410229 
+L 171.587642 197.410229 
+L 171.587642 176.946809 
+L 166.514915 176.946809 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_24">
+<path d="M 171.587642 197.410229 
+L 176.660369 197.410229 
+L 176.660369 185.318208 
+L 171.587642 185.318208 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_25">
+<path d="M 176.660369 197.410229 
+L 181.733097 197.410229 
+L 181.733097 184.388053 
+L 176.660369 184.388053 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_26">
+<path d="M 181.733097 197.410229 
+L 186.805824 197.410229 
+L 186.805824 190.899141 
+L 181.733097 190.899141 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_27">
+<path d="M 186.805824 197.410229 
+L 191.878551 197.410229 
+L 191.878551 189.03883 
+L 186.805824 189.03883 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_28">
+<path d="M 191.878551 197.410229 
+L 196.951278 197.410229 
+L 196.951278 187.178519 
+L 191.878551 187.178519 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_29">
+<path d="M 196.951278 197.410229 
+L 202.024006 197.410229 
+L 202.024006 190.899141 
+L 196.951278 190.899141 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_30">
+<path d="M 202.024006 197.410229 
+L 207.096733 197.410229 
+L 207.096733 195.549918 
+L 202.024006 195.549918 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_31">
+<path d="M 207.096733 197.410229 
+L 212.16946 197.410229 
+L 212.16946 194.619762 
+L 207.096733 194.619762 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_32">
+<path d="M 212.16946 197.410229 
+L 217.242188 197.410229 
+L 217.242188 196.480073 
+L 212.16946 196.480073 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_33">
+<path d="M 217.242188 197.410229 
+L 222.314915 197.410229 
+L 222.314915 197.410229 
+L 217.242188 197.410229 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_34">
+<path d="M 222.314915 197.410229 
+L 227.387642 197.410229 
+L 227.387642 192.759452 
+L 222.314915 192.759452 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_35">
+<path d="M 227.387642 197.410229 
+L 232.460369 197.410229 
+L 232.460369 193.689607 
+L 227.387642 193.689607 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_36">
+<path d="M 232.460369 197.410229 
+L 237.533097 197.410229 
+L 237.533097 196.480073 
+L 232.460369 196.480073 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_37">
+<path d="M 237.533097 197.410229 
+L 242.605824 197.410229 
+L 242.605824 196.480073 
+L 237.533097 196.480073 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_38">
+<path d="M 242.605824 197.410229 
+L 247.678551 197.410229 
+L 247.678551 196.480073 
+L 242.605824 196.480073 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_39">
+<path d="M 247.678551 197.410229 
+L 252.751278 197.410229 
+L 252.751278 196.480073 
+L 247.678551 196.480073 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_40">
+<path d="M 252.751278 197.410229 
+L 257.824006 197.410229 
+L 257.824006 196.480073 
+L 252.751278 196.480073 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_41">
+<path d="M 257.824006 197.410229 
+L 262.896733 197.410229 
+L 262.896733 196.480073 
+L 257.824006 196.480073 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_42">
+<path d="M 262.896733 197.410229 
+L 267.96946 197.410229 
+L 267.96946 197.410229 
+L 262.896733 197.410229 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_43">
+<path d="M 267.96946 197.410229 
+L 273.042188 197.410229 
+L 273.042188 196.480073 
+L 267.96946 196.480073 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_44">
+<path d="M 273.042188 197.410229 
+L 278.114915 197.410229 
+L 278.114915 197.410229 
+L 273.042188 197.410229 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_45">
+<path d="M 278.114915 197.410229 
+L 283.187642 197.410229 
+L 283.187642 196.480073 
+L 278.114915 196.480073 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_46">
+<path d="M 283.187642 197.410229 
+L 288.260369 197.410229 
+L 288.260369 197.410229 
+L 283.187642 197.410229 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_47">
+<path d="M 288.260369 197.410229 
+L 293.333097 197.410229 
+L 293.333097 196.480073 
+L 288.260369 196.480073 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_48">
+<path d="M 293.333097 197.410229 
+L 298.405824 197.410229 
+L 298.405824 197.410229 
+L 293.333097 197.410229 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_49">
+<path d="M 298.405824 197.410229 
+L 303.478551 197.410229 
+L 303.478551 197.410229 
+L 298.405824 197.410229 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_50">
+<path d="M 303.478551 197.410229 
+L 308.551278 197.410229 
+L 308.551278 197.410229 
+L 303.478551 197.410229 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_51">
+<path d="M 308.551278 197.410229 
+L 313.624006 197.410229 
+L 313.624006 197.410229 
+L 308.551278 197.410229 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_52">
+<path d="M 313.624006 197.410229 
+L 318.696733 197.410229 
+L 318.696733 197.410229 
+L 313.624006 197.410229 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_53">
+<path d="M 318.696733 197.410229 
+L 323.76946 197.410229 
+L 323.76946 197.410229 
+L 318.696733 197.410229 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_54">
+<path d="M 323.76946 197.410229 
+L 328.842188 197.410229 
+L 328.842188 197.410229 
+L 323.76946 197.410229 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_55">
+<path d="M 328.842188 197.410229 
+L 333.914915 197.410229 
+L 333.914915 197.410229 
+L 328.842188 197.410229 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_56">
+<path d="M 333.914915 197.410229 
+L 338.987642 197.410229 
+L 338.987642 197.410229 
+L 333.914915 197.410229 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_57">
+<path d="M 338.987642 197.410229 
+L 344.060369 197.410229 
+L 344.060369 197.410229 
+L 338.987642 197.410229 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_58">
+<path d="M 344.060369 197.410229 
+L 349.133097 197.410229 
+L 349.133097 197.410229 
+L 344.060369 197.410229 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_59">
+<path d="M 349.133097 197.410229 
+L 354.205824 197.410229 
+L 354.205824 197.410229 
+L 349.133097 197.410229 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_60">
+<path d="M 354.205824 197.410229 
+L 359.278551 197.410229 
+L 359.278551 197.410229 
+L 354.205824 197.410229 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_61">
+<path d="M 359.278551 197.410229 
+L 364.351278 197.410229 
+L 364.351278 197.410229 
+L 359.278551 197.410229 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="patch_62">
+<path d="M 364.351278 197.410229 
+L 369.424006 197.410229 
+L 369.424006 196.480073 
+L 364.351278 196.480073 
+z
+" clip-path="url(#p9e1ba61dbd)" style="fill: #1f77b4; opacity: 0.75"/>
+</g>
+<g id="matplotlib.axis_1">
+<g id="xtick_1">
+<g id="line2d_1">
+<defs>
+<path id="mb3b5ba5549" d="M 0 0 
+L 0 3.5 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#mb3b5ba5549" x="56.940353" y="197.410229" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_1">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="56.940353" y="212.76851" transform="rotate(-0 56.940353 212.76851)">0</text>
+</g>
+</g>
+<g id="xtick_2">
+<g id="line2d_2">
+<g>
+<use xlink:href="#mb3b5ba5549" x="96.889627" y="197.410229" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_2">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="96.889627" y="212.76851" transform="rotate(-0 96.889627 212.76851)">25</text>
+</g>
+</g>
+<g id="xtick_3">
+<g id="line2d_3">
+<g>
+<use xlink:href="#mb3b5ba5549" x="136.838901" y="197.410229" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_3">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="136.838901" y="212.76851" transform="rotate(-0 136.838901 212.76851)">50</text>
+</g>
+</g>
+<g id="xtick_4">
+<g id="line2d_4">
+<g>
+<use xlink:href="#mb3b5ba5549" x="176.788175" y="197.410229" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_4">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="176.788175" y="212.76851" transform="rotate(-0 176.788175 212.76851)">75</text>
+</g>
+</g>
+<g id="xtick_5">
+<g id="line2d_5">
+<g>
+<use xlink:href="#mb3b5ba5549" x="216.737449" y="197.410229" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_5">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="216.737449" y="212.76851" transform="rotate(-0 216.737449 212.76851)">100</text>
+</g>
+</g>
+<g id="xtick_6">
+<g id="line2d_6">
+<g>
+<use xlink:href="#mb3b5ba5549" x="256.686723" y="197.410229" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_6">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="256.686723" y="212.76851" transform="rotate(-0 256.686723 212.76851)">125</text>
+</g>
+</g>
+<g id="xtick_7">
+<g id="line2d_7">
+<g>
+<use xlink:href="#mb3b5ba5549" x="296.635997" y="197.410229" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_7">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="296.635997" y="212.76851" transform="rotate(-0 296.635997 212.76851)">150</text>
+</g>
+</g>
+<g id="xtick_8">
+<g id="line2d_8">
+<g>
+<use xlink:href="#mb3b5ba5549" x="336.585271" y="197.410229" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_8">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="336.585271" y="212.76851" transform="rotate(-0 336.585271 212.76851)">175</text>
+</g>
+</g>
+<g id="xtick_9">
+<g id="line2d_9">
+<g>
+<use xlink:href="#mb3b5ba5549" x="376.534544" y="197.410229" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_9">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="376.534544" y="212.76851" transform="rotate(-0 376.534544 212.76851)">200</text>
+</g>
+</g>
+<g id="text_10">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="217.242188" y="227.414447" transform="rotate(-0 217.242188 227.414447)">salary (thousands)</text>
+</g>
+</g>
+<g id="matplotlib.axis_2">
+<g id="ytick_1">
+<g id="line2d_10">
+<defs>
+<path id="m02ea6e0788" d="M 0 0 
+L -3.5 0 
+" style="stroke: currentColor; stroke-width: 0.8"/>
+</defs>
+<g>
+<use xlink:href="#m02ea6e0788" x="49.842188" y="197.410229" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_11">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="42.842188" y="201.589369" transform="rotate(-0 42.842188 201.589369)">0</text>
+</g>
+</g>
+<g id="ytick_2">
+<g id="line2d_11">
+<g>
+<use xlink:href="#m02ea6e0788" x="49.842188" y="150.902457" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_12">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="42.842188" y="155.081597" transform="rotate(-0 42.842188 155.081597)">50</text>
+</g>
+</g>
+<g id="ytick_3">
+<g id="line2d_12">
+<g>
+<use xlink:href="#m02ea6e0788" x="49.842188" y="104.394685" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_13">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="42.842188" y="108.573825" transform="rotate(-0 42.842188 108.573825)">100</text>
+</g>
+</g>
+<g id="ytick_4">
+<g id="line2d_13">
+<g>
+<use xlink:href="#m02ea6e0788" x="49.842188" y="57.886913" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_14">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="42.842188" y="62.066053" transform="rotate(-0 42.842188 62.066053)">150</text>
+</g>
+</g>
+<g id="ytick_5">
+<g id="line2d_14">
+<g>
+<use xlink:href="#m02ea6e0788" x="49.842188" y="11.379141" style="fill: currentColor; stroke: currentColor; stroke-width: 0.8"/>
+</g>
+</g>
+<g id="text_15">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: end; fill: currentColor" x="42.842188" y="15.558281" transform="rotate(-0 42.842188 15.558281)">200</text>
+</g>
+</g>
+<g id="text_16">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: currentColor" x="15.558281" y="103.162229" transform="rotate(-90 15.558281 103.162229)">count</text>
+</g>
+</g>
+<g id="line2d_15">
+<path d="M 110.976917 197.410229 
+L 110.976917 8.914229 
+" clip-path="url(#p9e1ba61dbd)" style="fill: none; stroke: #ff7f0e; stroke-width: 2.5; stroke-linecap: square"/>
+</g>
+<g id="line2d_16">
+<path d="M 104.272608 197.410229 
+L 104.272608 8.914229 
+" clip-path="url(#p9e1ba61dbd)" style="fill: none; stroke-dasharray: 9.25,4; stroke-dashoffset: 0; stroke: #2ca02c; stroke-width: 2.5"/>
+</g>
+<g id="patch_63">
+<path d="M 49.842188 197.410229 
+L 49.842188 8.914229 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_64">
+<path d="M 384.642188 197.410229 
+L 384.642188 8.914229 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_65">
+<path d="M 49.842188 197.410229 
+L 384.642188 197.410229 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="patch_66">
+<path d="M 49.842188 8.914229 
+L 384.642188 8.914229 
+" style="fill: none; stroke: currentColor; stroke-width: 0.8; stroke-linejoin: miter; stroke-linecap: square"/>
+</g>
+<g id="legend_1">
+<g id="patch_67">
+<path d="M 259.805938 50.006104 
+L 376.942187 50.006104 
+Q 379.142187 50.006104 379.142187 47.806104 
+L 379.142187 16.614229 
+Q 379.142187 14.414229 376.942187 14.414229 
+L 259.805938 14.414229 
+Q 257.605938 14.414229 257.605938 16.614229 
+L 257.605938 47.806104 
+Q 257.605938 50.006104 259.805938 50.006104 
+L 259.805938 50.006104 
+z
+" style="fill: none; opacity: 0.35; stroke: currentColor; stroke-linejoin: miter"/>
+</g>
+<g id="line2d_17">
+<path d="M 262.005938 23.32251 
+L 273.005938 23.32251 
+L 284.005938 23.32251 
+" style="fill: none; stroke: #ff7f0e; stroke-width: 2.5; stroke-linecap: square"/>
+</g>
+<g id="text_17">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="292.805938" y="27.17251" transform="rotate(-0 292.805938 27.17251)">mean = 33.8</text>
+</g>
+<g id="line2d_18">
+<path d="M 262.005938 39.468447 
+L 273.005938 39.468447 
+L 284.005938 39.468447 
+" style="fill: none; stroke-dasharray: 9.25,4; stroke-dashoffset: 0; stroke: #2ca02c; stroke-width: 2.5"/>
+</g>
+<g id="text_18">
+<text style="font-size: 11px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: start; fill: currentColor" x="292.805938" y="43.318447" transform="rotate(-0 292.805938 43.318447)">median = 29.6</text>
+</g>
+</g>
+</g>
+</g>
+<defs>
+<clipPath id="p9e1ba61dbd">
+<rect x="49.842188" y="8.914229" width="334.8" height="188.496"/>
+</clipPath>
+</defs>
+</svg></div><figcaption>الرسم الذي يظهر عندما تشغّل الكود.</figcaption></figure><div class="callout interview"><div class="ct">سؤال مقابلة</div><div class="blk"><p>سؤال قد تسمعه في المقابلة:</p></div><div class="en" dir="ltr"><p>Why do we scale features before training some models?</p></div><div class="blk"><p>جواب قصير وجيد:</p></div><div class="en" dir="ltr"><p>Because features on very different scales cause problems. Distance-based models like KNN would only listen to the feature with big numbers, and gradient descent converges slowly when one parameter is much more sensitive than another. Standardization gives every feature mean 0 and standard deviation 1. We fit the scaler on the training data only.</p></div></div><section class="summary"><div class="ct">الخلاصة</div><ul class="l"><li>المتوسط يتأثر بالقيم الشاذة. والوسيط لا يتأثر كثيراً.</li><li>التباين متوسط مربعات البعد عن المتوسط. والانحراف المعياري جذره.</li><li>نمباي تقسم على العدد، وباندا على العدد ناقص واحد.</li><li>التوحيد القياسي يعطي متوسط صفر وانحرافاً واحداً. والتطبيع بين الحدين يعطي مجالاً من صفر إلى واحد.</li><li>إحصاءات التوحيد تُحسب من بيانات التدريب فقط.</li><li>معامل الارتباط يقيس العلاقة الخطية من سالب واحد إلى واحد. والارتباط ليس سبباً.</li></ul></section><section class="quiz" data-quiz="l10-q"><h2>اختبر فهمك</h2><div class="q" data-answer="1"><div class="qt"><span class="qn">1.</span>البيانات <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1</mn><mo separator="true">,</mo><mn>2</mn><mo separator="true">,</mo><mn>3</mn><mo separator="true">,</mo><mn>4</mn><mo separator="true">,</mo><mn>100</mn></mrow></math></bdi>. ما الوسيط؟</div><div class="opts"><button type="button" class="opt">22</button><button type="button" class="opt">3</button><button type="button" class="opt">100</button></div><div class="explain" hidden><span class="verdict"></span><p>الوسيط هو القيمة في المنتصف بعد الترتيب. القيمة الشاذة لا تؤثر عليه.</p></div></div><div class="q" data-answer="0"><div class="qt"><span class="qn">2.</span>ما الانحراف المعياري للبيانات <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>5</mn><mo separator="true">,</mo><mn>5</mn><mo separator="true">,</mo><mn>5</mn><mo separator="true">,</mo><mn>5</mn></mrow></math></bdi>؟</div><div class="opts"><button type="button" class="opt">صفر</button><button type="button" class="opt">5</button><button type="button" class="opt">1</button></div><div class="explain" hidden><span class="verdict"></span><p>لا يوجد أي بعد عن المتوسط.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">3.</span>عمود متوسطه 50، وانحرافه المعياري 10. ما القيمة الموحدة للرقم 70؟</div><div class="opts"><button type="button" class="opt">20</button><button type="button" class="opt">2</button><button type="button" class="opt">0.7</button></div><div class="explain" hidden><span class="verdict"></span><p>نطرح 50 ونقسم على 10.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">4.</span>معامل الارتباط بين عمودين يساوي سالب 0.9. ماذا يعني ذلك؟</div><div class="opts"><button type="button" class="opt">لا توجد علاقة</button><button type="button" class="opt">علاقة خطية عكسية قوية</button><button type="button" class="opt">العمود الأول يسبب نقصان الثاني</button></div><div class="explain" hidden><span class="verdict"></span><p>العلاقة قوية وعكسية. لكن الارتباط لا يثبت السبب.</p></div></div><div class="q" data-answer="1"><div class="qt"><span class="qn">5.</span>لماذا نحسب المتوسط والانحراف المعياري للتوحيد من بيانات التدريب فقط؟</div><div class="opts"><button type="button" class="opt">لأن الحساب أسرع</button><button type="button" class="opt">لكي لا يتسرب شيء من بيانات الاختبار إلى النموذج</button><button type="button" class="opt">لأن بيانات الاختبار ليس لها متوسط</button></div><div class="explain" hidden><span class="verdict"></span><p>هذا تسريب للبيانات. سنتعمق فيه في الدرس 26.</p></div></div><div class="row"><span class="score"></span><button type="button" class="btn ghost quiz-reset">أعد المحاولة</button></div></section><section class="exercise"><div class="xt">تمرين: لخّص الأسعار</div><div class="blk"><p>أسعار سبع وجبات في مطعم، بالليرة:</p></div><div class="blk"><div class="math" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mn>120</mn><mo separator="true">,</mo><mtext>  </mtext><mn>150</mn><mo separator="true">,</mo><mtext>  </mtext><mn>150</mn><mo separator="true">,</mo><mtext>  </mtext><mn>180</mn><mo separator="true">,</mo><mtext>  </mtext><mn>200</mn><mo separator="true">,</mo><mtext>  </mtext><mn>210</mn><mo separator="true">,</mo><mtext>  </mtext><mn>390</mn></mrow></math></div></div><ol class="l"><li>احسب بيدك المتوسط والوسيط. أيهما أفضل لوصف السعر المعتاد؟ لماذا؟</li><li>بالكود: احسب الانحراف المعياري بطريقة نمباي، وبطريقة باندا. لماذا يختلفان؟</li><li>وحّد الأسعار قياسياً. أي وجبة قيمتها الموحدة أكبر من 2؟</li></ol><details><summary>تلميح</summary><div class="dbody"><div class="blk"><p>مجموع الأسعار 1400.</p><p>في الكود، ضع الأسعار في مصفوفة نمباي، ثم في سلسلة باندا.</p></div></div></details><details class="sol"><summary>الحل (افتحه بعد أن تحاول)</summary><div class="dbody"><div class="blk"><p>المتوسط <bdi class="im" dir="ltr"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mn>1400</mn><mi mathvariant="normal">/</mi><mn>7</mn><mo>=</mo><mn>200</mn></mrow></math></bdi>. والوسيط هو الرابع بعد الترتيب: 180.</p><p>الوسيط أفضل هنا، لأن الوجبة الأخيرة بسعر 390 تسحب المتوسط نحو الأعلى.</p></div><div class="code "><div class="code-head"><span class="path"></span><span class="role py">بايثون</span><button type="button" class="copy">نسخ</button></div><pre><span class="n">prices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">120</span><span class="p">,</span> <span class="mi">150</span><span class="p">,</span> <span class="mi">150</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">210</span><span class="p">,</span> <span class="mi">390</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;numpy std :&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">prices</span><span class="o">.</span><span class="n">std</span><span class="p">(),</span> <span class="mi">2</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;pandas std:&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">prices</span><span class="p">)</span><span class="o">.</span><span class="n">std</span><span class="p">(),</span> <span class="mi">2</span><span class="p">))</span>
+
+<span class="n">z</span> <span class="o">=</span> <span class="p">(</span><span class="n">prices</span> <span class="o">-</span> <span class="n">prices</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">/</span> <span class="n">prices</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;z:&quot;</span><span class="p">,</span> <span class="n">z</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;above 2:&quot;</span><span class="p">,</span> <span class="n">prices</span><span class="p">[</span><span class="n">z</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">])</span></pre></div><div class="code out"><div class="code-head"><span class="path"></span><span class="role out">الناتج</span></div><pre>numpy std : 82.81
+pandas std: 89.44
+z: [-0.97 -0.6  -0.6  -0.24  0.    0.12  2.29]
+above 2: [390]</pre></div><div class="blk"><p>نمباي تقسم على 7، وباندا على 6، لذلك رقم باندا أكبر قليلاً.</p><p>الوجبة بسعر 390 قيمتها الموحدة فوق 2: هي القيمة الشاذة.</p></div></div></details><div class="askbox" data-kind="review" hidden><div class="al">اطلب من كلود أن يراجع حلّك</div><div class="ah">اكتب إجابتك أو الصق الكود. سيقارنه بالحل ويشرح لك بالعربي. هذا يستهلك من رصيد استخدامك.</div><textarea id="rv-l10-1" dir="auto" placeholder="اكتب إجابتك هنا"></textarea><div class="row"><button type="button" class="btn ask-go">راجع حلّي</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></div><pre hidden class="x-task">أسعار سبع وجبات في مطعم، بالليرة:
+
+$$120,\; 150,\; 150,\; 180,\; 200,\; 210,\; 390$$
+
+1. احسب بيدك المتوسط والوسيط. أيهما أفضل لوصف السعر المعتاد؟ لماذا؟
+2. بالكود: احسب الانحراف المعياري بطريقة نمباي، وبطريقة باندا. لماذا يختلفان؟
+3. وحّد الأسعار قياسياً. أي وجبة قيمتها الموحدة أكبر من 2؟</pre><pre hidden class="x-solution">المتوسط $1400 / 7 = 200$. والوسيط هو الرابع بعد الترتيب: 180.
+الوسيط أفضل هنا، لأن الوجبة الأخيرة بسعر 390 تسحب المتوسط نحو الأعلى.
+
+```python
+prices = np.array([120, 150, 150, 180, 200, 210, 390])
+print("numpy std :", round(prices.std(), 2))
+print("pandas std:", round(pd.Series(prices).std(), 2))
+
+z = (prices - prices.mean()) / prices.std()
+print("z:", z.round(2))
+print("above 2:", prices[z &gt; 2])
+```
+
+نمباي تقسم على 7، وباندا على 6، لذلك رقم باندا أكبر قليلاً.
+الوجبة بسعر 390 قيمتها الموحدة فوق 2: هي القيمة الشاذة.</pre></section></article><section class="askbox" data-kind="ask" hidden><div class="al">عندك سؤال عن هذا الدرس؟ اسأل كلود</div><div class="ah">اكتب سؤالك بالعربي. كلود يقرأ نص الدرس ويجيبك. هذا يستهلك من رصيد استخدامك.</div><textarea id="ask-l10" dir="auto" placeholder="مثلاً: لماذا نضرب هنا في المشتقة؟"></textarea><div class="row"><button type="button" class="btn ask-go">اسأل</button><button type="button" class="btn ghost ask-stop" hidden>إيقاف</button><span class="status"></span></div><div class="answer" aria-live="polite"></div></section><div class="donebox"><span class="dmsg"></span><button type="button" class="btn">أنهيت هذا الدرس</button></div><nav class="pager" aria-label="التنقل بين الدروس"><a class="prev" href="#l09"><small>الدرس السابق</small>النزول بالتدرّج: كيف يتعلّم النموذج</a><a class="next" href="#l11"><small>الدرس التالي</small>الاحتمالات وقاعدة بايز</a></nav></div>
